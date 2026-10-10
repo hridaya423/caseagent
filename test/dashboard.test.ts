@@ -101,7 +101,8 @@ test("a case whose folder is missing still opens, without a history", () => {
 
 test("reads an eval sample with its trace and a single-step decision", () => {
   const { src } = fixture();
-  const run = discoverRuns(src).find((r) => r.kind === "eval")!;
+  // Runs are ordered by file time, which depends on checkout order, so pick the ten-sample run by name.
+  const run = discoverRuns(src).find((r) => r.kind === "eval" && r.dir.includes("2026-10-10T10-26-01"))!;
   const view = readRun(src, run.id)!;
   assert.equal(view.cases.length, 10);
   assert.ok(view.meta.note?.includes("10"));

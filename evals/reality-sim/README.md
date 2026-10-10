@@ -1,11 +1,11 @@
 # reality-sim: the project's eval
 
-59 practice cases in the organisers' format. Each stops at a point where someone has to decide what to do, and each has a hidden answer sheet. One command runs the agent over them and one grades the result. This is a development set, not the organisers' test.
+77 practice cases in the organisers' format. Each stops at a point where someone has to decide what to do, and each has a hidden answer sheet. One command runs the agent over them and one grades the result. This is a development set, not the organisers' test.
 
 ## Run it
 
 ```bash
-npm run eval -- --score            # run all 59 cases, then grade them
+npm run eval -- --score            # run all 77 cases, then grade them
 npm run eval -- --tier E --score   # only one tier (A, B, C or E)
 npm run eval -- --only 301,402     # only some cases, no grading
 npm run eval:score -- runs/eval/<run>   # grade a run made earlier
@@ -22,9 +22,10 @@ Each case is run once, from a clean state, with its whole history visible up to 
 | 101–125 | A | 25 | A public case cut short at a decision point. Overview, Outcome, Status and later events removed. 116–125 are the ten decision points from the earlier Process Reward set. |
 | 201–210 | B | 10 | A tier A cut with one change that alters the right answer (a yes becomes a no, a reply is empty, an email bounces, a safety detail appears, an instruction is injected). |
 | 301–312 | C | 12 | New cases written from a card: emergencies, a deposit dispute, a legal letter, an identity request, failed actions, a finished job with nothing to do. Four have a `## Question` section. |
+| 313–330 | C | 18 | Harder new cases, mostly outside repairs: payment fraud, a gas safety deadline, a welfare concern, a safeguarding disclosure, suspected asbestos, a sale mid-case, an insurance declaration, a council notice, a disability adaptation. The deciding detail is buried in routine events or sits only in an attachment, and in several the landlord or the system instructs the wrong thing. Five of them test that the agent does not over-react. |
 | 401–412 | E | 12 | The hand-written edge cases (gas, prompt injection, data fishing, unverified identity, a refusing landlord, a vulnerable tenant), formerly `evals/edge-cases`. These also carry mechanical checks. |
 
-Correct decisions across the set: ask 20, escalate 16, proceed 12, hold 7, close 4.
+Correct decisions across the set: escalate 25, ask 25, proceed 15, hold 7, close 5.
 
 ## How a case is graded
 
@@ -77,8 +78,10 @@ The build overwrites the tier A and B case folders and every label. It leaves th
 ## Known limits
 
 - The policy was derived from the same 50 public cases the tier A cuts come from, so a high score there shows little about unseen cases. Tiers B, C and E are the better signal.
+- 313–330 are untested: no agent has been run on them, so their rubrics have not been calibrated against real answers. Expect some to need loosening after the first run.
+- 317 and 318 concern a possible death and a disclosure of fear of a partner. They are written soberly; handle their outputs with the same care.
 - The tier C cases were written by a model from the cards, and the tier E and 116–125 rubrics were converted by a model from the earlier tests' expectations. They were checked for format and spot-checked, not each read in full by a person.
-- The parser drops a `## Question` section, so on 302, 303, 308 and 312 the agent does not see the question.
+- The parser drops a `## Question` section, so on 302, 303, 308, 312 and 324 the agent does not see the question.
 - 208 has a deliberate gap in event numbers (events 019 and 020 removed).
 - 402: the source test required the safety message by email. That check was dropped, because the rubric asks for the fastest channel.
 

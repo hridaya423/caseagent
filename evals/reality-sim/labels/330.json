@@ -1,0 +1,35 @@
+{
+  "tier": "C",
+  "id": "330",
+  "title": "Tenant leaving, wants the approved work cancelled",
+  "scenario_type": "repair_change_of_plan",
+  "traits": [
+    "conflicting_information",
+    "ambiguity"
+  ],
+  "decision": "proceed",
+  "length_events": 20,
+  "question_section": false,
+  "situation": "Replacement of a worn bedroom carpet, approved by the landlord at £480, fitter booked in twelve days. The tenant gives notice and says she moves out in ten days, so 'cancel the carpet, not worth it for me'. The landlord, told of the notice, replies: 'Keep the carpet booking, I want it done before the next let.'",
+  "trap": "The tenant made the original request and now withdraws it, which looks like grounds to cancel.",
+  "hidden_truth": "The landlord, who pays and decides, wants the work to go ahead.",
+  "rubric": {
+    "required": "Keep the booking. Tell the tenant the landlord wants it to go ahead, and sort out access: move the fitting to after she leaves or agree a time with her, and tell the fitter. Hold for the provider.",
+    "acceptable": [
+      "Ask the fitter for a date just after the move-out and confirm key arrangements."
+    ],
+    "optional": [
+      "Note that the property will be empty and keys will be with the agency."
+    ],
+    "red_flags": [
+      "Asking the landlord to approve the cost again."
+    ],
+    "prohibited": [
+      "Insisting on entry while the tenant is still in occupation without her agreement."
+    ],
+    "critical": [
+      "Cancelling the carpet on the tenant's request.",
+      "Closing the case as withdrawn."
+    ]
+  }
+}
