@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "bank_version": 4,
+  "bank_version": 5,
   "track": "Property Management",
   "retrieval_unit": "playbook",
   "source_revision": "9bcdca585955dfb930005ed742572606e68f5688",
@@ -578,7 +578,7 @@
     },
     {
       "id": "PB03",
-      "version": 2,
+      "version": 3,
       "title": "Agency arranged assessment and repair",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -658,10 +658,12 @@
           ],
           "guard_status": "reference guidance; current policy and tool guards remain authoritative",
           "decision_checks": [
-            "Check property identity, item, risk, active coordinator and the exact fact that would change the action."
+            "Check property identity, item, risk, active coordinator and the exact fact that would change the action.",
+            "Separate the cause of a fault, responsibility for arranging attendance, ownership of an item, and liability for charges. A report of damage or an emergency expense does not by itself establish reimbursement or tenant liability."
           ],
           "communication_requirements": [
-            "Ask a focused question only when its answer changes trade, scope, authority or safety; do not ask for an already supplied location."
+            "Ask a focused question only when its answer changes trade, scope, authority or safety; do not ask for an already supplied location.",
+            "Acknowledge a reported expense without promising reimbursement or attributing fault. Ask for the missing expense and approval evidence, or route a disputed financial decision to the authorized person under current policy."
           ],
           "wait_for": "The material missing fact.",
           "possible_next_steps": [
@@ -772,8 +774,8 @@
         },
         {
           "id": "result",
-          "when": "The provider reports repair, no repair needed, or incomplete work.",
-          "next_action": "Verify the applicable result; apply PB11 and PB12 before closure.",
+          "when": "A provider reports a result, or a stakeholder questions the current progress, delay or quality of instructed work.",
+          "next_action": "For a progress or delay complaint, obtain current status, work description and relevant photos from the active provider, and give the complainant an honest acknowledgement or verified update. For a reported result, verify it and apply PB11 and PB12 before closure.",
           "compatible_tools": [
             "send_message",
             "add_note",
@@ -782,19 +784,23 @@
           "if_required_information_is_missing": "Do not equate a status update with verified completion.",
           "evidence_refs": [
             "E14",
-            "E15"
+            "E15",
+            "E40"
           ],
           "guard_status": "reference guidance; current policy and tool guards remain authoritative",
           "decision_checks": [
-            "Match the report to the correct property and job; distinguish repair, no work required and unfinished work."
+            "Match the report to the correct property and job; distinguish repair, no work required and unfinished work.",
+            "A reply to the landlord does not obtain missing contractor evidence. If both acknowledgement and a provider evidence request are needed, treat them as separate outstanding actions until successful tool results show each was sent."
           ],
           "communication_requirements": [
-            "Verify remaining work and PB12 requirements instead of closing from a generic completion label."
+            "Verify remaining work and PB12 requirements instead of closing from a generic completion label.",
+            "Ask the active provider for progress, work done and remaining, relevant current photos and the revised plan; request the invoice conditionally if work is completed. Tell the landlord what is confirmed and what is being checked, without inventing a delay cause, completion date or photo contents."
           ],
           "wait_for": "Outstanding completion evidence.",
           "possible_next_steps": [
             "PB11.block",
-            "PB12.verify"
+            "PB12.verify",
+            "PB10.pending"
           ]
         }
       ],
@@ -918,6 +924,21 @@
           "history_sha256": "d3ab597e03eb0d2e3cfded66e0d4594b19cd34c4bd5732b22bfe176ca3188238",
           "index_path": "Property Management/026/index.md",
           "index_sha256": "e7fc7d710880a4a3d1286f671905f02d2037cc2441d939bd27109d70a279f2fb",
+          "source_revision": "9bcdca585955dfb930005ed742572606e68f5688"
+        },
+        "E40": {
+          "case_id": "Property Management/036",
+          "event_ids": [
+            "event-045",
+            "event-046",
+            "event-048"
+          ],
+          "finding": "The landlord requested pictures and questioned the time taken; the agency chased the provider for works details, a current update, photos and an invoice only if completed.",
+          "evidence_kind": "observed_pattern",
+          "history_path": "Property Management/036/history.md",
+          "history_sha256": "dab973ea0f326c23f045e655c87f3dba226ab497483f9be851809d02b0aa79a7",
+          "index_path": "Property Management/036/index.md",
+          "index_sha256": "c43c3ad53e93d3dc43295425e98bb99fab20b8cf0dc1aa22d425b2c57a8c2111",
           "source_revision": "9bcdca585955dfb930005ed742572606e68f5688"
         }
       },
@@ -1121,6 +1142,14 @@
           "index_sha256": "518c35fbcdd419e661bb01685b8308bf5d3ab7b8b49792d413385d33345fb124",
           "history_sha256": "35780255fbee892c15bd24f06155c0256a6f034c16f148c0b2c924b653fdb1de",
           "source_revision": "9bcdca585955dfb930005ed742572606e68f5688"
+        },
+        {
+          "case_id": "Property Management/036",
+          "index_path": "Property Management/036/index.md",
+          "history_path": "Property Management/036/history.md",
+          "index_sha256": "c43c3ad53e93d3dc43295425e98bb99fab20b8cf0dc1aa22d425b2c57a8c2111",
+          "history_sha256": "dab973ea0f326c23f045e655c87f3dba226ab497483f9be851809d02b0aa79a7",
+          "source_revision": "9bcdca585955dfb930005ed742572606e68f5688"
         }
       ],
       "review_scope": "Source-linked workflow guidance and current-policy compatibility; not certification of historical decisions or tool authorization.",
@@ -1133,12 +1162,17 @@
         "assessment",
         "not working",
         "leak",
-        "inspection"
+        "inspection",
+        "progress",
+        "delay",
+        "taking so long",
+        "work description",
+        "photos"
       ]
     },
     {
       "id": "PB04",
-      "version": 2,
+      "version": 3,
       "title": "Checkout cleaning and coordinated works",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -1192,9 +1226,11 @@
         },
         {
           "id": "approval",
-          "when": "A quote is available but the selected scope is not authorized.",
-          "next_action": "Request approval, including any requested comparison quote, through PB09.",
+          "when": "A quote is available and a comparison quote or approval of the selected work is still needed.",
+          "next_action": "If the landlord explicitly asks for a comparison quote, obtain it within the quotation-only scope first. When comparable quotes are available, request selection and approval of the exact work and total through PB09.",
           "compatible_tools": [
+            "send_message",
+            "assign_contractor",
             "request_landlord_approval"
           ],
           "if_required_information_is_missing": "Clarify price, selected quote or included work.",
@@ -1204,15 +1240,18 @@
           ],
           "guard_status": "reference guidance; current policy and tool guards remain authoritative",
           "decision_checks": [
-            "Match the selected quote, included items, price and tax basis to the landlord reply; check for a withdrawn or revised quote."
+            "Match the selected quote, included items, price and tax basis to the landlord reply; check for a withdrawn or revised quote.",
+            "Separate permission to obtain a second quote from permission to perform work. An explicit comparison request already authorizes seeking that quote within its stated scope; do not ask the landlord to repeat the same request. Check whether the quotation visit itself has a charge requiring additional approval."
           ],
           "communication_requirements": [
-            "Name the competing quotes and ask which exact scope and total is approved when the reply cannot resolve it."
+            "Name the competing quotes and ask which exact scope and total is approved when the reply cannot resolve it.",
+            "Tell the second provider this is a comparison quotation only and no works may start without separate approval. If the quotation visit has an unapproved fee, resolve that fee before dispatch."
           ],
           "wait_for": "Unambiguous quote selection and approval.",
           "possible_next_steps": [
             "dependency",
-            "PB09.multiple"
+            "PB09.multiple",
+            "PB09.limited"
           ]
         },
         {
@@ -1447,7 +1486,10 @@
         "carpet",
         "vacated",
         "end of tenancy",
-        "cleaner"
+        "cleaner",
+        "comparison quote",
+        "second quote",
+        "another quote"
       ]
     },
     {
@@ -2271,7 +2313,7 @@
     },
     {
       "id": "PB09",
-      "version": 4,
+      "version": 5,
       "title": "Scope quote and approval boundaries",
       "kind": "decision_module",
       "status": "reference_reviewed",
@@ -2380,11 +2422,12 @@
         },
         {
           "id": "multiple",
-          "when": "Several quotes or multiple work items are under discussion.",
-          "next_action": "Confirm which quote and items were approved; retain the approved version.",
+          "when": "A comparison quote is requested, or several quotes or multiple work items are under discussion.",
+          "next_action": "Obtain an explicitly requested comparison quote without starting work; once comparable proposals exist, confirm the exact quote and items approved and retain that version.",
           "compatible_tools": [
             "send_message",
-            "request_landlord_approval"
+            "request_landlord_approval",
+            "assign_contractor"
           ],
           "if_required_information_is_missing": "An unspecified yes is insufficient when its referent changes the action.",
           "evidence_refs": [
@@ -2393,12 +2436,14 @@
           ],
           "guard_status": "reference guidance; current policy and tool guards remain authoritative",
           "decision_checks": [
-            "Identify each live quote and included item; check whether the reply names a version and whether an earlier quote was withdrawn."
+            "Identify each live quote and included item; check whether the reply names a version and whether an earlier quote was withdrawn.",
+            "An explicit request for another quote is current quotation authority, not repair or refurbishment approval. Distinguish a no-work quotation assignment from a chargeable visit or instruction to begin works."
           ],
           "communication_requirements": [
-            "Ask the landlord which exact quote, items and total they approve; do not choose a cheaper or newer version from an ambiguous yes."
+            "Ask the landlord which exact quote, items and total they approve; do not choose a cheaper or newer version from an ambiguous yes.",
+            "For an outstanding comparison request, contact the appropriate second provider with quotation-only instructions, subject to current visit and fee guards. Do not redundantly ask permission to obtain the requested quote or imply that either proposal is approved."
           ],
-          "wait_for": "Unambiguous selected quote and scope.",
+          "wait_for": "The requested comparable quote, then unambiguous selection and work approval.",
           "possible_next_steps": [
             "limited",
             "PB03.dispatch"
@@ -2610,12 +2655,16 @@
         "estimate",
         "scope",
         "charge",
-        "cap"
+        "cap",
+        "comparison quote",
+        "second quote",
+        "quotation only",
+        "reimbursement"
       ]
     },
     {
       "id": "PB10",
-      "version": 2,
+      "version": 3,
       "title": "Booking access and disrupted attendance",
       "kind": "decision_module",
       "status": "reference_reviewed",
@@ -2719,7 +2768,7 @@
         {
           "id": "pending",
           "when": "An answer or visit remains pending.",
-          "next_action": "Use the configured operational reminder and escalation policy.",
+          "next_action": "For routine waiting, apply the configured reminder and escalation policy. When the landlord questions progress or asks for evidence, acknowledge the concern and request the missing progress, work description and photos from the active provider before waiting for their reply.",
           "compatible_tools": [
             "hold",
             "send_message",
@@ -2727,14 +2776,17 @@
           ],
           "if_required_information_is_missing": "Use a real current clock and verified last-contact facts if timers are enabled.",
           "evidence_refs": [
-            "E30"
+            "E30",
+            "E40"
           ],
           "guard_status": "reference guidance; current policy and tool guards remain authoritative",
           "decision_checks": [
-            "Use the current policy, observed time, prior successful chases and latest outside response; do not count duplicate historical templates as agent chases."
+            "Use the current policy, observed time, prior successful chases and latest outside response; do not count duplicate historical templates as agent chases.",
+            "Distinguish a routine pending appointment from an unanswered request for progress or photos. Check successful prior messages for each requested item; an internal intention to chase is not a sent request."
           ],
           "communication_requirements": [
-            "Hold or chase the responsible party when due; escalate at the configured boundary."
+            "Hold or chase the responsible party when due; escalate at the configured boundary.",
+            "For a delay complaint, complete both applicable communications: an honest stakeholder acknowledgement and an evidence request to the provider. Ask for current progress, work description, photos and revised timing without promising a result; hold only once outstanding requests have actually been sent."
           ],
           "wait_for": "The outstanding answer or visit result.",
           "possible_next_steps": [
@@ -2853,6 +2905,21 @@
           "index_path": "Property Management/030/index.md",
           "index_sha256": "4781019938b3a58004c27d8e8cf80bd49dd437ac6a8ce32b80ef24e28846e9c0",
           "source_revision": "9bcdca585955dfb930005ed742572606e68f5688"
+        },
+        "E40": {
+          "case_id": "Property Management/036",
+          "event_ids": [
+            "event-045",
+            "event-046",
+            "event-048"
+          ],
+          "finding": "The landlord requested pictures and questioned the time taken; the agency chased the provider for works details, a current update, photos and an invoice only if completed.",
+          "evidence_kind": "observed_pattern",
+          "history_path": "Property Management/036/history.md",
+          "history_sha256": "dab973ea0f326c23f045e655c87f3dba226ab497483f9be851809d02b0aa79a7",
+          "index_path": "Property Management/036/index.md",
+          "index_sha256": "c43c3ad53e93d3dc43295425e98bb99fab20b8cf0dc1aa22d425b2c57a8c2111",
+          "source_revision": "9bcdca585955dfb930005ed742572606e68f5688"
         }
       },
       "provenance": [
@@ -2947,7 +3014,13 @@
         "missed",
         "slot",
         "parts ordered",
-        "visit"
+        "visit",
+        "progress",
+        "delay",
+        "taking so long",
+        "photos",
+        "pictures",
+        "work description"
       ]
     },
     {
@@ -3258,7 +3331,7 @@
     },
     {
       "id": "PB12",
-      "version": 2,
+      "version": 3,
       "title": "Completion evidence keys invoices and remaining work",
       "kind": "decision_module",
       "status": "reference_reviewed",
@@ -3318,8 +3391,8 @@
         },
         {
           "id": "keys",
-          "when": "Keys were issued or new keys are owed.",
-          "next_action": "Verify actual return or delivery; a future promise does not satisfy it.",
+          "when": "Keys were issued or owed, a lock was replaced, or a tenant reports arranging a lock change and requests reimbursement.",
+          "next_action": "Establish the current key inventory and authorized distribution after a lock change, and verify actual return or delivery. Handle any expense or reimbursement decision separately; a future promise does not establish delivery or payment approval.",
           "compatible_tools": [
             "send_message",
             "hold"
@@ -3331,15 +3404,18 @@
           ],
           "guard_status": "reference guidance; current policy and tool guards remain authoritative",
           "decision_checks": [
-            "Identify issued or newly owed keys and actual return evidence; tomorrow or will drop off describes a future promise."
+            "Identify issued or newly owed keys and actual return evidence; tomorrow or will drop off describes a future promise.",
+            "After a lock change, check how many new keys exist, who currently holds them and which authorized recipients need copies. A repair or reimbursement request can leave this practical follow-up open even when the door works."
           ],
           "communication_requirements": [
-            "If the return is still promised, hold for the provider or request confirmation when due. Do not mark keys returned or not issued."
+            "If the return is still promised, hold for the provider or request confirmation when due. Do not mark keys returned or not issued.",
+            "Ask the tenant or provider who has the new keys and how required management or landlord copies will be supplied, using the current arrangement rather than a fixed historical key count. Obtain expense evidence separately and do not promise reimbursement or blame the tenant without authority."
           ],
-          "wait_for": "Actual return or delivery confirmation.",
+          "wait_for": "A verified new-key inventory and required actual delivery, plus any separately required expense decision.",
           "possible_next_steps": [
             "invoice",
-            "close"
+            "close",
+            "PB09.missing"
           ]
         },
         {
@@ -3430,7 +3506,8 @@
       ],
       "evidence_limits": [
         "Fifteen selected supporting cases illustrate closure dimensions; not all report every check reliably.",
-        "Policy defines required checks. Historical omissions are cautionary evidence, not permission to omit them."
+        "Policy defines required checks. Historical omissions are cautionary evidence, not permission to omit them.",
+        "Lock-change key inventory is generalized from the key-distribution histories. They do not establish a reimbursement entitlement or responsibility for emergency expenses; current policy and authority govern those decisions."
       ],
       "update_policy": "Update this playbook version after source and operational review. Do not create a searchable record for each ticket.",
       "source_references": {
@@ -3684,7 +3761,13 @@
         "invoice",
         "close",
         "remaining",
-        "return tomorrow"
+        "return tomorrow",
+        "lock changed",
+        "lock replacement",
+        "locksmith",
+        "new keys",
+        "reimbursement",
+        "emergency expense"
       ]
     }
   ]

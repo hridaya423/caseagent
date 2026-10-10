@@ -6,6 +6,7 @@ import { renderCase } from "./prompt.ts";
 import type { CaseState } from "./state.ts";
 import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "./tools.ts";
 import { playbookContext, type PlaybookOptions } from "./playbooks.ts";
+import { auditStageCompletion } from "./playbook-audit.ts";
 
 export const MAX_TURNS = 15;
 // The agency's own records of a landlord approval that came before the agent's first run.
@@ -94,6 +95,8 @@ export async function runCase(opts: {
     ...(i === TOOL_SPECS.length - 1 ? { cache_control: { type: "ephemeral" } } : {}),
   })) as Anthropic.Tool[];
 
+  const referenceHistory = new Set<string>();
+  let completionChecks = 0;
   for (let turn = 1; turn <= MAX_TURNS; turn++) {
     // Reassess after each tool result; a resumed run uses only its newly visible state.
     const currentActions = state.actions.map((a) => ({ tool: a.tool, input: a.input, ok: a.ok, result: a.result }));
@@ -106,6 +109,7 @@ export async function runCase(opts: {
         ...currentActions.map((a, i) => ({ id: `action:${i}`, text: JSON.stringify(a) })),
       ].filter((e) => e.text.trim()), trace, turn,
     }) : "";
+    if (references) referenceHistory.add(references);
     // Add cache_control to system and message content
     const systemParam: Anthropic.MessageCreateParamsNonStreaming["system"] = [
       { type: "text", text: systemText + references, cache_control: { type: "ephemeral" } },
@@ -168,6 +172,29 @@ export async function runCase(opts: {
         trace("tool", { name: u.name, input: u.input, ok: false, ends: false, result });
         results.push({ type: "tool_result", tool_use_id: u.id, content: result, is_error: true });
         continue;
+      }
+      // Review only optional selected workflows, at most twice per invocation.
+      // A refusal becomes a tool result so the actor must recover before claiming completion.
+      if (!opts.singleStep && opts.playbooks && referenceHistory.size && completionChecks < 2 && (u.name === "hold" || u.name === "close_case")) {
+        completionChecks++;
+        const audit = await auditStageCompletion({
+          client, model: opts.playbooks.model ?? model,
+          references: [...referenceHistory].join("\n"),
+          currentEvidence: [
+            { id: "request", text: c.request }, { id: "details", text: c.details },
+            ...visible.map((e) => ({ id: `event:${e.n}`, text: e.body })),
+          ],
+          actions: state.actions.filter((a) => a.run === state.runs),
+          ending: { tool: u.name, input: u.input }, trace,
+        });
+        if (!audit.ready) {
+          const result = `Workflow completion check: this end action was not executed. Review these applicable omissions against current evidence and policy, execute any required actions, or escalate if human judgement is needed: ${JSON.stringify(audit.missing)}`;
+          state.actions.push({ run: state.runs, afterEvent: state.seen, tool: u.name, input: u.input as Record<string, unknown>, ok: false, result });
+          trace("tool", { name: u.name, input: u.input, ok: false, ends: false, result });
+          results.push({ type: "tool_result", tool_use_id: u.id, content: result, is_error: true });
+          failed = true;
+          continue;
+        }
       }
       const out = runTool(u.name, u.input, state, adapters, toolContext);
       state.actions.push({ run: state.runs, afterEvent: state.seen, tool: u.name, input: u.input as Record<string, unknown>, ok: out.ok, result: out.result });
