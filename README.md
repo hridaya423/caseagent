@@ -123,3 +123,7 @@ mkdir -p data/public && ln -s "$(cd ../HackatonPublicCases && pwd)/Property Mana
 - Real adapters for email, SMS and the agency's job system; the seam already exists in `runTool`.
 - A watch mode that ingests a new reply and resumes automatically, replacing `--next`.
 - A human-in-the-loop queue for escalations, writing a person's decision back into the case as an event.
+
+## Playbook references
+
+The JSON playbook bank is enabled by default; set `PLAYBOOKS=off` for the baseline. The selector uses only current visible evidence. Selected steps are checked against successful actions before hold/close, at most twice per invocation; invalid or failed optional audits fall back to the normal policy. Paired evaluation instructions are in `evals/reality-sim/README.md`.

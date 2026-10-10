@@ -87,3 +87,15 @@ python3 -I evals/reality-sim/tools/validate.py --all
 - The policy was derived from the same 50 public cases the 1xx cuts come from, so a high score on those shows little about unseen cases. The 2xx and 3xx cases are the better signal.
 - The 3xx cases were written by a model from the cards and checked for format, not each read in full by a person.
 - 208 has a deliberate gap in event numbers (events 019 and 020 removed).
+
+## Paired playbook check
+
+`run-paired.ts` uses the same MCP invocation above for both arms, with fresh state, the same policy, tools and actor model. Only playbook selection and completion checking are disabled in the baseline. Each case alternates which arm runs first; the next trial reverses this order. The runner reads only IDs and steps from the manifest and exposes only `cases/` to the server. Use a fresh output directory:
+
+```bash
+MODEL=claude-sonnet-5-5 PLAYBOOK_MODEL=claude-sonnet-5-5 PLAYBOOKS=on FALLBACK_MODEL='' node --env-file-if-exists=.env --import tsx evals/reality-sim/run-paired.ts runs/reality-sim/paired-v2 2
+```
+
+Score each `trial-N/baseline` and `trial-N/playbooks` folder with the unchanged `score.ts` command and its default Opus judge. Report all trials, failures and judge errors; do not rerun just semantic failures or change rubrics to obtain a gain. These practice cases have informed development, so this comparison is a development check, not held-out evidence of generalisation or statistical proof.
+
+For an exact latest-main comparator, set `BASELINE_REPO` to a separate clean checkout of main. The baseline then imports that checkout's MCP server and dependencies directly and records its own commit, while the playbook arm imports this branch. Both still use the same cases, model and policy; compare the recorded policy hashes before interpreting the results.

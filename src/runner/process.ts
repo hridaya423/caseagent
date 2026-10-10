@@ -6,6 +6,7 @@ import { writeAnswer, writeOutbox } from "./answers.ts";
 import { initialSeen, nextSeen, visibleEvents } from "../case/cut.ts";
 import { loadCase } from "../case/parse.ts";
 import { loadState, newState, saveState, statusLabel, type CaseState } from "../case/state.ts";
+import type { PlaybookOptions } from "../agent/playbooks.ts";
 
 const MAX_STAGES = 50;
 
@@ -18,7 +19,7 @@ function startTrace(tracePath: string): void {
   writeFileSync(tracePath, "");
 }
 
-export type RunDeps = { out: string; client: ModelClient; model: string; policy: string };
+export type RunDeps = { out: string; client: ModelClient; model: string; policy: string; playbooks?: PlaybookOptions | false };
 
 // Errors the SDK already retried with backoff: rate limits, overload, server errors, lost connections.
 const OVERLOAD = new Set([429, 500, 502, 503, 504, 529]);
@@ -48,6 +49,7 @@ export function liveDeps(out: string): RunDeps {
     client: withFallback(new Anthropic({ timeout: 120_000, maxRetries: 4 }), process.env.FALLBACK_MODEL ?? "claude-sonnet-5"),
     model: process.env.MODEL ?? "claude-sonnet-5-5",
     policy: readFileSync(new URL("../../policy.md", import.meta.url), "utf8"),
+    playbooks: process.env.PLAYBOOKS === "off" ? false : { model: process.env.PLAYBOOK_MODEL ?? process.env.MODEL ?? "claude-sonnet-5-5" },
   };
 }
 
@@ -118,7 +120,7 @@ export async function processCase(
   }
 
   try {
-    await runCase({ c, state: state!, newFrom, client, model, policy, trace, singleStep: options.singleStep, caseDir: dir });
+    await runCase({ c, state: state!, newFrom, client, model, policy, trace, singleStep: options.singleStep, caseDir: dir, playbooks: deps.playbooks });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     markSystemFailure(state!, "System error", message, c.id);

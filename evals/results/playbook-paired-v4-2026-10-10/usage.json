@@ -1,0 +1,464 @@
+{
+  "run_dir": "/Users/haoguo/Documents/Codex/2026-10-10/this/repos/caseagent/runs/reality-sim/paired-v4-latest-main-2026-10-10",
+  "playbooks_commit": "8ea7817",
+  "baseline_commit": "0b2399d",
+  "complete": true,
+  "completed_total": 148,
+  "pricing_note": "Billed USD is absent from API traces; no price assumptions applied. Token usage includes actor, selector, completion auditor and approval checker separately.",
+  "groups": [
+    {
+      "trial": "trial-1",
+      "arm": "baseline",
+      "completed_cases": 37,
+      "trace_cases": 37,
+      "events": {
+        "run_start": 37,
+        "model": 39,
+        "tool": 121
+      },
+      "models": {
+        "model:claude-sonnet-5-5": 39
+      },
+      "tokens": {
+        "model": {
+          "input_tokens": 152,
+          "output_tokens": 60311,
+          "cache_creation_input_tokens": 113580,
+          "cache_read_input_tokens": 252242
+        }
+      },
+      "selector_api_calls": 0,
+      "nonempty_selector_events": 0,
+      "cases_with_references": [],
+      "gating_events": 0,
+      "gated_case_ids": [],
+      "successful_actions_after_gate": [],
+      "errors": [],
+      "completion_audits_per_case": {
+        "101": 0,
+        "102": 0,
+        "103": 0,
+        "104": 0,
+        "105": 0,
+        "106": 0,
+        "107": 0,
+        "108": 0,
+        "109": 0,
+        "110": 0,
+        "111": 0,
+        "112": 0,
+        "113": 0,
+        "114": 0,
+        "115": 0,
+        "201": 0,
+        "202": 0,
+        "203": 0,
+        "204": 0,
+        "205": 0,
+        "206": 0,
+        "207": 0,
+        "208": 0,
+        "209": 0,
+        "210": 0,
+        "301": 0,
+        "302": 0,
+        "303": 0,
+        "304": 0,
+        "305": 0,
+        "306": 0,
+        "307": 0,
+        "308": 0,
+        "309": 0,
+        "310": 0,
+        "311": 0,
+        "312": 0
+      },
+      "max_completion_audits_per_case": 0,
+      "sum_case_duration_ms": 476985,
+      "mean_case_duration_ms": 12891.486486486487,
+      "median_case_duration_ms": 13234,
+      "dollar_cost": null
+    },
+    {
+      "trial": "trial-1",
+      "arm": "playbooks",
+      "completed_cases": 37,
+      "trace_cases": 37,
+      "events": {
+        "run_start": 37,
+        "playbook_selection": 56,
+        "model": 56,
+        "tool": 145,
+        "playbook_completion_audit": 33
+      },
+      "models": {
+        "model:claude-sonnet-5-5": 56,
+        "playbook_completion_audit:claude-sonnet-5-5": 33
+      },
+      "tokens": {
+        "playbook_selection": {
+          "input_tokens": 638807,
+          "output_tokens": 30799,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        },
+        "model": {
+          "input_tokens": 186,
+          "output_tokens": 70141,
+          "cache_creation_input_tokens": 331705,
+          "cache_read_input_tokens": 292549
+        },
+        "playbook_completion_audit": {
+          "input_tokens": 333738,
+          "output_tokens": 14618,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        }
+      },
+      "selector_api_calls": 55,
+      "nonempty_selector_events": 48,
+      "cases_with_references": [
+        "101",
+        "102",
+        "103",
+        "104",
+        "106",
+        "107",
+        "108",
+        "109",
+        "110",
+        "111",
+        "112",
+        "113",
+        "114",
+        "115",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "207",
+        "208",
+        "209",
+        "210",
+        "304",
+        "305",
+        "306",
+        "307",
+        "309",
+        "311",
+        "312"
+      ],
+      "gating_events": 7,
+      "gated_case_ids": [
+        "201",
+        "203",
+        "207",
+        "304",
+        "306",
+        "307",
+        "312"
+      ],
+      "successful_actions_after_gate": [
+        {
+          "case_id": "201",
+          "tool": "send_message",
+          "to": "contractor"
+        },
+        {
+          "case_id": "203",
+          "tool": "send_message",
+          "to": "contractor"
+        },
+        {
+          "case_id": "207",
+          "tool": "send_message",
+          "to": "contractor"
+        },
+        {
+          "case_id": "304",
+          "tool": "send_message",
+          "to": "contractor"
+        },
+        {
+          "case_id": "306",
+          "tool": "send_message",
+          "to": "contractor"
+        },
+        {
+          "case_id": "307",
+          "tool": "send_message",
+          "to": "contractor"
+        },
+        {
+          "case_id": "312",
+          "tool": "send_message",
+          "to": "tenant"
+        }
+      ],
+      "errors": [],
+      "completion_audits_per_case": {
+        "101": 1,
+        "102": 1,
+        "103": 1,
+        "104": 1,
+        "105": 0,
+        "106": 1,
+        "107": 1,
+        "108": 1,
+        "109": 1,
+        "110": 0,
+        "111": 1,
+        "112": 1,
+        "113": 1,
+        "114": 1,
+        "115": 0,
+        "201": 2,
+        "202": 1,
+        "203": 2,
+        "204": 1,
+        "205": 1,
+        "206": 0,
+        "207": 2,
+        "208": 1,
+        "209": 0,
+        "210": 1,
+        "301": 0,
+        "302": 0,
+        "303": 0,
+        "304": 2,
+        "305": 0,
+        "306": 2,
+        "307": 2,
+        "308": 0,
+        "309": 1,
+        "310": 0,
+        "311": 1,
+        "312": 2
+      },
+      "max_completion_audits_per_case": 2,
+      "sum_case_duration_ms": 985472,
+      "mean_case_duration_ms": 26634.37837837838,
+      "median_case_duration_ms": 25444,
+      "dollar_cost": null
+    },
+    {
+      "trial": "trial-2",
+      "arm": "baseline",
+      "completed_cases": 37,
+      "trace_cases": 37,
+      "events": {
+        "run_start": 37,
+        "model": 43,
+        "tool": 124
+      },
+      "models": {
+        "model:claude-sonnet-5-5": 43
+      },
+      "tokens": {
+        "model": {
+          "input_tokens": 160,
+          "output_tokens": 63110,
+          "cache_creation_input_tokens": 177923,
+          "cache_read_input_tokens": 225948
+        }
+      },
+      "selector_api_calls": 0,
+      "nonempty_selector_events": 0,
+      "cases_with_references": [],
+      "gating_events": 0,
+      "gated_case_ids": [],
+      "successful_actions_after_gate": [],
+      "errors": [],
+      "completion_audits_per_case": {
+        "101": 0,
+        "102": 0,
+        "103": 0,
+        "104": 0,
+        "105": 0,
+        "106": 0,
+        "107": 0,
+        "108": 0,
+        "109": 0,
+        "110": 0,
+        "111": 0,
+        "112": 0,
+        "113": 0,
+        "114": 0,
+        "115": 0,
+        "201": 0,
+        "202": 0,
+        "203": 0,
+        "204": 0,
+        "205": 0,
+        "206": 0,
+        "207": 0,
+        "208": 0,
+        "209": 0,
+        "210": 0,
+        "301": 0,
+        "302": 0,
+        "303": 0,
+        "304": 0,
+        "305": 0,
+        "306": 0,
+        "307": 0,
+        "308": 0,
+        "309": 0,
+        "310": 0,
+        "311": 0,
+        "312": 0
+      },
+      "max_completion_audits_per_case": 0,
+      "sum_case_duration_ms": 498620,
+      "mean_case_duration_ms": 13476.216216216217,
+      "median_case_duration_ms": 12833,
+      "dollar_cost": null
+    },
+    {
+      "trial": "trial-2",
+      "arm": "playbooks",
+      "completed_cases": 37,
+      "trace_cases": 37,
+      "events": {
+        "run_start": 37,
+        "playbook_selection": 50,
+        "model": 50,
+        "tool": 141,
+        "playbook_completion_audit": 30
+      },
+      "models": {
+        "model:claude-sonnet-5-5": 50,
+        "playbook_completion_audit:claude-sonnet-5-5": 30
+      },
+      "tokens": {
+        "playbook_selection": {
+          "input_tokens": 559996,
+          "output_tokens": 26519,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        },
+        "model": {
+          "input_tokens": 174,
+          "output_tokens": 68639,
+          "cache_creation_input_tokens": 391101,
+          "cache_read_input_tokens": 171563
+        },
+        "playbook_completion_audit": {
+          "input_tokens": 305222,
+          "output_tokens": 13562,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        }
+      },
+      "selector_api_calls": 49,
+      "nonempty_selector_events": 42,
+      "cases_with_references": [
+        "101",
+        "102",
+        "103",
+        "104",
+        "106",
+        "107",
+        "108",
+        "109",
+        "110",
+        "111",
+        "112",
+        "113",
+        "114",
+        "115",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "207",
+        "208",
+        "209",
+        "210",
+        "304",
+        "305",
+        "306",
+        "307",
+        "309",
+        "311",
+        "312"
+      ],
+      "gating_events": 4,
+      "gated_case_ids": [
+        "201",
+        "203",
+        "205",
+        "306"
+      ],
+      "successful_actions_after_gate": [
+        {
+          "case_id": "201",
+          "tool": "send_message",
+          "to": "contractor"
+        },
+        {
+          "case_id": "203",
+          "tool": "send_message",
+          "to": "contractor"
+        },
+        {
+          "case_id": "205",
+          "tool": "send_message",
+          "to": "contractor"
+        },
+        {
+          "case_id": "306",
+          "tool": "send_message",
+          "to": "contractor"
+        }
+      ],
+      "errors": [],
+      "completion_audits_per_case": {
+        "101": 1,
+        "102": 1,
+        "103": 1,
+        "104": 1,
+        "105": 0,
+        "106": 1,
+        "107": 1,
+        "108": 1,
+        "109": 1,
+        "110": 0,
+        "111": 1,
+        "112": 1,
+        "113": 1,
+        "114": 1,
+        "115": 0,
+        "201": 2,
+        "202": 1,
+        "203": 2,
+        "204": 1,
+        "205": 2,
+        "206": 0,
+        "207": 1,
+        "208": 1,
+        "209": 0,
+        "210": 1,
+        "301": 0,
+        "302": 0,
+        "303": 0,
+        "304": 1,
+        "305": 0,
+        "306": 2,
+        "307": 1,
+        "308": 0,
+        "309": 1,
+        "310": 0,
+        "311": 1,
+        "312": 1
+      },
+      "max_completion_audits_per_case": 2,
+      "sum_case_duration_ms": 906634,
+      "mean_case_duration_ms": 24503.62162162162,
+      "median_case_duration_ms": 22524,
+      "dollar_cost": null
+    }
+  ]
+}
