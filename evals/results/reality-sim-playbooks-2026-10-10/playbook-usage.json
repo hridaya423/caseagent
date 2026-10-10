@@ -1,0 +1,1061 @@
+{
+  "code_commit": "686cab2",
+  "run_dir": "/Users/haoguo/Documents/Codex/2026-10-10/this/repos/caseagent/runs/reality-sim/playbooks-2026-10-10-686cab2",
+  "completed_cases": 37,
+  "trace_files": 37,
+  "events": {
+    "run_start": 37,
+    "playbook_selection": 44,
+    "model": 44,
+    "tool": 132
+  },
+  "actual_actor_models": {
+    "claude-sonnet-5-5": 44
+  },
+  "actor_fallback_responses": 0,
+  "selector_api_calls": 43,
+  "nonempty_selector_events": 35,
+  "selected_playbook_counts": {
+    "PB05": 2,
+    "PB04": 5,
+    "PB09": 10,
+    "PB06": 1,
+    "PB07": 3,
+    "PB12": 7,
+    "PB03": 11,
+    "PB10": 9,
+    "PB11": 2
+  },
+  "cases_with_nonempty_selection": 29,
+  "selector_errors": [],
+  "selector_usage": {
+    "input_tokens": 445935,
+    "output_tokens": 24241
+  },
+  "actor_usage": {
+    "input_tokens": 162,
+    "output_tokens": 67007
+  },
+  "cases": [
+    {
+      "case_id": "101",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB05",
+          "step_ids": [
+            "scope"
+          ],
+          "current_evidence_ids": [
+            "event:19",
+            "event:25",
+            "request"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "102",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB04",
+          "step_ids": [
+            "approval"
+          ],
+          "current_evidence_ids": [
+            "event:6",
+            "event:9",
+            "request"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "multiple"
+          ],
+          "current_evidence_ids": [
+            "event:9",
+            "event:6",
+            "event:7"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "103",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB06",
+          "step_ids": [
+            "verify",
+            "conflict"
+          ],
+          "current_evidence_ids": [
+            "event:6",
+            "event:20",
+            "event:24"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "104",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB07",
+          "step_ids": [
+            "already_changed",
+            "agreement"
+          ],
+          "current_evidence_ids": [
+            "event:8",
+            "event:9",
+            "request"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB12",
+          "step_ids": [
+            "verify"
+          ],
+          "current_evidence_ids": [
+            "event:8",
+            "event:9"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "105",
+      "selector_calls": 1,
+      "nonempty_selections": 0,
+      "selections": [],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "106",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB07",
+          "step_ids": [
+            "agreement",
+            "finish"
+          ],
+          "current_evidence_ids": [
+            "event:5",
+            "event:9",
+            "request"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "107",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "quote"
+          ],
+          "current_evidence_ids": [
+            "event:18",
+            "event:17",
+            "event:9"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "108",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "multiple"
+          ],
+          "current_evidence_ids": [
+            "event:19",
+            "event:21",
+            "event:18"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "109",
+      "selector_calls": 2,
+      "nonempty_selections": 2,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB10",
+          "step_ids": [
+            "book"
+          ],
+          "current_evidence_ids": [
+            "event:20",
+            "event:18",
+            "event:7"
+          ]
+        },
+        {
+          "turn": 2,
+          "playbook_id": "PB10",
+          "step_ids": [
+            "book",
+            "conflict"
+          ],
+          "current_evidence_ids": [
+            "event:20",
+            "event:18",
+            "action:0"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "110",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB10",
+          "step_ids": [
+            "conflict"
+          ],
+          "current_evidence_ids": [
+            "event:21",
+            "event:17",
+            "event:19"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB11",
+          "step_ids": [
+            "block"
+          ],
+          "current_evidence_ids": [
+            "event:16",
+            "event:18",
+            "event:21"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "111",
+      "selector_calls": 2,
+      "nonempty_selections": 2,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB12",
+          "step_ids": [
+            "verify",
+            "invoice"
+          ],
+          "current_evidence_ids": [
+            "event:22",
+            "event:15",
+            "event:21"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "result"
+          ],
+          "current_evidence_ids": [
+            "event:9",
+            "event:22",
+            "event:21"
+          ]
+        },
+        {
+          "turn": 2,
+          "playbook_id": "PB12",
+          "step_ids": [
+            "verify",
+            "close"
+          ],
+          "current_evidence_ids": [
+            "event:22",
+            "action:0",
+            "event:9"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "112",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB10",
+          "step_ids": [
+            "conflict",
+            "missed"
+          ],
+          "current_evidence_ids": [
+            "event:39",
+            "event:41",
+            "event:43"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "113",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "triage"
+          ],
+          "current_evidence_ids": [
+            "event:10",
+            "event:9",
+            "event:5"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "114",
+      "selector_calls": 3,
+      "nonempty_selections": 3,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB04",
+          "step_ids": [
+            "approval",
+            "access"
+          ],
+          "current_evidence_ids": [
+            "event:16",
+            "event:15",
+            "event:2"
+          ]
+        },
+        {
+          "turn": 2,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "missing",
+            "changed"
+          ],
+          "current_evidence_ids": [
+            "event:16",
+            "action:0",
+            "event:15"
+          ]
+        },
+        {
+          "turn": 2,
+          "playbook_id": "PB04",
+          "step_ids": [
+            "approval"
+          ],
+          "current_evidence_ids": [
+            "event:13",
+            "event:16",
+            "action:0"
+          ]
+        },
+        {
+          "turn": 3,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "missing",
+            "changed"
+          ],
+          "current_evidence_ids": [
+            "event:16",
+            "action:0",
+            "action:5"
+          ]
+        },
+        {
+          "turn": 3,
+          "playbook_id": "PB04",
+          "step_ids": [
+            "approval"
+          ],
+          "current_evidence_ids": [
+            "event:15",
+            "event:16",
+            "action:5"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5",
+        "claude-sonnet-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "115",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB10",
+          "step_ids": [
+            "pending"
+          ],
+          "current_evidence_ids": [
+            "event:11",
+            "event:12",
+            "event:7"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB11",
+          "step_ids": [
+            "detect",
+            "block"
+          ],
+          "current_evidence_ids": [
+            "event:8",
+            "event:9"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "201",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB05",
+          "step_ids": [
+            "quote",
+            "scope"
+          ],
+          "current_evidence_ids": [
+            "event:19",
+            "event:25",
+            "event:9"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "202",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "approve"
+          ],
+          "current_evidence_ids": [
+            "event:9",
+            "event:5",
+            "request"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "missing"
+          ],
+          "current_evidence_ids": [
+            "event:9",
+            "event:3"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "203",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "result"
+          ],
+          "current_evidence_ids": [
+            "event:22",
+            "event:21",
+            "event:16"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "204",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "missing"
+          ],
+          "current_evidence_ids": [
+            "event:16",
+            "event:17"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB04",
+          "step_ids": [
+            "approval"
+          ],
+          "current_evidence_ids": [
+            "event:15",
+            "event:16",
+            "event:17"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "205",
+      "selector_calls": 2,
+      "nonempty_selections": 2,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB10",
+          "step_ids": [
+            "book"
+          ],
+          "current_evidence_ids": [
+            "event:20",
+            "event:22",
+            "event:23"
+          ]
+        },
+        {
+          "turn": 2,
+          "playbook_id": "PB10",
+          "step_ids": [
+            "book",
+            "pending"
+          ],
+          "current_evidence_ids": [
+            "event:20",
+            "event:22",
+            "event:23"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "206",
+      "selector_calls": 1,
+      "nonempty_selections": 0,
+      "selections": [],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "207",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "triage"
+          ],
+          "current_evidence_ids": [
+            "event:10",
+            "event:9",
+            "event:5"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB12",
+          "step_ids": [
+            "verify"
+          ],
+          "current_evidence_ids": [
+            "event:11",
+            "event:10"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "208",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "changed"
+          ],
+          "current_evidence_ids": [
+            "event:18",
+            "event:17",
+            "event:21"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "quote"
+          ],
+          "current_evidence_ids": [
+            "event:9",
+            "event:18",
+            "event:21"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "209",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB10",
+          "step_ids": [
+            "conflict",
+            "missed"
+          ],
+          "current_evidence_ids": [
+            "event:38",
+            "event:41",
+            "event:25"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "210",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB07",
+          "step_ids": [
+            "already_changed"
+          ],
+          "current_evidence_ids": [
+            "event:8",
+            "event:9",
+            "event:4"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB12",
+          "step_ids": [
+            "verify",
+            "remaining"
+          ],
+          "current_evidence_ids": [
+            "event:8",
+            "event:9",
+            "request"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "301",
+      "selector_calls": 1,
+      "nonempty_selections": 0,
+      "selections": [],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "302",
+      "selector_calls": 1,
+      "nonempty_selections": 0,
+      "selections": [],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "303",
+      "selector_calls": 1,
+      "nonempty_selections": 0,
+      "selections": [],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "304",
+      "selector_calls": 2,
+      "nonempty_selections": 2,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "result"
+          ],
+          "current_evidence_ids": [
+            "event:21",
+            "event:23",
+            "event:25"
+          ]
+        },
+        {
+          "turn": 2,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "changed"
+          ],
+          "current_evidence_ids": [
+            "event:13",
+            "event:15",
+            "event:25"
+          ]
+        },
+        {
+          "turn": 2,
+          "playbook_id": "PB12",
+          "step_ids": [
+            "verify",
+            "invoice"
+          ],
+          "current_evidence_ids": [
+            "event:21",
+            "event:23",
+            "event:30"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "305",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "missing"
+          ],
+          "current_evidence_ids": [
+            "event:10",
+            "event:16",
+            "event:6"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "306",
+      "selector_calls": 2,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 2,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "schedule"
+          ],
+          "current_evidence_ids": [
+            "action:0",
+            "event:23",
+            "event:18"
+          ]
+        },
+        {
+          "turn": 2,
+          "playbook_id": "PB10",
+          "step_ids": [
+            "pending"
+          ],
+          "current_evidence_ids": [
+            "action:0",
+            "event:19",
+            "event:20"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "307",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB12",
+          "step_ids": [
+            "verify",
+            "close"
+          ],
+          "current_evidence_ids": [
+            "event:16",
+            "event:20",
+            "event:25"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "308",
+      "selector_calls": 1,
+      "nonempty_selections": 0,
+      "selections": [],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "309",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB09",
+          "step_ids": [
+            "missing"
+          ],
+          "current_evidence_ids": [
+            "event:56",
+            "event:27",
+            "event:39"
+          ]
+        },
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "quote"
+          ],
+          "current_evidence_ids": [
+            "event:37",
+            "event:55",
+            "event:56"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "310",
+      "selector_calls": 1,
+      "nonempty_selections": 0,
+      "selections": [],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "311",
+      "selector_calls": 1,
+      "nonempty_selections": 1,
+      "selections": [
+        {
+          "turn": 1,
+          "playbook_id": "PB03",
+          "step_ids": [
+            "triage"
+          ],
+          "current_evidence_ids": [
+            "request",
+            "event:2",
+            "event:8"
+          ]
+        }
+      ],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    },
+    {
+      "case_id": "312",
+      "selector_calls": 1,
+      "nonempty_selections": 0,
+      "selections": [],
+      "actor_models": [
+        "claude-sonnet-5-5"
+      ],
+      "selector_errors": []
+    }
+  ],
+  "selector_events": 44,
+  "selector_no_candidate_events": 1
+}
