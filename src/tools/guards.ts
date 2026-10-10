@@ -21,6 +21,19 @@ export function requireEvidence(text: string, ctx: ToolContext | undefined, what
   }
 }
 
+// A model can leak its tool-call syntax into a value: it closes one field with "</field>" and writes the
+// next one inside it as <parameter name="...">. That text would reach the outbox or the handover verbatim.
+// Ordinary angle brackets ("< 5C", "<urgent>") pass; only the call syntax and this tool's own field names count.
+export function checkMarkup(input: Record<string, unknown>): void {
+  const names = ["parameter", "invoke", "function_calls", ...Object.keys(input)].join("|");
+  const tag = new RegExp(`</?(?:antml:)?(?:${names})\\b[^>]*>`, "i");
+  for (const [field, value] of Object.entries(input)) {
+    if (typeof value === "string" && tag.test(value)) {
+      throw new Refusal(`${field} contains tool-call markup (${tag.exec(value)![0]}). Put each value in its own field as plain text and call the tool again.`);
+    }
+  }
+}
+
 const normaliseText = (t: string) => t.replace(/\s+/g, " ").trim().toLowerCase();
 
 export function checkMessage(state: CaseState, i: { to: string; text: string }, ctx?: ToolContext): void {

@@ -1,6 +1,6 @@
 {
-  "bank_version": 4,
-  "scope": "Review of all 12 definitions and their existing step-level evidence; concrete checks and transitions refined for reference use.",
+  "bank_version": 6,
+  "scope": "Review of all 12 definitions and their existing step-level evidence; concrete checks and transitions refined for reference use. Bank version 6 removes runtime text the acting model cannot resolve; no branch or decision rule was added or dropped.",
   "review_type": "Engineering and source review, not independent performance grading or operational approval.",
   "findings": [
     {
@@ -67,6 +67,26 @@
       "id": "R13",
       "problem": "The replacement sample excluded a concrete human escalation even though resolving missing consent can legitimately require human judgement.",
       "resolution": "Suite version 3 recognizes that alternative for both arms. The missing terms still must be named, and no approval or completion may be inferred."
+    },
+    {
+      "id": "R14",
+      "problem": "Step text named other playbooks (\"apply PB12\", \"using PB10\") that the acting model is usually not given, since it receives at most two steps of at most two playbooks.",
+      "resolution": "Each cross-reference is written out as the check it stands for, for example the completion checks: who confirmed the result, landlord told, keys, invoice. possible_next_steps keeps the structural transitions for validation; it is no longer sent at runtime."
+    },
+    {
+      "id": "R15",
+      "problem": "Some step text referred to things that do not exist for the agent: a source case, historical templates, a configured chase or vacant-property policy, and timers.",
+      "resolution": "Chasing now cites policy rules 9 and 10 (chase after 3 days, escalate after 3 unanswered chases); time uses the days since last contact in the case; an earlier approval is described as approval for different work."
+    },
+    {
+      "id": "R16",
+      "problem": "PB02 repeated one long communication requirement verbatim in the ownership and progress steps.",
+      "resolution": "Kept once, in the ownership step where the landlord's arrangement is first recorded."
+    },
+    {
+      "id": "R17",
+      "problem": "Runtime context carried selection-only fields: the selector read every candidate's full guidance, and the actor received trigger, exclusions, version, compatible tools and transitions.",
+      "resolution": "The selector reads a menu (title, trigger, exclusions, each step's when and next action). The actor receives each selected step's guidance only. The completion check receives each event once."
     }
   ],
   "limits": [

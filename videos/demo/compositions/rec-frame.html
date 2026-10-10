@@ -1,0 +1,86 @@
+<!doctype html>
+<html
+  data-composition-variables='[
+    {"id":"step","type":"string","label":"Step","default":"1"},
+    {"id":"title","type":"string","label":"Title","default":"Screen recording"},
+    {"id":"todo","type":"string","label":"What to record","default":"Drop the recording into recordings/ and swap it in, see STORYBOARD.md."}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          background: #f4f5f7;
+          font-family: Inter, sans-serif;
+        }
+        .rf-label {
+          position: absolute;
+          left: 192px;
+          top: 40px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .rf-step {
+          display: grid;
+          place-items: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          background: #1f5fae;
+          color: #ffffff;
+          font: 700 22px/1 Inter, sans-serif;
+        }
+        .rf-title {
+          font: 600 28px/1 Inter, sans-serif;
+          color: #111827;
+          letter-spacing: -0.01em;
+        }
+        /* The recording plays above this window, at the same rectangle (see index.html). */
+        .rf-window {
+          position: absolute;
+          left: 192px;
+          top: 112px;
+          width: 1536px;
+          height: 864px;
+          border-radius: 16px;
+          background: #ffffff;
+          box-shadow: 0 0 0 1px rgb(17 24 39 / 0.08), 0 2px 6px rgb(17 24 39 / 0.06), 0 24px 64px rgb(17 24 39 / 0.1);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          gap: 18px;
+          padding: 0 160px;
+          text-align: center;
+        }
+        .rf-ph {
+          font: 600 20px/1 Inter, sans-serif;
+          color: #8f5400;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+        .rf-todo {
+          font: 400 28px/1.45 Inter, sans-serif;
+          color: #3f4856;
+        }
+      </style>
+      <div id="root" data-composition-id="rec-frame" data-width="1920" data-height="1080">
+        <div class="rf-label"><span class="rf-step" data-var-text="step">1</span><span class="rf-title" data-var-text="title">Screen recording</span></div>
+        <div class="rf-window">
+          <div class="rf-ph">Recording goes here</div>
+          <div class="rf-todo" data-var-text="todo">Drop the recording into recordings/ and swap it in, see STORYBOARD.md.</div>
+        </div>
+      </div>
+      <script>
+        window.__timelines["rec-frame"] = gsap.timeline({ paused: true });
+      </script>
+    </template>
+  </body>
+</html>

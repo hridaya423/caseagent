@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          background: #f4f5f7;
+          font-family: Inter, sans-serif;
+        }
+        #tw-head {
+          position: absolute;
+          left: 192px;
+          right: 192px;
+          top: 120px;
+        }
+        #tw-title {
+          font: 700 64px/1.1 Inter, sans-serif;
+          color: #111827;
+          letter-spacing: -0.03em;
+        }
+        #tw-sub {
+          margin-top: 16px;
+          font: 400 28px/1.4 Inter, sans-serif;
+          color: #3f4856;
+        }
+        #tw-cards {
+          position: absolute;
+          left: 192px;
+          right: 192px;
+          top: 340px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          align-items: start;
+          gap: 40px;
+        }
+        .tw-card {
+          padding: 32px 36px 36px;
+          border-radius: 16px;
+          background: #ffffff;
+          box-shadow: 0 0 0 1px rgb(17 24 39 / 0.07), 0 2px 4px rgb(17 24 39 / 0.05), 0 12px 32px rgb(17 24 39 / 0.06);
+        }
+        .tw-case {
+          display: flex;
+          align-items: baseline;
+          gap: 14px;
+          font: 700 30px/1.2 Inter, sans-serif;
+          color: #111827;
+        }
+        .tw-case span {
+          font: 500 20px/1 Inter, sans-serif;
+          color: #5f6977;
+        }
+        .tw-meta {
+          margin: 18px 0 14px;
+          font: 400 19px/1 "JetBrains Mono", monospace;
+          color: #5f6977;
+        }
+        .tw-body {
+          font: 400 25px/1.5 Inter, sans-serif;
+          color: #3f4856;
+        }
+        .tw-added {
+          color: #111827;
+          font-weight: 600;
+          padding: 1px 4px;
+          border-radius: 5px;
+          background: linear-gradient(rgb(97 66 184 / 0.16), rgb(97 66 184 / 0.16)) no-repeat 0 0 / 0% 100%;
+          -webkit-box-decoration-break: clone;
+          box-decoration-break: clone;
+        }
+        .tw-same {
+          margin-top: 22px;
+          font: 500 20px/1 Inter, sans-serif;
+          color: #5f6977;
+        }
+        .tw-same b {
+          color: #6142b8;
+          font-weight: 600;
+        }
+      </style>
+      <div id="root" data-composition-id="twin" data-width="1920" data-height="1080">
+        <div id="tw-head">
+          <div id="tw-title">Same case, one sentence added.</div>
+          <div id="tw-sub">Both cases share 21 events of an oven repair. Only the last one differs.</div>
+        </div>
+        <div id="tw-cards">
+          <div class="tw-card" id="tw-left">
+            <div class="tw-case">Case 110 <span>a real case, cut at event 21</span></div>
+            <div class="tw-meta" id="tw-meta-l"></div>
+            <div class="tw-body" id="tw-body-l"></div>
+            <div class="tw-same">Events 001-020 identical</div>
+          </div>
+          <div class="tw-card" id="tw-right">
+            <div class="tw-case">Case 206 <span>the same case</span></div>
+            <div class="tw-meta" id="tw-meta-r"></div>
+            <div class="tw-body" id="tw-body-r"></div>
+            <div class="tw-same">Events 001-020 identical · <b>+1 sentence</b></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (() => {
+          // Real text: content/cases.js is generated from evals/reality-sim/cases/110 and 206.
+          const D = window.CASE_DATA.last;
+          const root = document.querySelector('[data-composition-id="twin"]');
+          const meta = `event 021 · ${D.channel.toLowerCase()} · ${D.from.toLowerCase()} → ${D.to.toLowerCase()} · ${D.at.slice(0, 16)}`;
+          root.querySelector("#tw-meta-l").textContent = meta;
+          root.querySelector("#tw-meta-r").textContent = meta;
+          root.querySelector("#tw-body-l").textContent = D.shared;
+          const r = root.querySelector("#tw-body-r");
+          r.append(document.createTextNode(`${D.shared} `));
+          const added = document.createElement("span");
+          added.className = "tw-added";
+          added.textContent = D.added;
+          r.append(added);
+
+          const tl = gsap.timeline({ paused: true });
+          tl.fromTo("#tw-head", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.1);
+          tl.fromTo("#tw-left", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.5);
+          tl.fromTo("#tw-right", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.7);
+          tl.fromTo(".tw-added", { backgroundSize: "0% 100%" }, { backgroundSize: "100% 100%", duration: 0.9, ease: "power2.inOut" }, 1.8);
+          window.__timelines["twin"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

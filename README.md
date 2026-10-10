@@ -54,6 +54,7 @@ Three kinds of guardrails:
   - `assign_contractor` refuses unless the agency recorded an approval, or the landlord's reply to an earlier request reads as approved.
   - `send_message` refuses `[event N]` references, a message identical to one already sent to the same person, and any £ amount or date that no event, record or document in the case shows. `request_landlord_approval` applies the same amount and date check to its cost.
   - `close_case` refuses while keys are outstanding, and unless `work_confirmed_by` cites an event the agent can see.
+  - Every tool refuses a field that holds tool-call markup (`</missing_or_conflict>`, `<parameter name="…">`), so leaked call syntax never reaches the outbox or a handover. A live run of reality-sim 206 hit it and resent the handover cleanly.
   - After a refused or failed call, the rest of the same model response is not run, so a later message cannot claim the failed action happened.
 - **Loop limits.** A run that does not end in 15 turns auto-escalates; a system error escalates with a handover summary.
 - **Overload.** The SDK retries rate limits and server errors with backoff; if the model stays overloaded, the request goes once to `FALLBACK_MODEL` (default `claude-sonnet-5`), and the trace records which model answered.

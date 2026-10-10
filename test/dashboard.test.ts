@@ -162,3 +162,11 @@ test("is read-only, local-only and confined to the dashboard folder", async () =
     server.close();
   }
 });
+
+test("leaves out eval exports that have no per-sample state", () => {
+  const { src } = fixture();
+  const root = mkdtempSync(join(tmpdir(), "evals-"));
+  mkdirSync(join(root, "summary-only"));
+  writeFileSync(join(root, "summary-only", "results.json"), JSON.stringify({ results: [{ id: "x", case_id: "101" }] }));
+  assert.ok(!discoverRuns({ ...src, evalDirs: [root] }).some((r) => r.id.includes("summary-only")));
+});

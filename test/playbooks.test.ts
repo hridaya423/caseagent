@@ -69,7 +69,7 @@ test("retrieval errors and invalid selectors fall back to the ordinary agent", a
     { messages: { create: async () => response("select_references", { selections: [{ ...selection.selections[0], step_ids: ["missing"] }] }) } } as ModelClient,
   ]) {
     const trace: string[] = [];
-    const ctx = await playbookContext({ options: {}, client, model: "fake", policy: "policy", query: "invoice complete", currentEvidence: [{ id: "event:1", text: c.events[0].body }],
+    const ctx = await playbookContext({ options: {}, client, model: "fake", query: "invoice complete", currentEvidence: [{ id: "event:1", text: c.events[0].body }],
       trace: (kind) => trace.push(kind), turn: 1 });
     assert.equal(ctx, ""); assert.deepEqual(trace, ["playbook_error"]);
   }
@@ -87,7 +87,12 @@ test("loop injects selected steps, never hidden events or historical examples, a
   assert.equal(calls.length, 2);
   assert.equal(actionLog(state).length, 1);
   assert.equal(actionLog(state)[0].tool, "hold");
-  assert.match(JSON.stringify(calls[1].system), /Workflow references/);
+  assert.match(JSON.stringify(calls[1].messages), /Workflow references/);
+  assert.doesNotMatch(JSON.stringify(calls[1].system), /Workflow references/);
+  assert.doesNotMatch(JSON.stringify(calls[0]), /"current_policy"/);
+  // The selector reads a menu; the actor reads only the selected steps' guidance.
+  assert.doesNotMatch(JSON.stringify(calls[0].messages), /decision_checks|communication_requirements/);
+  assert.doesNotMatch(JSON.stringify(calls[1].messages), /possible_next_steps|compatible_tools|retrieval_terms|exclusions/);
   assert.doesNotMatch(JSON.stringify(calls), /HIDDEN_FUTURE_CANARY|source_references|provenance|representative_examples/);
   assert.equal(state.approvalOnFile, false);
 });
@@ -104,6 +109,27 @@ test("a later loop turn reassesses references after the executed tool result", a
   assert.equal(selectors, 2);
   assert.match(JSON.stringify(calls[2].messages), /send_message.*queued in the outbox/);
   assert.doesNotMatch(JSON.stringify(calls[3].system), /Workflow references/);
+  assert.match(JSON.stringify(calls[3].messages), /no longer apply/);
+});
+
+test("references are selected once per stage unless a successful action changes the state", async () => {
+  let actorTurns = 0, selectors = 0;
+  const systems: string[] = [];
+  const client: ModelClient = { messages: { create: async (p) => {
+    if (p.tools?.some((t) => "name" in t && t.name === "select_references")) { selectors++; return response("select_references", selection); }
+    if (p.tools?.some((t) => "name" in t && t.name === "audit_workflow")) return response("audit_workflow", { ready: true, missing: [] });
+    systems.push(JSON.stringify(p.system));
+    const turn = ++actorTurns;
+    if (turn === 1) return { ...response("hold", {}), content: [{ type: "text", text: "Thinking about the invoice.", citations: null }] };
+    if (turn === 2) return response("send_message", { to: "contractor", channel: "email", text: "Please send the invoice by [event 001].", reason: "[event 001]" });
+    return response("hold", { waiting_for: "Waiting for Provider", reason: "Invoice pending [event 001]" });
+  } } };
+  const state = newState(c.id, 1);
+  await runCase({ c, state, newFrom: 1, client, model: "fake", policy: "policy", playbooks: {}, trace: () => {} });
+  // A prose turn and a refused message change nothing, so the first selection stands.
+  assert.equal(actorTurns, 3);
+  assert.equal(selectors, 1);
+  assert.equal(new Set(systems).size, 1);
 });
 
 test("a single-step retry after prose still permits the needed message action", async () => {
@@ -154,7 +180,7 @@ test("eval projection isolates the input from expected results, derivation and f
 test("a false-positive shortlist can be rejected without putting guidance into context", async () => {
   const trace: Record<string, unknown>[] = [];
   const client: ModelClient = { messages: { create: async () => response("select_references", { selections: [] }) } };
-  const ctx = await playbookContext({ options: {}, client, model: "fake", policy: "policy", query: "reset portal password",
+  const ctx = await playbookContext({ options: {}, client, model: "fake", query: "reset portal password",
     currentEvidence: [{ id: "request", text: "Please help with my portal password." }], trace: (kind,data) => trace.push({ kind,...data }), turn: 1 });
   assert.equal(ctx, ""); assert.equal(trace[0].kind, "playbook_selection");
   assert.ok((trace[0].candidates as string[]).length > 0);

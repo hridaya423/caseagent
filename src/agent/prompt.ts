@@ -65,6 +65,8 @@ export type CasePrompt = {
   content: Anthropic.ContentBlockParam[];
   // The prompt text plus the extracted text of every native document: what the agent could read.
   evidence: string;
+  // The visible attachments alone, as text: the part of the evidence that is not an event or an action.
+  attachments: string;
 };
 
 // A request may be 32 MB and base64 adds a third, so native PDFs share a 20 MB budget per prompt.
@@ -146,5 +148,5 @@ export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[]
     ...documentTexts,
   ].join("\n\n");
 
-  return { content: [{ type: "text", text }, ...images, ...documents], evidence };
+  return { content: [{ type: "text", text }, ...images, ...documents], evidence, attachments: [...attachmentLines, ...documentTexts].join("\n\n") };
 }

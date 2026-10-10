@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "bank_version": 5,
+  "bank_version": 6,
   "track": "Property Management",
   "retrieval_unit": "playbook",
   "source_revision": "9bcdca585955dfb930005ed742572606e68f5688",
@@ -32,7 +32,7 @@
   "playbooks": [
     {
       "id": "PB01",
-      "version": 2,
+      "version": 3,
       "title": "Supported tenant checks and confirmed resolution",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -62,7 +62,7 @@
         {
           "id": "check",
           "when": "A safe applicable check is evidenced and has not already been tried.",
-          "next_action": "Ask the tenant to perform that check and report the result. Do not copy equipment layout or liability from a historical example.",
+          "next_action": "Ask the tenant to perform that check and report the result. Do not assume the equipment layout or who is liable.",
           "compatible_tools": [
             "send_message"
           ],
@@ -112,7 +112,7 @@
         {
           "id": "failed",
           "when": "The tenant says the check failed or the problem recurred.",
-          "next_action": "Move to approved professional assessment using PB03, or the currently applicable ownership route.",
+          "next_action": "Move to a professional assessment with landlord approval, or to whoever currently manages the repair.",
           "compatible_tools": [
             "request_landlord_approval",
             "send_message"
@@ -127,7 +127,7 @@
             "Find the failed attempt; separate a repeated identical check from a different currently supported one."
           ],
           "communication_requirements": [
-            "Request approval for professional assessment when needed; do not repeat a failed check or dispatch under historical approval."
+            "Request approval for professional assessment when needed; do not repeat a failed check or dispatch under an approval given for earlier or different work."
           ],
           "wait_for": "Current scope approval or the active owner response.",
           "possible_next_steps": [
@@ -138,7 +138,7 @@
         {
           "id": "resolved",
           "when": "The tenant confirms the specific problem is resolved and no material risk remains.",
-          "next_action": "Apply PB12 before closing; record any recurrence or monitoring condition.",
+          "next_action": "Run the completion checks (who confirmed the result, landlord told, keys, invoice) before closing; record any recurrence or monitoring condition.",
           "compatible_tools": [
             "add_note",
             "close_case"
@@ -153,7 +153,7 @@
             "Match the tenant confirmation to the original problem; identify any outstanding in-scope obligation."
           ],
           "communication_requirements": [
-            "Use the truthful no-work disposition only after applicable PB12 checks."
+            "Close with the no-work outcome only after those completion checks."
           ],
           "wait_for": "Any missing closure confirmation.",
           "possible_next_steps": [
@@ -313,7 +313,7 @@
     },
     {
       "id": "PB02",
-      "version": 3,
+      "version": 4,
       "title": "Landlord managed repair",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -369,22 +369,21 @@
         {
           "id": "progress",
           "when": "The landlord-managed work is pending.",
-          "next_action": "Wait or request a progress update according to the configured chase policy.",
+          "next_action": "Wait, or ask the landlord for a progress update when it is due: chase after 3 days without an answer and escalate after 3 unanswered chases (policy rules 9 and 10).",
           "compatible_tools": [
             "hold",
             "send_message"
           ],
-          "if_required_information_is_missing": "Do not infer a visit date or chase interval from repeated historic holds.",
+          "if_required_information_is_missing": "Do not infer a visit date from earlier holds or reminders.",
           "evidence_refs": [
             "E05"
           ],
           "guard_status": "reference guidance; current policy and tool guards remain authoritative",
           "decision_checks": [
-            "Identify the active owner, last response and any promised milestone; apply only the configured chase policy."
+            "Identify the active owner, last response and any promised milestone; count only chases the agency actually sent."
           ],
           "communication_requirements": [
-            "Ask the landlord about the pending milestone, not a provider the agency never instructed.",
-            "Do not promise that the landlord or their own provider will contact the tenant directly unless the current arrangement explicitly confirms that. State only that the landlord is checking the date, which remains unconfirmed; the agency can promise its own update only."
+            "Ask the landlord about the pending milestone, not a provider the agency never instructed."
           ],
           "wait_for": "Owner progress or completion.",
           "possible_next_steps": [
@@ -421,7 +420,7 @@
         {
           "id": "done",
           "when": "A credible current report confirms the in-scope work is complete.",
-          "next_action": "Apply PB12; keep unrelated unfinished work separate.",
+          "next_action": "Run the completion checks (who confirmed the result, landlord told, keys, invoice); keep unrelated unfinished work separate.",
           "compatible_tools": [
             "add_note",
             "close_case"
@@ -436,7 +435,7 @@
             "Check who observed the result, which item was repaired and what remains; a landlord promise is not a result."
           ],
           "communication_requirements": [
-            "Ask only for outstanding PB12 checks; do not request approval again for completed work."
+            "Ask only for the completion facts still missing; do not request approval again for completed work."
           ],
           "wait_for": "Missing completion evidence or final checks.",
           "possible_next_steps": [
@@ -578,7 +577,7 @@
     },
     {
       "id": "PB03",
-      "version": 3,
+      "version": 4,
       "title": "Agency arranged assessment and repair",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -646,7 +645,7 @@
         {
           "id": "triage",
           "when": "The property, affected item, risk and responsibility are sufficiently clear.",
-          "next_action": "Assess current permission and scope; use PB09 or PB11 where they are unclear.",
+          "next_action": "Assess current permission and scope; check the quote and approval where they are unclear, and escalate when records about the property, person or job conflict.",
           "compatible_tools": [
             "send_message",
             "escalate"
@@ -678,7 +677,7 @@
           "compatible_tools": [
             "request_landlord_approval"
           ],
-          "if_required_information_is_missing": "Do not use approval from a source case.",
+          "if_required_information_is_missing": "An approval for a different visit, item or cost does not cover this one; request approval for this proposal.",
           "evidence_refs": [
             "E09",
             "E11"
@@ -724,7 +723,7 @@
         {
           "id": "schedule",
           "when": "A provider is instructed but attendance is pending.",
-          "next_action": "Apply PB10 for booking, access, changes and missed visits.",
+          "next_action": "Arrange the booking and access; handle changes and missed visits with the provider and the tenant.",
           "compatible_tools": [
             "send_message",
             "hold"
@@ -738,7 +737,7 @@
             "Determine whether the provider has actually been instructed and which booking or access field is missing."
           ],
           "communication_requirements": [
-            "Ask the responsible party for that missing field using PB10."
+            "Ask the responsible party for that missing field."
           ],
           "wait_for": "A confirmed appointment or access arrangement.",
           "possible_next_steps": [
@@ -749,7 +748,7 @@
         {
           "id": "quote",
           "when": "Assessment changes the work, risk or cost beyond authorization.",
-          "next_action": "Apply PB09 before authorizing the changed work.",
+          "next_action": "Check the changed quote and obtain approval before authorizing the changed work.",
           "compatible_tools": [
             "request_landlord_approval",
             "send_message"
@@ -764,7 +763,7 @@
             "Compare the new work and total charge with the approved version; separate assessment permission from repair permission."
           ],
           "communication_requirements": [
-            "Do not instruct additional work before the PB09 scope and cost checks are satisfied."
+            "Do not instruct additional work until the changed scope and total are known and approved."
           ],
           "wait_for": "A complete quote and approval for the changed proposal.",
           "possible_next_steps": [
@@ -775,7 +774,7 @@
         {
           "id": "result",
           "when": "A provider reports a result, or a stakeholder questions the current progress, delay or quality of instructed work.",
-          "next_action": "For a progress or delay complaint, obtain current status, work description and relevant photos from the active provider, and give the complainant an honest acknowledgement or verified update. For a reported result, verify it and apply PB11 and PB12 before closure.",
+          "next_action": "For a progress or delay complaint, obtain current status, work description and relevant photos from the active provider, and give the complainant an honest acknowledgement or verified update. For a reported result, verify it, check that the records about the property and job agree, and run the completion checks (who confirmed the result, landlord told, keys, invoice) before closure.",
           "compatible_tools": [
             "send_message",
             "add_note",
@@ -793,7 +792,7 @@
             "A reply to the landlord does not obtain missing contractor evidence. If both acknowledgement and a provider evidence request are needed, treat them as separate outstanding actions until successful tool results show each was sent."
           ],
           "communication_requirements": [
-            "Verify remaining work and PB12 requirements instead of closing from a generic completion label.",
+            "Verify remaining work and the completion checks (who confirmed the result, landlord told, keys, invoice) instead of closing from a generic completion label.",
             "Ask the active provider for progress, work done and remaining, relevant current photos and the revised plan; request the invoice conditionally if work is completed. Tell the landlord what is confirmed and what is being checked, without inventing a delay cause, completion date or photo contents."
           ],
           "wait_for": "Outstanding completion evidence.",
@@ -1172,7 +1171,7 @@
     },
     {
       "id": "PB04",
-      "version": 3,
+      "version": 4,
       "title": "Checkout cleaning and coordinated works",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -1227,7 +1226,7 @@
         {
           "id": "approval",
           "when": "A quote is available and a comparison quote or approval of the selected work is still needed.",
-          "next_action": "If the landlord explicitly asks for a comparison quote, obtain it within the quotation-only scope first. When comparable quotes are available, request selection and approval of the exact work and total through PB09.",
+          "next_action": "If the landlord explicitly asks for a comparison quote, obtain it within the quotation-only scope first. When comparable quotes are available, ask the landlord to choose and approve the exact work and total.",
           "compatible_tools": [
             "send_message",
             "assign_contractor",
@@ -1282,12 +1281,12 @@
         {
           "id": "access",
           "when": "Approved work can proceed.",
-          "next_action": "Coordinate keys, caretaker access or the verified access arrangement using PB10.",
+          "next_action": "Coordinate keys, caretaker access or the verified access arrangement.",
           "compatible_tools": [
             "send_message",
             "assign_contractor"
           ],
-          "if_required_information_is_missing": "Follow the configured vacant-property policy and obtain access details.",
+          "if_required_information_is_missing": "Obtain the missing access details; for a vacant property, ask the landlord how access is arranged.",
           "evidence_refs": [
             "E19"
           ],
@@ -1307,7 +1306,7 @@
         {
           "id": "finish",
           "when": "Work is reported finished.",
-          "next_action": "Reconcile changes against approved scope and apply PB12 for keys, invoice and confirmation.",
+          "next_action": "Reconcile changes against the approved scope, then run the completion checks for keys, invoice and confirmation.",
           "compatible_tools": [
             "send_message",
             "add_note",
@@ -1325,7 +1324,7 @@
           "communication_requirements": [
             "Request outstanding evidence rather than inferring payment from an invoice or receipt from a request."
           ],
-          "wait_for": "Remaining PB12 evidence.",
+          "wait_for": "The remaining completion evidence.",
           "possible_next_steps": [
             "PB12.keys",
             "PB12.invoice",
@@ -1494,7 +1493,7 @@
     },
     {
       "id": "PB05",
-      "version": 2,
+      "version": 3,
       "title": "Garden scope responsibility and completion evidence",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -1520,7 +1519,7 @@
         {
           "id": "scope",
           "when": "The affected area, requested work and responsible party are clear.",
-          "next_action": "Separate communal work, landlord-managed work and tenant-maintenance follow-up. Route execution through PB01, PB02 or PB03 as applicable.",
+          "next_action": "Separate communal work, landlord-managed work and tenant-maintenance follow-up, and route each to a tenant check, the landlord's own arrangement or an agency-arranged repair.",
           "compatible_tools": [
             "send_message",
             "add_note"
@@ -1547,7 +1546,7 @@
         {
           "id": "quote",
           "when": "The contractor identifies additional material or disposal requirements.",
-          "next_action": "Obtain and submit the revised scope and quote using PB09.",
+          "next_action": "Obtain the revised scope and quote, then request approval for the changed scope and total.",
           "compatible_tools": [
             "request_landlord_approval"
           ],
@@ -1595,7 +1594,7 @@
         {
           "id": "finish",
           "when": "Current evidence supports completion of the agreed scope.",
-          "next_action": "Apply PB12. Keep uncleared or unapproved items open.",
+          "next_action": "Run the completion checks (who confirmed the result, landlord told, keys, invoice). Keep uncleared or unapproved items open.",
           "compatible_tools": [
             "add_note",
             "close_case"
@@ -1609,7 +1608,7 @@
             "Check whether reported clearance also establishes any separately promised gravel, levelling or disposal."
           ],
           "communication_requirements": [
-            "Keep unconfirmed in-scope items open and apply PB12 to the verified result."
+            "Keep unconfirmed in-scope items open; close only on the verified result."
           ],
           "wait_for": "Missing in-scope evidence.",
           "possible_next_steps": [
@@ -1728,7 +1727,7 @@
     },
     {
       "id": "PB06",
-      "version": 2,
+      "version": 3,
       "title": "Warranty and remedial repair",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -1798,7 +1797,7 @@
         {
           "id": "arrange",
           "when": "The responsible provider confirms the route and any cost.",
-          "next_action": "Coordinate attendance and parts through PB10; use PB09 if a charge falls outside approval.",
+          "next_action": "Coordinate attendance and parts; request approval if a charge falls outside the current approval.",
           "compatible_tools": [
             "send_message",
             "hold",
@@ -1826,7 +1825,7 @@
         {
           "id": "result",
           "when": "The warranty or remedial provider reports completion.",
-          "next_action": "Confirm the result and charge status, then apply PB12.",
+          "next_action": "Confirm the result and charge status, then run the completion checks (who confirmed the result, landlord told, keys, invoice).",
           "compatible_tools": [
             "send_message",
             "add_note",
@@ -1842,7 +1841,7 @@
             "Separate ordered parts and expected repair dates from an actual completed repair and final no-charge confirmation."
           ],
           "communication_requirements": [
-            "Request the missing result or charge evidence before PB12 closure."
+            "Request the missing result or charge evidence before closing."
           ],
           "wait_for": "The actual repair result and final charge status.",
           "possible_next_steps": [
@@ -1930,7 +1929,7 @@
     },
     {
       "id": "PB07",
-      "version": 3,
+      "version": 4,
       "title": "Tenant supplied replacement and property ownership",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -2007,7 +2006,7 @@
         {
           "id": "finish",
           "when": "The current agreement and relevant completion facts are confirmed.",
-          "next_action": "Apply PB12, retaining unresolved appliance inspection or storage matters.",
+          "next_action": "Run the completion checks (who confirmed the result, landlord told, keys, invoice), keeping unresolved appliance inspection or storage matters open.",
           "compatible_tools": [
             "add_note",
             "close_case"
@@ -2022,7 +2021,7 @@
             "Check the current agreement and all in-scope follow-up; separate tenant-owned replacement from landlord asset disposition."
           ],
           "communication_requirements": [
-            "Use PB12 only when the remaining inspection or storage obligation is resolved or explicitly withdrawn."
+            "Close only when the remaining inspection or storage obligation is resolved or explicitly withdrawn."
           ],
           "wait_for": "Any outstanding in-scope obligation.",
           "possible_next_steps": [
@@ -2114,7 +2113,7 @@
     },
     {
       "id": "PB08",
-      "version": 2,
+      "version": 3,
       "title": "Reading requests and inspection reports",
       "kind": "scenario",
       "status": "reference_reviewed",
@@ -2160,7 +2159,7 @@
         {
           "id": "visit",
           "when": "An inspection needs scheduling or a change.",
-          "next_action": "Confirm date, access and relevant pet arrangements with PB10.",
+          "next_action": "Confirm date, access and relevant pet arrangements.",
           "compatible_tools": [
             "send_message",
             "hold"
@@ -2174,7 +2173,7 @@
             "Identify the requested date, time window, access and pet arrangements; reconcile inconsistent dates."
           ],
           "communication_requirements": [
-            "Ask only for the missing booking field using PB10."
+            "Ask only for the missing booking field."
           ],
           "wait_for": "Consistent current booking and access.",
           "possible_next_steps": [
@@ -2664,7 +2663,7 @@
     },
     {
       "id": "PB10",
-      "version": 3,
+      "version": 4,
       "title": "Booking access and disrupted attendance",
       "kind": "decision_module",
       "status": "reference_reviewed",
@@ -2721,7 +2720,7 @@
             "send_message",
             "escalate"
           ],
-          "if_required_information_is_missing": "Do not silently choose one historic date representation.",
+          "if_required_information_is_missing": "Do not silently choose one of the conflicting dates.",
           "evidence_refs": [
             "E12",
             "E16"
@@ -2768,24 +2767,24 @@
         {
           "id": "pending",
           "when": "An answer or visit remains pending.",
-          "next_action": "For routine waiting, apply the configured reminder and escalation policy. When the landlord questions progress or asks for evidence, acknowledge the concern and request the missing progress, work description and photos from the active provider before waiting for their reply.",
+          "next_action": "For routine waiting, chase after 3 days without an answer and escalate after 3 unanswered chases (policy rules 9 and 10). When the landlord questions progress or asks for evidence, acknowledge the concern and request the missing progress, work description and photos from the active provider before waiting for their reply.",
           "compatible_tools": [
             "hold",
             "send_message",
             "escalate"
           ],
-          "if_required_information_is_missing": "Use a real current clock and verified last-contact facts if timers are enabled.",
+          "if_required_information_is_missing": "Use the days since last contact shown in the case and the reminders the agency actually sent.",
           "evidence_refs": [
             "E30",
             "E40"
           ],
           "guard_status": "reference guidance; current policy and tool guards remain authoritative",
           "decision_checks": [
-            "Use the current policy, observed time, prior successful chases and latest outside response; do not count duplicate historical templates as agent chases.",
+            "Use the observed time, prior successful chases and latest outside response; a duplicated copy of the same reminder is not an extra chase.",
             "Distinguish a routine pending appointment from an unanswered request for progress or photos. Check successful prior messages for each requested item; an internal intention to chase is not a sent request."
           ],
           "communication_requirements": [
-            "Hold or chase the responsible party when due; escalate at the configured boundary.",
+            "Hold or chase the responsible party when due; escalate after 3 unanswered chases.",
             "For a delay complaint, complete both applicable communications: an honest stakeholder acknowledgement and an evidence request to the provider. Ask for current progress, work description, photos and revised timing without promising a result; hold only once outstanding requests have actually been sent."
           ],
           "wait_for": "The outstanding answer or visit result.",
@@ -3025,7 +3024,7 @@
     },
     {
       "id": "PB11",
-      "version": 2,
+      "version": 3,
       "title": "Material identity and evidence conflicts",
       "kind": "decision_module",
       "status": "reference_reviewed",
@@ -3052,7 +3051,7 @@
         {
           "id": "detect",
           "when": "Current evidence contains a material mismatch.",
-          "next_action": "Identify the conflicting fields and affected decision without choosing an unsupported canonical value.",
+          "next_action": "Identify the conflicting fields and the decision they affect, without choosing one value over the other.",
           "compatible_tools": [
             "add_note",
             "send_message"
@@ -3071,7 +3070,7 @@
             "Identify both conflicting values and the concrete next action they affect; cosmetic wording is not a material conflict."
           ],
           "communication_requirements": [
-            "State the conflict without choosing a canonical value; apply the block step when it affects dispatch, recipient or closure."
+            "State the conflict without choosing a value; escalate when it affects dispatch, recipient or closure."
           ],
           "wait_for": "An authoritative resolution.",
           "possible_next_steps": [
@@ -3331,7 +3330,7 @@
     },
     {
       "id": "PB12",
-      "version": 3,
+      "version": 4,
       "title": "Completion evidence keys invoices and remaining work",
       "kind": "decision_module",
       "status": "reference_reviewed",
@@ -3379,7 +3378,7 @@
             "Check property and job identity, who observed the result, what was actually completed and remaining in-scope work."
           ],
           "communication_requirements": [
-            "Ask for the missing specific completion fact; use PB11 for a material identity conflict."
+            "Ask for the missing specific completion fact; escalate when records about the property, person or job conflict."
           ],
           "wait_for": "Specific current completion confirmation.",
           "possible_next_steps": [
@@ -3409,7 +3408,7 @@
           ],
           "communication_requirements": [
             "If the return is still promised, hold for the provider or request confirmation when due. Do not mark keys returned or not issued.",
-            "Ask the tenant or provider who has the new keys and how required management or landlord copies will be supplied, using the current arrangement rather than a fixed historical key count. Obtain expense evidence separately and do not promise reimbursement or blame the tenant without authority."
+            "Ask the tenant or provider who has the new keys and how required management or landlord copies will be supplied, using the current arrangement rather than assuming a key count. Obtain expense evidence separately and do not promise reimbursement or blame the tenant without authority."
           ],
           "wait_for": "A verified new-key inventory and required actual delivery, plus any separately required expense decision.",
           "possible_next_steps": [

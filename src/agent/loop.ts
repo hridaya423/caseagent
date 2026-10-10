@@ -5,7 +5,7 @@ import { isAgency, type Case } from "../case/parse.ts";
 import { renderCase } from "./prompt.ts";
 import { actionLog, type CaseState, type Run } from "../case/state.ts";
 import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "../tools/index.ts";
-import { playbookContext, type PlaybookOptions } from "./playbooks.ts";
+import { playbookContext, type CurrentEvidence, type PlaybookOptions } from "./playbooks.ts";
 import { auditStageCompletion } from "./playbook-audit.ts";
 
 export const MAX_TURNS = 15;
@@ -21,6 +21,11 @@ export type ModelClient = {
 };
 
 export type Trace = (kind: string, data: Record<string, unknown>) => void;
+
+function appendText(m: Anthropic.MessageParam, text: string): void {
+  const block: Anthropic.TextBlockParam = { type: "text", text };
+  m.content = typeof m.content === "string" ? [{ type: "text", text: m.content }, block] : [...m.content, block];
+}
 
 export function casePolicy(policy: string, singleStep = false): string {
   return singleStep ? `${policy}\nInvocation contract: execute exactly one business tool action. Do not chain actions. After a message, approval request, assignment or note, saved status may remain open; a later invocation can hold, escalate or close. The normal end-tool requirement applies to a complete stage, not to this single-action invocation.` : policy;
@@ -73,24 +78,38 @@ export async function runCase(opts: {
 
   const tools: Anthropic.Tool[] = TOOL_SPECS.map((t) => ({ ...t, strict: true }));
 
+  // The system block is the same for every case and turn, so the policy stays cached.
+  const system: Anthropic.TextBlockParam[] = [{ type: "text", text: systemText, cache_control: CACHE }];
+
+  // What the selector and the completion check may cite, each item once: the case, its visible
+  // attachments and events. Actions are added by each caller in its own form.
+  const caseEvidence: CurrentEvidence[] = [
+    { id: "title", text: c.title }, { id: "details", text: c.details }, { id: "request", text: c.request },
+    { id: "attachments", text: prompt.attachments },
+    ...visible.map((e) => ({ id: `event:${e.n}`, text: `${e.at} | ${e.channel} | from ${e.from} | to ${e.to}\n${e.body}` })),
+  ].filter((e) => e.text.trim());
   const referenceHistory = new Set<string>();
+  let shownReferences = "";
+  let selectedAt = -1;
   let completionChecks = 0;
   for (let turn = 1; turn <= MAX_TURNS; turn++) {
-    // Reassess after each tool result; a resumed run uses only its newly visible state.
-    const currentActions = actionLog(state).map((a) => ({ tool: a.tool, input: a.input, ok: a.ok, result: a.result }));
-    const references = opts.playbooks ? await playbookContext({
-      options: opts.playbooks, client, model, policy,
-      query: `${retrievalQuery}\n${JSON.stringify(currentActions)}`,
-      currentEvidence: [
-        { id: "title", text: c.title }, { id: "details", text: c.details }, { id: "request", text: c.request },
-        ...visible.map((e) => ({ id: `event:${e.n}`, text: `${e.at} | ${e.channel} | from ${e.from} | to ${e.to}\n${e.body}` })),
-        ...currentActions.map((a, i) => ({ id: `action:${i}`, text: JSON.stringify(a) })),
-      ].filter((e) => e.text.trim()), trace, turn,
-    }) : "";
-    if (references) referenceHistory.add(references);
-    const system: Anthropic.TextBlockParam[] = [
-      { type: "text", text: systemText + references, cache_control: CACHE },
-    ];
+    // Select at the start of the stage, then again only after a successful action changed the state.
+    // Changed references go into the newest user message, so the cached conversation prefix stays valid.
+    const done = actionLog(state).filter((a) => a.ok).length;
+    if (opts.playbooks && done !== selectedAt) {
+      selectedAt = done;
+      const currentActions = actionLog(state).map((a) => ({ tool: a.tool, input: a.input, ok: a.ok, result: a.result }));
+      const references = await playbookContext({
+        options: opts.playbooks, client, model,
+        query: `${retrievalQuery}\n${JSON.stringify(currentActions)}`,
+        currentEvidence: [...caseEvidence, ...currentActions.map((a, i) => ({ id: `action:${i}`, text: JSON.stringify(a) }))], trace, turn,
+      });
+      if (references) referenceHistory.add(references);
+      if (references !== shownReferences) {
+        appendText(messages.at(-1)!, references || "## Workflow references\nThe earlier workflow references no longer apply to the current state.");
+        shownReferences = references;
+      }
+    }
     const resp = await client.messages.create({ model, max_tokens: 4096, cache_control: CACHE, system, tools, messages });
 
     trace("model", { turn, model: resp.model, stop: resp.stop_reason, usage: resp.usage, content: resp.content });
@@ -136,11 +155,9 @@ export async function runCase(opts: {
         const audit = await auditStageCompletion({
           client, model: opts.playbooks.model ?? model,
           references: [...referenceHistory].join("\n"),
-          currentEvidence: [
-            { id: "request", text: c.request }, { id: "details", text: c.details },
-            { id: "visible_prompt_evidence", text: prompt.evidence },
-            ...visible.map((e) => ({ id: `event:${e.n}`, text: `${e.at} | ${e.channel} | from ${e.from} | to ${e.to}\n${e.body}` })),
-          ],
+          // Successful actions of earlier runs are history; this run's actions go in separately.
+          currentEvidence: [...caseEvidence, ...actionLog(state).filter((a) => a.ok && a.run < state.runs.length)
+            .map((a, i) => ({ id: `earlier_action:${i}`, text: JSON.stringify({ run: a.run, tool: a.tool, input: a.input }) }))],
           actions: run.actions,
           ending: { tool: u.name, input: u.input }, trace,
         });

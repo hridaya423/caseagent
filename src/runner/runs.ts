@@ -20,6 +20,7 @@ export type CaseRow = {
   key: string;
   caseId: string;
   title: string;
+  property: string;
   status: StatusKey;
   label: string;
   next: string;
@@ -127,8 +128,12 @@ function scan(root: string, path: string[]): RunRef[] {
   });
 }
 
+// Eval exports in other formats (summaries, paired arms) carry no per-sample state, so there is nothing to show for them.
+const hasCases = (run: RunRef): boolean =>
+  run.kind === "batch" || samples(run).some((s) => existsSync(join(s.outDir, "state", `${s.caseId}.json`)));
+
 export function discoverRuns(src: Sources): RunRef[] {
-  const runs = [...scan(src.runsDir, []), ...src.evalDirs.flatMap((d) => scan(d, ["evals", "results"]))];
+  const runs = [...scan(src.runsDir, []), ...src.evalDirs.flatMap((d) => scan(d, ["evals", "results"]))].filter(hasCases);
   return runs.sort((a, b) => b.updated.localeCompare(a.updated));
 }
 
@@ -261,12 +266,14 @@ function loadCaseAt(dir: string): Case | null {
   return loaded.get(dir)!;
 }
 
+const detail = (c: Case | null, name: string): string => c?.details.match(new RegExp(`\\*\\*${name}:\\*\\*\\s*(.+)`))?.[1].trim() ?? "";
+
 // A process eval stops after one action, so "open" is expected there and means nothing is wrong.
 function decisionFor(run: RunRef, state: CaseState): Decision {
   const decision = decisionOf(state);
   const last = actionLog(state).at(-1);
   if (run.kind === "batch" || state.status.kind !== "open" || !last) return decision;
-  return { ...decision, next: `Single-step sample: the next action is ${last.tool}.` };
+  return { ...decision, next: `One action: ${last.tool}` };
 }
 
 function caseRow(src: Sources, run: RunRef, s: Sample): CaseRow | null {
@@ -280,6 +287,7 @@ function caseRow(src: Sources, run: RunRef, s: Sample): CaseRow | null {
     key: s.key,
     caseId: s.caseId,
     title: (dir && loadCaseAt(dir)?.title) || `Case ${s.caseId}`,
+    property: detail(dir ? loadCaseAt(dir) : null, "Property"),
     status: statusKey(state),
     label: decision.status,
     next: decision.next,
@@ -329,8 +337,6 @@ function eventViews(c: Case, initial: number, seen: number): EventView[] {
     view: visible.has(e.n) ? "seen" : e.n > seen ? "future" : "own",
   }));
 }
-
-const detail = (c: Case | null, name: string): string => c?.details.match(new RegExp(`\\*\\*${name}:\\*\\*\\s*(.+)`))?.[1].trim() ?? "";
 
 export function readCase(src: Sources, id: string, key: string): CaseView | null {
   const run = findRun(src, id);

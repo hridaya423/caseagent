@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          background: #f4f5f7;
+          font-family: Inter, sans-serif;
+        }
+        #cl-stage {
+          position: absolute;
+          inset: 0;
+          padding: 0 240px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 36px;
+        }
+        #cl-name {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          font: 700 96px/1 Inter, sans-serif;
+          color: #111827;
+          letter-spacing: -0.035em;
+        }
+        #cl-mark {
+          width: 60px;
+          height: 60px;
+          border-radius: 15px;
+          background: #1f5fae;
+        }
+        #cl-cmd {
+          align-self: flex-start;
+          padding: 18px 26px;
+          border-radius: 12px;
+          background: #ffffff;
+          box-shadow: 0 0 0 1px rgb(17 24 39 / 0.07), 0 1px 2px rgb(17 24 39 / 0.05), 0 4px 12px rgb(17 24 39 / 0.04);
+          font: 400 32px/1 "JetBrains Mono", monospace;
+          color: #111827;
+        }
+        #cl-cmd span {
+          color: #5f6977;
+        }
+        #cl-facts {
+          display: flex;
+          gap: 44px;
+          font: 400 26px/1.3 Inter, sans-serif;
+          color: #3f4856;
+        }
+        #cl-url {
+          font: 600 30px/1 Inter, sans-serif;
+          color: #1f5fae;
+        }
+      </style>
+      <div id="root" data-composition-id="close" data-width="1920" data-height="1080">
+        <div id="cl-stage">
+          <div id="cl-name"><span id="cl-mark"></span>case-agent</div>
+          <div id="cl-cmd"><span>$ </span>npm run reality -- &lt;cases-dir&gt;</div>
+          <div id="cl-facts">
+            <span>Claude · 7 tools</span>
+            <span>Guards in code</span>
+            <span>Handover to a person</span>
+            <span>Apache-2.0</span>
+          </div>
+          <div id="cl-url">github.com/hridaya423/caseagent</div>
+        </div>
+      </div>
+      <script>
+        const tl = gsap.timeline({ paused: true });
+        ["#cl-name", "#cl-cmd", "#cl-facts", "#cl-url"].forEach((s, i) =>
+          tl.fromTo(s, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.1 + i * 0.18));
+        window.__timelines["close"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

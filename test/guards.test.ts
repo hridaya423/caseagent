@@ -68,6 +68,24 @@ test("guards run before adapters: an adapter cannot send an event reference or a
   assert.equal(runTool("send_message", msg("We will be in touch."), s, adapters, ctx).result, "sent by the real email adapter");
 });
 
+// Seen in a live run of reality-sim 110: the model closed one field with tool-call markup and wrote the
+// next field inside it, so the handover showed the raw markup.
+test("any tool refuses a field that holds tool-call markup, and nothing is recorded", () => {
+  const s = newState("x", 1);
+  const leaked = runTool("escalate", {
+    checked: "Booking [event 003].",
+    missing_or_conflict: 'The date conflicts.</missing_or_conflict>\n<parameter name="decision_needed">Confirm the date.',
+    decision_needed: "Confirm the date.",
+    reason: "r",
+  }, s, undefined, ctx);
+  assert.equal(leaked.ok, false);
+  assert.match(leaked.result, /^refused: missing_or_conflict contains tool-call markup/);
+  assert.deepEqual(s.status, { kind: "open" });
+  assert.equal(runTool("send_message", msg('Hello.</text>\n<parameter name="reason">r'), s, undefined, ctx).ok, false);
+  assert.equal(runTool("add_note", { text: "x</invoke>", reason: "r" }, s, undefined, ctx).ok, false);
+  assert.equal(runTool("send_message", msg("Temperature < 5C in the flat; the tenant wrote <urgent> in the subject."), s, undefined, ctx).ok, true);
+});
+
 test("the evidence includes visible events but not a refused message's invented amount", async () => {
   const c: Case = {
     id: "x", title: "x", details: "", request: "Tap leaking", attachments: [], layer: "strict",

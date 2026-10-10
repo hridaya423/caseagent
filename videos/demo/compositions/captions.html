@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        #cap-rail {
+          position: absolute;
+          left: 192px;
+          right: 192px;
+          top: 988px;
+          height: 60px;
+        }
+        .cap-group {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font: 500 30px/1.25 Inter, sans-serif;
+          color: #111827;
+          letter-spacing: -0.005em;
+          text-align: center;
+          opacity: 0;
+        }
+      </style>
+      <div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
+        <div id="cap-rail"></div>
+      </div>
+      <script>
+        (() => {
+          const root = document.querySelector('[data-composition-id="captions"]');
+          const rail = root.querySelector("#cap-rail");
+          const tl = gsap.timeline({ paused: true });
+          window.CAPTIONS.forEach((c, i) => {
+            const g = document.createElement("div");
+            g.className = "cap-group";
+            g.id = `cap-${i}`;
+            g.textContent = c.text;
+            rail.append(g);
+            tl.fromTo(g, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "none" }, c.start);
+            tl.to(g, { opacity: 0, duration: 0.15, ease: "none" }, c.end - 0.15);
+            tl.set(g, { opacity: 0 }, c.end);
+          });
+          window.__timelines["captions"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

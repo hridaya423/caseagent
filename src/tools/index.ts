@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { closeChecks, holdReason, type CaseState } from "../case/state.ts";
-import { checkClose, checkMessage, Refusal, requireApproval, requireEvidence, type ToolContext } from "./guards.ts";
+import { checkClose, checkMarkup, checkMessage, Refusal, requireApproval, requireEvidence, type ToolContext } from "./guards.ts";
 
 export { Refusal, type ToolContext } from "./guards.ts";
 
@@ -120,6 +120,7 @@ export function runTool(
   if (!parsed.success) return { ok: false, ends: false, result: `invalid input:\n${z.prettifyError(parsed.error)}` };
   const apply = adapters?.[name] ?? t.apply;
   try {
+    checkMarkup(parsed.data as Record<string, unknown>);
     t.guard?.(state, parsed.data as Record<string, unknown>, ctx);
     return { ok: true, ends: t.end, result: apply(parsed.data as Record<string, unknown>, state) };
   } catch (e) {

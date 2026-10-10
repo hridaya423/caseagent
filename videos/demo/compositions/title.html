@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          background: #f4f5f7;
+          font-family: Inter, sans-serif;
+        }
+        #ti-stage {
+          position: absolute;
+          inset: 0;
+          padding: 0 240px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 28px;
+        }
+        #ti-eyebrow {
+          font: 500 22px/1 Inter, sans-serif;
+          color: #5f6977;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+        #ti-name {
+          display: flex;
+          align-items: center;
+          gap: 28px;
+          font: 700 112px/1 Inter, sans-serif;
+          color: #111827;
+          letter-spacing: -0.035em;
+        }
+        #ti-mark {
+          width: 72px;
+          height: 72px;
+          border-radius: 18px;
+          background: #1f5fae;
+        }
+        #ti-line {
+          max-width: 1300px;
+          font: 400 40px/1.35 Inter, sans-serif;
+          color: #3f4856;
+          letter-spacing: -0.01em;
+        }
+      </style>
+      <div id="root" data-composition-id="title" data-width="1920" data-height="1080">
+        <div id="ti-stage">
+          <div id="ti-eyebrow">Real-World Agents Hackathon · Property Management</div>
+          <div id="ti-name"><span id="ti-mark"></span>case-agent</div>
+          <div id="ti-line">An agent that works letting-agency repair cases, and knows when to hand one to a person.</div>
+        </div>
+      </div>
+      <script>
+        const tl = gsap.timeline({ paused: true });
+        tl.fromTo("#ti-eyebrow", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.1);
+        tl.fromTo("#ti-name", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.25);
+        tl.fromTo("#ti-line", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.55);
+        window.__timelines["title"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
