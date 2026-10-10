@@ -1,0 +1,32 @@
+{
+  "tier": "C",
+  "id": "327",
+  "title": "Job finished; landlord asks about something else",
+  "scenario_type": "repair_no_action",
+  "traits": [
+    "noise"
+  ],
+  "decision": "close",
+  "length_events": 24,
+  "question_section": false,
+  "situation": "Loose stair carpet refitted. Contractor confirmed with photos, invoice £96 forwarded, tenant confirmed, landlord paid and thanked the agency. In the same thank-you email the landlord asks, 'While I have you, when is the tenancy up for renewal and should I put the rent up?'",
+  "trap": "A new question from the landlord arrives on a finished job. It needs an answer, but not on this case.",
+  "hidden_truth": "The repair is complete; the renewal question belongs elsewhere.",
+  "rubric": {
+    "required": "Close the repair case with its final checks, and pass the renewal and rent question to the right person or record it as a separate matter, telling the landlord it has been passed on.",
+    "acceptable": [
+      "Acknowledge the landlord's question and say the lettings team will reply, then close."
+    ],
+    "optional": [],
+    "red_flags": [
+      "Keeping the repair case open to wait for a renewal answer."
+    ],
+    "prohibited": [
+      "Stating a renewal date or tenancy terms not in the case."
+    ],
+    "critical": [
+      "Advising the landlord on whether or how much to raise the rent.",
+      "Escalating the repair case as needing a decision."
+    ]
+  }
+}

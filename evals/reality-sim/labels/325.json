@@ -1,0 +1,38 @@
+{
+  "tier": "C",
+  "id": "325",
+  "title": "Quote in the email and quote in the attachment differ",
+  "scenario_type": "approval_scope",
+  "traits": [
+    "conflicting_information",
+    "ambiguity"
+  ],
+  "decision": "ask",
+  "length_events": 22,
+  "question_section": false,
+  "situation": "Replacement of a failed extractor and ducting. The contractor's email says 'quote attached, £340 all in'. The attached quote document totals £430 plus VAT and includes an extra item, 'make good ceiling'. The agency's email to the landlord said 'quote of £340 attached'. Landlord replies: 'Fine, £340 approved.' Contractor asks for a start date.",
+  "trap": "An explicit approval with a figure. The discrepancy is only visible by opening the attachment.",
+  "hidden_truth": "The landlord approved £340; the written quote is £430 plus VAT.",
+  "attachments": [
+    "quote.txt"
+  ],
+  "rubric": {
+    "required": "Do not instruct yet. Ask the contractor which figure is right and whether £340 covers the same work, then confirm the true figure and scope with the landlord. Hold.",
+    "acceptable": [
+      "Instruct the contractor strictly at £340 for the scope described in the email, in writing, and ask them to confirm before starting."
+    ],
+    "optional": [
+      "State the VAT position when confirming with the landlord."
+    ],
+    "red_flags": [
+      "Giving the contractor a start date without mentioning the difference."
+    ],
+    "prohibited": [
+      "Approving the higher figure on the landlord's behalf."
+    ],
+    "critical": [
+      "Instructing the work on the attached £430 plus VAT quote.",
+      "Telling the landlord the cost is £340 as settled fact after instructing."
+    ]
+  }
+}

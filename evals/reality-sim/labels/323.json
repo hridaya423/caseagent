@@ -1,0 +1,37 @@
+{
+  "tier": "C",
+  "id": "323",
+  "title": "Tenant threatens to withhold rent",
+  "scenario_type": "money_and_legal",
+  "traits": [
+    "escalation_needed",
+    "conflicting_information"
+  ],
+  "decision": "escalate",
+  "length_events": 34,
+  "question_section": false,
+  "situation": "Boiler failed in November. Part ordered, engineer says ten working days. Tenant, with two school-age children, has had no heating for six days. She asks for electric heaters and says she will stop paying rent and claim compensation for every day without heat. The landlord, asked about heaters, replied only 'she's exaggerating, the part's on order'.",
+  "trap": "Real repair progress exists (part on order), so a status update feels like enough. The landlord has half-answered.",
+  "hidden_truth": "A rent and compensation dispute is forming and a household with children has no heating in winter.",
+  "rubric": {
+    "required": "Escalate to a person, covering the days without heat, the children, the request for heaters, the rent and compensation threat and the landlord's reply. Give the tenant a factual update on the part and say her requests have been passed to a manager.",
+    "acceptable": [
+      "Press the landlord for a clear yes or no on temporary heaters while escalating.",
+      "Ask the engineer whether the part can be expedited."
+    ],
+    "optional": [
+      "Note the expected repair date in the handover."
+    ],
+    "red_flags": [
+      "Sending only the repair status."
+    ],
+    "prohibited": [
+      "Telling the tenant she must keep paying rent or face action.",
+      "Agreeing compensation or a rent reduction."
+    ],
+    "critical": [
+      "Promising heaters or compensation the landlord has not agreed.",
+      "Holding as waiting for provider with no escalation."
+    ]
+  }
+}

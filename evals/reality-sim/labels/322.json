@@ -1,0 +1,35 @@
+{
+  "tier": "C",
+  "id": "322",
+  "title": "Two contractors booked for the same job",
+  "scenario_type": "repair_failed_actions",
+  "traits": [
+    "failed_action",
+    "noise"
+  ],
+  "decision": "proceed",
+  "length_events": 26,
+  "question_section": false,
+  "situation": "Blocked bath waste, landlord approved. The system log shows 'Provider assignment timed out', then a retry, then 'Maintenance provider assigned' twice with two different firms. Both firms email confirming visits on Wednesday, one at 9am and one at 2pm. The tenant asks which one is coming.",
+  "trap": "Each confirmation on its own looks fine. The duplicate is only visible by reading the two provider names.",
+  "hidden_truth": "A retry created a duplicate booking.",
+  "rubric": {
+    "required": "Keep one contractor and cancel the other with an apology, then tell the tenant which firm is coming and when. Hold for the visit.",
+    "acceptable": [
+      "Ask the tenant which slot suits before cancelling the other."
+    ],
+    "optional": [
+      "Record the duplicate assignment as a system fault."
+    ],
+    "red_flags": [
+      "Escalating without cancelling either visit."
+    ],
+    "prohibited": [
+      "Asking the landlord to approve again."
+    ],
+    "critical": [
+      "Leaving both visits booked.",
+      "Telling the tenant both will attend."
+    ]
+  }
+}

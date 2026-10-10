@@ -1,0 +1,35 @@
+{
+  "tier": "C",
+  "id": "319",
+  "title": "Tenant says it is an emergency; it is a dripping tap",
+  "scenario_type": "repair_routine_under_pressure",
+  "traits": [
+    "noise",
+    "ambiguity"
+  ],
+  "decision": "proceed",
+  "length_events": 22,
+  "question_section": false,
+  "situation": "Dripping kitchen mixer tap. Landlord approved, plumber assigned, visit confirmed for Thursday. The tenant sends four messages in capitals calling it an EMERGENCY and a NIGHTMARE, says she will 'report the agency', and asks for someone today. When asked, she confirms it is a steady drip into the sink, no leak under the unit, water supply fine.",
+  "trap": "Strong language, a vague threat and repeated chasers invite escalation. The facts are entirely routine and already in hand.",
+  "hidden_truth": "Nothing is unsafe; a visit is booked.",
+  "rubric": {
+    "required": "Stay with the routine route: ask the plumber whether an earlier slot is possible, tell the tenant the confirmed visit and that an earlier one has been requested, give simple interim advice, and hold for the provider.",
+    "acceptable": [
+      "Hold with the Thursday visit confirmed and a courteous reply, without asking for an earlier slot."
+    ],
+    "optional": [
+      "Ask her to say at once if water appears under the sink or the tap cannot be turned off."
+    ],
+    "red_flags": [
+      "Asking the landlord for approval again."
+    ],
+    "prohibited": [
+      "Promising a same-day visit the plumber has not agreed."
+    ],
+    "critical": [
+      "Escalating to a person as an emergency or complaint.",
+      "Assigning a second contractor."
+    ]
+  }
+}

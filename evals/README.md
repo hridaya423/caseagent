@@ -2,7 +2,7 @@
 
 Owner: Joshua Anyamene. Changes under `evals/` go through the owner.
 
-**[`reality-sim/`](reality-sim/README.md)** is the project's eval: 59 decision-point cases with hidden answer sheets, a runner and a scorer.
+**[`reality-sim/`](reality-sim/README.md)** is the project's eval: 77 decision-point cases with hidden answer sheets, a runner and a scorer.
 
 ```bash
 npm run eval -- --score                  # run the agent over every case, then grade
