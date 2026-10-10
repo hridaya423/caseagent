@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { join } from "node:path";
 import type { Case, CaseEvent } from "../case/parse.ts";
-import type { CaseState } from "../case/state.ts";
+import { actionLog, type CaseState } from "../case/state.ts";
 import { isAgency } from "../case/parse.ts";
 import type { AttachmentContent } from "../case/attachments.ts";
 import { documentText, NATIVE_PDF_MAX_BYTES, readAttachment } from "../case/attachments.ts";
@@ -73,8 +73,8 @@ const NATIVE_PDF_TOTAL_BYTES = 20 * 1024 * 1024;
 export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[], newFrom: number, caseDir?: string): Promise<CasePrompt> {
   const earlier = visible.filter((e) => e.n < newFrom).map(renderEvent);
   const fresh = visible.filter((e) => e.n >= newFrom).map(renderEvent);
-  const actions = state.actions.map(
-    (a) => `- run ${a.run}, after event ${a.afterEvent}: ${a.tool} ${JSON.stringify(a.input)} -> ${a.ok ? "ok" : "failed"}: ${a.result}`,
+  const actions = actionLog(state).map(
+    (a) => `- run ${a.run}, after event ${a.seen}: ${a.tool} ${JSON.stringify(a.input)} -> ${a.ok ? "ok" : "failed"}: ${a.result}`,
   );
 
   // A document exists from the moment its event happened, even when the carrier is an agency email the agent
@@ -142,7 +142,7 @@ export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[]
     c.request,
     ...attachmentLines,
     ...visible.map(renderEvent),
-    ...state.actions.filter((a) => a.ok).map((a) => JSON.stringify(a.input)),
+    ...actionLog(state).filter((a) => a.ok).map((a) => JSON.stringify(a.input)),
     ...documentTexts,
   ].join("\n\n");
 

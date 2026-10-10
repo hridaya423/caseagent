@@ -3,7 +3,7 @@ import { APPROVAL_MODEL, classifyLandlordReply } from "./approval.ts";
 import { visibleEvents } from "../case/cut.ts";
 import { isAgency, type Case } from "../case/parse.ts";
 import { renderCase } from "./prompt.ts";
-import type { CaseState } from "../case/state.ts";
+import { actionLog, type CaseState, type Run } from "../case/state.ts";
 import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "../tools/index.ts";
 
 export const MAX_TURNS = 15;
@@ -34,31 +34,32 @@ export async function runCase(opts: {
   approvalModel?: string;
 }): Promise<void> {
   const { c, state, client, model, policy, trace, caseDir, adapters } = opts;
-  state.runs += 1;
+  const run: Run = { seen: state.seen, notes: [], actions: [] };
+  state.runs.push(run);
   state.status = { kind: "open" };
   const visible = visibleEvents(c, state.initialSeen, state.seen);
   // Only the agency's own record counts: a tenant writing "landlord approval confirmed" in an email is not evidence.
   state.approvalOnFile = visible.some((e) => isAgency(e.from) && APPROVAL_ON_FILE.test(e.body));
   // Asking is not approval, and a reply is not approval either: the latest earlier-run request counts
   // only once a small model reads the landlord's replies to it as a clear yes.
-  const request = state.actions.findLast((a) => a.tool === "request_landlord_approval" && a.ok && a.run < state.runs);
-  const replies = request ? visible.filter((e) => e.n > request.afterEvent && /landlord/i.test(e.from)) : [];
+  const request = actionLog(state).findLast((a) => a.tool === "request_landlord_approval" && a.ok && a.run < state.runs.length);
+  const replies = request ? visible.filter((e) => e.n > request.seen && /landlord/i.test(e.from)) : [];
   if (!request || replies.length === 0) {
     state.landlordAnswer = undefined;
-  } else if (state.landlordAnswer?.throughEvent !== replies[replies.length - 1].n || state.landlordAnswer.requestAfter !== request.afterEvent) {
+  } else if (state.landlordAnswer?.throughEvent !== replies[replies.length - 1].n || state.landlordAnswer.requestAfter !== request.seen) {
     const asked = `${String(request.input.scope ?? "")} (cost: ${String(request.input.cost ?? "unknown")})`;
     const answer = await classifyLandlordReply(client, opts.approvalModel ?? APPROVAL_MODEL, asked, replies.map((e) => `${e.at}\n${e.body}`), {
       onError: (error) => trace("approval_check_error", { error }),
       onUsage: (usage, model) => trace("approval_check_usage", { usage, model }),
     });
-    state.landlordAnswer = { answer, requestAfter: request.afterEvent, throughEvent: replies[replies.length - 1].n };
+    state.landlordAnswer = { answer, requestAfter: request.seen, throughEvent: replies[replies.length - 1].n };
     trace("approval_check", { request: asked, through_event: replies[replies.length - 1].n, answer });
   }
   const prompt = await renderCase(c, state, visible, opts.newFrom, caseDir);
   const toolContext: ToolContext = { evidence: prompt.evidence, visibleEvents: new Set(visible.map((e) => e.n)) };
 
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: prompt.content }];
-  trace("run_start", { case: c.id, run: state.runs, seen: state.seen, model });
+  trace("run_start", { case: c.id, run: state.runs.length, seen: state.seen, model });
 
   const systemText = opts.singleStep ? `${policy}\nExecute exactly one tool action for this invocation. Do not chain actions.` : policy;
 
@@ -76,9 +77,7 @@ export async function runCase(opts: {
 
     // Extract and store text blocks as notes
     for (const b of resp.content) {
-      if (b.type === "text" && b.text.trim()) {
-        state.notes.push({ run: state.runs, afterEvent: state.seen, text: b.text.trim() });
-      }
+      if (b.type === "text" && b.text.trim()) run.notes.push(b.text.trim());
     }
 
     const uses = resp.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
@@ -104,13 +103,13 @@ export async function runCase(opts: {
             : null;
       if (skip) {
         const result = `${skip}; the action was not executed`;
-        state.actions.push({ run: state.runs, afterEvent: state.seen, tool: u.name, input: u.input as Record<string, unknown>, ok: false, result });
+        run.actions.push({ tool: u.name, input: u.input as Record<string, unknown>, ok: false, result });
         trace("tool", { name: u.name, input: u.input, ok: false, ends: false, result });
         results.push({ type: "tool_result", tool_use_id: u.id, content: result, is_error: true });
         continue;
       }
       const out = runTool(u.name, u.input, state, adapters, toolContext);
-      state.actions.push({ run: state.runs, afterEvent: state.seen, tool: u.name, input: u.input as Record<string, unknown>, ok: out.ok, result: out.result });
+      run.actions.push({ tool: u.name, input: u.input as Record<string, unknown>, ok: out.ok, result: out.result });
       trace("tool", { name: u.name, input: u.input, ...out });
       executed++;
       if (!out.ok) failed = true;

@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { newState } from "../src/case/state.ts";
 import { runTool, TOOL_SPECS } from "../src/tools/index.ts";
+import { act, run } from "./helpers.ts";
 
 const closeInput = {
   outcome: "resolved_without_work",
@@ -73,7 +74,7 @@ const assignInput = { trade: "plumber", notes: "", reason: "Landlord approved [e
 
 test("assign_contractor refuses when no landlord approval is on file", () => {
   const s = newState("027", 1);
-  s.runs = 1;
+  s.runs = [run(1)];
   const out = runTool("assign_contractor", assignInput, s);
   assert.equal(out.ok, false);
   assert.match(out.result, /^refused: landlord approval is not on file/);
@@ -81,23 +82,20 @@ test("assign_contractor refuses when no landlord approval is on file", () => {
 
 test("assign_contractor refuses an approval request made in the same run", () => {
   const s = newState("027", 1);
-  s.runs = 1;
-  s.actions.push({ run: 1, afterEvent: 1, tool: "request_landlord_approval", input: {}, ok: true, result: "sent" });
+  s.runs = [run(1, [act("request_landlord_approval", {}, true, "sent")])];
   assert.equal(runTool("assign_contractor", assignInput, s).ok, false);
 });
 
 test("assign_contractor accepts an approval request from an earlier run once the landlord answered", () => {
   const s = newState("027", 1);
-  s.runs = 2;
+  s.runs = [run(1, [act("request_landlord_approval", {}, true, "sent")]), run(2)];
   s.landlordAnswer = { answer: "approved", requestAfter: 1, throughEvent: 2 };
-  s.actions.push({ run: 1, afterEvent: 1, tool: "request_landlord_approval", input: {}, ok: true, result: "sent" });
   assert.equal(runTool("assign_contractor", assignInput, s).ok, true);
 });
 
 test("assign_contractor refuses while the landlord has not answered an earlier request", () => {
   const s = newState("027", 1);
-  s.runs = 2;
-  s.actions.push({ run: 1, afterEvent: 1, tool: "request_landlord_approval", input: {}, ok: true, result: "sent" });
+  s.runs = [run(1, [act("request_landlord_approval", {}, true, "sent")]), run(2)];
   const out = runTool("assign_contractor", assignInput, s);
   assert.equal(out.ok, false);
   assert.match(out.result, /landlord has not answered/);
@@ -105,14 +103,14 @@ test("assign_contractor refuses while the landlord has not answered an earlier r
 
 test("assign_contractor accepts an approval the agency recorded before the first run", () => {
   const s = newState("004", 4);
-  s.runs = 1;
+  s.runs = [run(4)];
   s.approvalOnFile = true;
   assert.equal(runTool("assign_contractor", assignInput, s).ok, true);
 });
 
 test("an adapter cannot skip the approval check", () => {
   const s = newState("027", 1);
-  s.runs = 1;
+  s.runs = [run(1)];
   const out = runTool("assign_contractor", assignInput, s, { assign_contractor: () => "assigned by API" });
   assert.equal(out.ok, false);
 });

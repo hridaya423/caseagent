@@ -11,7 +11,7 @@ import { createServer } from '../../src/entry/mcp.ts';
 import { loadCase } from '../../src/case/parse.ts';
 import { TOOL_SPECS } from '../../src/tools/index.ts';
 import type { ModelClient } from '../../src/agent/loop.ts';
-import type { CaseState } from '../../src/case/state.ts';
+import { actionLog, type CaseState } from '../../src/case/state.ts';
 
 type Ref = { event: number; file: string; anchor: string; start_line: number; excerpt: string };
 type Sample = {
@@ -90,7 +90,7 @@ for (const item of manifest.samples) {
     assert.equal(calls, 1);
     const state = JSON.parse(readFileSync(join(out, 'state', `${sample.case_id}.json`), 'utf8')) as CaseState;
     assert.equal(state.seen, sample.step);
-    assert.equal(state.actions.length, 1);
+    assert.equal(actionLog(state).length, 1);
     assert.ok(readFileSync(join(out, 'ANSWERS', sample.case_id, 'ANSWER.md'), 'utf8'));
     assert.ok(readFileSync(join(out, 'ANSWERS', sample.case_id, 'REASONING.md'), 'utf8'));
   } finally {

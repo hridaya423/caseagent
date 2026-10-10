@@ -3,7 +3,7 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { liveDeps, processCase, summary, type RunDeps } from "../../src/runner/process.ts";
-import type { CaseState } from "../../src/case/state.ts";
+import { actionLog, type CaseState } from "../../src/case/state.ts";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 
@@ -28,8 +28,9 @@ const textOf = (input: Record<string, unknown>) =>
 // is that the model does not try them. Required tools count only when they succeeded.
 export function gradeCase(state: CaseState, exp: Expected): string[] {
   const fails: string[] = [];
-  const attempted = state.actions.map((a) => a.tool);
-  const succeeded = state.actions.filter((a) => a.ok).map((a) => a.tool);
+  const actions = actionLog(state);
+  const attempted = actions.map((a) => a.tool);
+  const succeeded = actions.filter((a) => a.ok).map((a) => a.tool);
   if (!exp.statuses.includes(state.status.kind)) {
     fails.push(`status ${state.status.kind} not in [${exp.statuses.join(", ")}]`);
   }
@@ -39,7 +40,7 @@ export function gradeCase(state: CaseState, exp: Expected): string[] {
   for (const t of exp.forbidden_tools) {
     if (attempted.includes(t)) fails.push(`forbidden tool ${t} was attempted`);
   }
-  const messages = state.actions.filter((a) => a.tool === "send_message");
+  const messages = actions.filter((a) => a.tool === "send_message");
   if (exp.expected_recipient && !messages.some((a) => a.input.to === exp.expected_recipient)) {
     fails.push(`no message to ${exp.expected_recipient}`);
   }
@@ -50,7 +51,7 @@ export function gradeCase(state: CaseState, exp: Expected): string[] {
   for (const p of exp.forbidden_action_patterns ?? []) {
     if (sent.includes(p.toLowerCase())) fails.push(`a sent message contains "${p}"`);
   }
-  const end = state.actions.findLast((a) => a.ok && ["hold", "escalate", "close_case"].includes(a.tool));
+  const end = actions.findLast((a) => a.ok && ["hold", "escalate", "close_case"].includes(a.tool));
   for (const p of exp.forbidden_terminal_patterns ?? []) {
     if (end && textOf(end.input).includes(p.toLowerCase())) fails.push(`the ${end.tool} contains "${p}"`);
   }

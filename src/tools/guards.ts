@@ -1,4 +1,4 @@
-import type { CaseState } from "../case/state.ts";
+import { actionLog, type CaseState } from "../case/state.ts";
 import { unsupported } from "./evidence.ts";
 
 // The rules a tool call must pass. Every rule lives in a guard, which runs before apply or an adapter,
@@ -25,7 +25,7 @@ const normaliseText = (t: string) => t.replace(/\s+/g, " ").trim().toLowerCase()
 
 export function checkMessage(state: CaseState, i: { to: string; text: string }, ctx?: ToolContext): void {
   if (/\[event \d+\]/i.test(i.text)) throw new Refusal("the message text contains an event reference. Event references belong in reason only; rewrite the text without them.");
-  const same = state.actions.find((a) => a.ok && a.tool === "send_message" && a.input.to === i.to && normaliseText(String(a.input.text)) === normaliseText(i.text));
+  const same = actionLog(state).find((a) => a.ok && a.tool === "send_message" && a.input.to === i.to && normaliseText(String(a.input.text)) === normaliseText(i.text));
   if (same) throw new Refusal(`the same message already went to the ${i.to} in run ${same.run}. Do not send it again; write only what is new, or send nothing.`);
   requireEvidence(i.text, ctx, "the message");
 }
@@ -44,7 +44,7 @@ export function checkClose(state: CaseState, i: { keys: string; work_confirmed_b
 // from an earlier run counts only once the landlord's reply was read as a clear approval.
 export function requireApproval(state: CaseState): void {
   if (state.approvalOnFile) return;
-  const requested = state.actions.some((a) => a.tool === "request_landlord_approval" && a.ok && a.run < state.runs);
+  const requested = actionLog(state).some((a) => a.tool === "request_landlord_approval" && a.ok && a.run < state.runs.length);
   if (!requested) throw new Refusal("landlord approval is not on file. Use request_landlord_approval first, and hold the case for the landlord's answer.");
   const answer = state.landlordAnswer?.answer;
   if (answer === "approved") return;

@@ -4,13 +4,13 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { MAX_TURNS, runCase, type ModelClient } from "../src/agent/loop.ts";
 import { loadCase } from "../src/case/parse.ts";
 import { renderCase } from "../src/agent/prompt.ts";
-import { promptText } from "./helpers.ts";
+import { act, promptText, run } from "./helpers.ts";
 import { visibleEvents } from "../src/case/cut.ts";
 import { processCase, processToEnd } from "../src/runner/process.ts";
 import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isIncomplete, newState } from "../src/case/state.ts";
+import { actionLog, isIncomplete, newState } from "../src/case/state.ts";
 
 const c = loadCase("data/public/Property Management/027");
 
@@ -66,9 +66,9 @@ test("the run stops at the first end tool", async () => {
   await runCase({ ...base, state: s, client });
   assert.equal(calls.length, 1);
   assert.deepEqual(s.status, { kind: "hold", reason: "Waiting for Tenant" });
-  assert.deepEqual(s.actions.map((a) => a.tool), ["send_message", "hold"]);
-  assert.deepEqual(s.notes.map((n) => n.text), ["Everyday blockage, tenant first."]);
-  assert.equal(s.runs, 1);
+  assert.deepEqual(actionLog(s).map((a) => a.tool), ["send_message", "hold"]);
+  assert.deepEqual(s.runs.flatMap((r) => r.notes), ["Everyday blockage, tenant first."]);
+  assert.equal(s.runs.length, 1);
 });
 
 test("a refused tool goes back to the model as an error and the model recovers", async () => {
@@ -106,7 +106,7 @@ test("processToEnd: hold, then close, then stop before the later events", async 
   const out = mkdtempSync(join(tmpdir(), "to-end-"));
   const state = await processToEnd({ out, client: f.client, model: "fake", policy: "policy" }, "data/public/Property Management/027");
   assert.equal(state.status.kind, "closed");
-  assert.equal(state.runs, 2);
+  assert.equal(state.runs.length, 2);
   assert.equal(f.calls.length, 2);
   assert.ok(state.seen < c.events.length, "events after the close must not run");
   const trace = readFileSync(join(out, "traces", "027.jsonl"), "utf8");
@@ -130,8 +130,8 @@ test("a failing tool comes back as an error; the model retries and the run compl
     [use("c", "hold", { waiting_for: "Waiting for Tenant", reason: "Awaiting the tenant." })],
   ]);
   await runCase({ ...base, state: s, client: f.client, adapters });
-  assert.deepEqual(s.actions.map((a) => [a.tool, a.ok]), [["send_message", false], ["send_message", true], ["hold", true]]);
-  assert.equal(s.actions[0].result, "failed: timeout");
+  assert.deepEqual(actionLog(s).map((a) => [a.tool, a.ok]), [["send_message", false], ["send_message", true], ["hold", true]]);
+  assert.equal(actionLog(s)[0].result, "failed: timeout");
   const back = f.calls[1].messages.at(-1)!.content as Anthropic.ToolResultBlockParam[];
   assert.equal(back[0].is_error, true);
   assert.equal(back[0].content, "failed: timeout");
@@ -148,7 +148,7 @@ test("a tool that fails twice is escalated by the model, and both failures are r
     [use("c", "escalate", { checked: "the outbox and the tool errors", missing_or_conflict: "send_message failed twice (provider error)", decision_needed: "a person must contact the tenant", reason: "Tool failed twice." })],
   ]);
   await runCase({ ...base, state: s, client: f.client, adapters });
-  assert.deepEqual(s.actions.map((a) => a.ok), [false, false, true]);
+  assert.deepEqual(actionLog(s).map((a) => a.ok), [false, false, true]);
   assert.ok(s.status.kind === "escalated");
   assert.match(s.status.summary, /send_message failed twice/);
 });
@@ -167,9 +167,8 @@ test("a landlord reply after the request is classified once, on the small model,
   // Case 004 event 12: the landlord writes "Pls go ahead."
   const c4 = loadCase("data/public/Property Management/004");
   const s = newState("004", 4);
-  s.runs = 1;
+  s.runs = [run(9, [act("request_landlord_approval", { scope: "boiler repair", cost: "£120" }, true, "sent")])];
   s.seen = 12;
-  s.actions.push({ run: 1, afterEvent: 9, tool: "request_landlord_approval", input: { scope: "boiler repair", cost: "£120" }, ok: true, result: "sent" });
   const { calls, client } = fake([
     [use("c", "record_answer", { answer: "approved" })],
     [use("a", "hold", { waiting_for: "Waiting for Tenant", reason: "r" })],
@@ -190,9 +189,8 @@ test("a landlord reply after the request is classified once, on the small model,
 
   // Before the landlord's reply there is nothing to classify.
   const s2 = newState("004", 4);
-  s2.runs = 1;
+  s2.runs = [run(9, [act("request_landlord_approval", {}, true, "sent")])];
   s2.seen = 11;
-  s2.actions.push({ run: 1, afterEvent: 9, tool: "request_landlord_approval", input: {}, ok: true, result: "sent" });
   const { calls: calls2, client: client2 } = fake([[use("a", "hold", { waiting_for: "Waiting for Landlord", reason: "r" })]]);
   await runCase({ c: c4, state: s2, newFrom: 11, client: client2, model: "fake", policy: "policy", trace: () => {} });
   assert.equal(s2.landlordAnswer, undefined);

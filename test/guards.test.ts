@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { datesIn, moneyIn, unsupported } from "../src/tools/evidence.ts";
 import { renderCase } from "../src/agent/prompt.ts";
-import { promptText } from "./helpers.ts";
+import { act, promptText, run } from "./helpers.ts";
 import { newState } from "../src/case/state.ts";
 import { runTool, type ToolContext } from "../src/tools/index.ts";
 import type { Case } from "../src/case/parse.ts";
@@ -42,8 +42,7 @@ test("request_landlord_approval refuses a cost the case does not show", () => {
 
 test("the same message to the same person is refused; a different person or text is fine", () => {
   const s = newState("x", 1);
-  s.runs = 2;
-  s.actions.push({ run: 1, afterEvent: 3, tool: "send_message", input: msg("Please try the reset button."), ok: true, result: "queued" });
+  s.runs = [run(3, [act("send_message", msg("Please try the reset button."), true, "queued")]), run(3)];
   const again = runTool("send_message", msg("Please  try the reset   button."), s, undefined, ctx);
   assert.equal(again.ok, false);
   assert.match(again.result, /already went to the tenant in run 1/);
@@ -75,7 +74,7 @@ test("the evidence includes visible events but not a refused message's invented 
     events: [{ n: 1, at: "2025-11-18 09:00:00 UTC", channel: "Email", from: "Tenant", to: "Agency", body: "Quote was £165.", attachments: [] }],
   };
   const s = newState("x", 1);
-  s.actions.push({ run: 1, afterEvent: 1, tool: "send_message", input: msg("It costs £777."), ok: false, result: "refused: invented" });
+  s.runs.push(run(1, [act("send_message", msg("It costs £777."), false, "refused: invented")]));
   const p = await renderCase(c, s, c.events, 1);
   assert.match(p.evidence, /£165/);
   assert.doesNotMatch(p.evidence, /£777/);
