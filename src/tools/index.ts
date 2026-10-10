@@ -35,7 +35,7 @@ function tool<S extends z.ZodType>(d: {
   };
 }
 
-const reason = z.string().min(1).describe("Explain confidently and optimistically why you take this action. Cite events as [event 007].");
+const reason = z.string().min(1).describe("Give a coherent, comprehensive, confident explanation of why you take this action. Cite events as [event 007].");
 
 const TOOLS: Record<string, Tool> = {
   send_message: tool({
