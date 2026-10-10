@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Case Agent · Runs</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip" href="#detail">Skip to the case</a>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">Case Agent</span>
+    <span class="brand-sub">Runs</span>
+  </div>
+  <div class="controls">
+    <label for="run-select">Run</label>
+    <select id="run-select" class="input"></select>
+    <span id="updated" class="muted mono"></span>
+    <button id="reload" class="btn" type="button">Reload</button>
+  </div>
+</header>
+<div id="banner" class="banner" role="alert" hidden></div>
+<main>
+  <section id="summary" class="summary" aria-label="Run summary"></section>
+  <div class="workspace">
+    <section id="queue" class="card queue" aria-label="Cases"></section>
+    <section id="detail" tabindex="-1" aria-label="Case"></section>
+  </div>
+</main>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

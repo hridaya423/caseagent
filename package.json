@@ -15,7 +15,8 @@
     "typecheck": "tsc -p .",
     "eval:edge": "node --env-file-if-exists=.env --import tsx \"evals/edge-cases/run.ts\"",
     "eval:process": "node --env-file-if-exists=.env --import tsx \"evals/Process Reward/run.ts\"",
-    "reality": "node --env-file-if-exists=.env --import tsx src/entry/cli.ts reality"
+    "reality": "node --env-file-if-exists=.env --import tsx src/entry/cli.ts reality",
+    "dashboard": "node --import tsx src/entry/dashboard.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.131.0",
