@@ -5,20 +5,26 @@ import { isAgency, type Case } from "../case/parse.ts";
 import { renderCase } from "./prompt.ts";
 import { actionLog, type CaseState, type Run } from "../case/state.ts";
 import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "../tools/index.ts";
+import { playbookContext, type PlaybookOptions } from "./playbooks.ts";
+import { auditStageCompletion } from "./playbook-audit.ts";
 
 export const MAX_TURNS = 15;
 // The agency's own records of a landlord approval that came before the agent's first run.
 // Positive grants only: "landlord approval pending" or "approve the quote with the landlord" must not match.
 const APPROVAL_ON_FILE =
   /landlord(?:'s)? approval (?:confirmed|granted|received|given|on file|obtained)|landlord (?:who |has )?approv(?:ed|es)\b|approved by (?:the )?landlord\b/i;
-const NUDGE = "End the run now with exactly one of hold, escalate or close_case.";
 const CACHE = { type: "ephemeral" } as const;
+const NUDGE = "End the run now with exactly one of hold, escalate or close_case.";
 
 export type ModelClient = {
   messages: { create(p: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message> };
 };
 
 export type Trace = (kind: string, data: Record<string, unknown>) => void;
+
+export function casePolicy(policy: string, singleStep = false): string {
+  return singleStep ? `${policy}\nInvocation contract: execute exactly one business tool action. Do not chain actions. After a message, approval request, assignment or note, saved status may remain open; a later invocation can hold, escalate or close. The normal end-tool requirement applies to a complete stage, not to this single-action invocation.` : policy;
+}
 
 export async function runCase(opts: {
   c: Case;
@@ -31,6 +37,7 @@ export async function runCase(opts: {
   caseDir?: string;
   adapters?: Record<string, ToolAdapter>;
   singleStep?: boolean;
+  playbooks?: PlaybookOptions | false;
   approvalModel?: string;
 }): Promise<void> {
   const { c, state, client, model, policy, trace, caseDir, adapters } = opts;
@@ -61,15 +68,29 @@ export async function runCase(opts: {
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: prompt.content }];
   trace("run_start", { case: c.id, run: state.runs.length, seen: state.seen, model });
 
-  const systemText = opts.singleStep ? `${policy}\nExecute exactly one tool action for this invocation. Do not chain actions.` : policy;
+  const systemText = casePolicy(policy, opts.singleStep);
+  const retrievalQuery = [c.title, c.request, ...visible.slice(-3).map((e) => e.body)].join("\n");
 
-  // strict: the API enforces each input schema, so a call cannot arrive with a required field missing.
   const tools: Anthropic.Tool[] = TOOL_SPECS.map((t) => ({ ...t, strict: true }));
-  // Two cache breakpoints: the system block caches the tools and the policy across cases; the
-  // request-level one caches each conversation as it grows turn by turn.
-  const system: Anthropic.TextBlockParam[] = [{ type: "text", text: systemText, cache_control: CACHE }];
 
+  const referenceHistory = new Set<string>();
+  let completionChecks = 0;
   for (let turn = 1; turn <= MAX_TURNS; turn++) {
+    // Reassess after each tool result; a resumed run uses only its newly visible state.
+    const currentActions = actionLog(state).map((a) => ({ tool: a.tool, input: a.input, ok: a.ok, result: a.result }));
+    const references = opts.playbooks ? await playbookContext({
+      options: opts.playbooks, client, model, policy,
+      query: `${retrievalQuery}\n${JSON.stringify(currentActions)}`,
+      currentEvidence: [
+        { id: "title", text: c.title }, { id: "details", text: c.details }, { id: "request", text: c.request },
+        ...visible.map((e) => ({ id: `event:${e.n}`, text: `${e.at} | ${e.channel} | from ${e.from} | to ${e.to}\n${e.body}` })),
+        ...currentActions.map((a, i) => ({ id: `action:${i}`, text: JSON.stringify(a) })),
+      ].filter((e) => e.text.trim()), trace, turn,
+    }) : "";
+    if (references) referenceHistory.add(references);
+    const system: Anthropic.TextBlockParam[] = [
+      { type: "text", text: systemText + references, cache_control: CACHE },
+    ];
     const resp = await client.messages.create({ model, max_tokens: 4096, cache_control: CACHE, system, tools, messages });
 
     trace("model", { turn, model: resp.model, stop: resp.stop_reason, usage: resp.usage, content: resp.content });
@@ -82,7 +103,7 @@ export async function runCase(opts: {
 
     const uses = resp.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
     if (uses.length === 0) {
-      messages.push({ role: "user", content: NUDGE });
+      messages.push({ role: "user", content: opts.singleStep ? "Execute exactly one next business action through the available tools. Do not chain actions or claim an action occurred before its tool result." : NUDGE });
       continue;
     }
     const results: Anthropic.ToolResultBlockParam[] = [];
@@ -107,6 +128,30 @@ export async function runCase(opts: {
         trace("tool", { name: u.name, input: u.input, ok: false, ends: false, result });
         results.push({ type: "tool_result", tool_use_id: u.id, content: result, is_error: true });
         continue;
+      }
+      // Review only optional selected workflows, at most twice per invocation.
+      // A refusal becomes a tool result so the actor must recover before claiming completion.
+      if (!opts.singleStep && opts.playbooks && referenceHistory.size && completionChecks < 2 && (u.name === "hold" || u.name === "close_case")) {
+        completionChecks++;
+        const audit = await auditStageCompletion({
+          client, model: opts.playbooks.model ?? model,
+          references: [...referenceHistory].join("\n"),
+          currentEvidence: [
+            { id: "request", text: c.request }, { id: "details", text: c.details },
+            { id: "visible_prompt_evidence", text: prompt.evidence },
+            ...visible.map((e) => ({ id: `event:${e.n}`, text: `${e.at} | ${e.channel} | from ${e.from} | to ${e.to}\n${e.body}` })),
+          ],
+          actions: run.actions,
+          ending: { tool: u.name, input: u.input }, trace,
+        });
+        if (!audit.ready) {
+          const result = `Workflow completion check: this end action was not executed. Review these applicable omissions against current evidence and policy, execute any required actions, or escalate if human judgement is needed: ${JSON.stringify(audit.missing)}`;
+          run.actions.push({ tool: u.name, input: u.input as Record<string, unknown>, ok: false, result });
+          trace("tool", { name: u.name, input: u.input, ok: false, ends: false, result });
+          results.push({ type: "tool_result", tool_use_id: u.id, content: result, is_error: true });
+          failed = true;
+          continue;
+        }
       }
       const out = runTool(u.name, u.input, state, adapters, toolContext);
       run.actions.push({ tool: u.name, input: u.input as Record<string, unknown>, ok: out.ok, result: out.result });

@@ -37,7 +37,9 @@ src/
     process.ts      state, traces, answers, outbox; --next resumes, --to-end runs through holds
     answers.ts      ANSWER.md, REASONING.md and the outbox files
     batch.ts        worker pool, resumable run-summary.json, RUN_SUMMARY.md
+    runs.ts         read-only views of the run folders, for the dashboard
   entry/     cli.ts and mcp.ts: the same runner over the command line and stdio MCP
+    dashboard.ts    the runs dashboard (server in dashboard-server.ts, page in dashboard/)
 ```
 
 Each folder imports only from the folders above it: `case` <- `tools` <- `agent` <- `runner` <- `entry`.
@@ -71,6 +73,7 @@ npm run case -- run-all <cases-dir> --concurrency 4    # every case in a folder,
 npm run case -- run-all <cases-dir> --to-end --concurrency 4  # every case, run to its end state
 npm run reality -- <cases-dir>                         # the submission run: every case to its end, outputs at the repo root
 npm run mcp                                            # stdio MCP server (CASES_DIR, OUT_DIR overridable)
+npm run dashboard                                      # read-only runs dashboard at http://localhost:4317 (demo only)
 npm test
 npm run typecheck
 npm run extract                                        # Docling pre-extract of attachments (optional)
@@ -81,6 +84,8 @@ npm run extract                                        # Docling pre-extract of 
 Two run modes. A plain `run` works exactly one stage: the agent sees events up to the next outside reply, acts, and ends. `--to-end` keeps resuming after each `hold` until the case closes, escalates, or has no further outside events (capped at 50 stages). Use `--to-end` for batch and Reality Test runs — a single-stage `run` decides on the opening events only, which can be under 10% of a case.
 
 The MCP tools follow the same rules. `run_case` and `resume_case` work one stage: the agent takes every action the stage needs, for example a message and then `hold`, and ends the run itself. `run_case` with `to_end` runs the whole case. `single_action: true` stops after one business action. Both eval suites run in multi-action mode.
+
+`npm run dashboard` is for the demo, not for hosting. It binds to 127.0.0.1, only reads, and needs no API key. It lists every run under `runs/` (or `--runs <dir>`) plus the checked-in process evals, refreshes while a batch is still writing, and opens on the first case that needs a person. Each case shows the decision or the three-field handover first, then every tool call (a guard refusal shows the guard's message), the history with the events the agent never saw hatched out, `ANSWER.md`, `REASONING.md` and the full trace. `--cases <dir>` (repeatable) points it at the case folders it should read history from; the default is the public Property Management cases.
 
 The tests read the public cases from `data/public/Property Management` (gitignored). Link them once:
 
@@ -118,3 +123,7 @@ mkdir -p data/public && ln -s "$(cd ../HackatonPublicCases && pwd)/Property Mana
 - Real adapters for email, SMS and the agency's job system; the seam already exists in `runTool`.
 - A watch mode that ingests a new reply and resumes automatically, replacing `--next`.
 - A human-in-the-loop queue for escalations, writing a person's decision back into the case as an event.
+
+## Playbook references
+
+The JSON playbook bank is enabled by default; set `PLAYBOOKS=off` for the baseline. The selector uses only current visible evidence. Selected steps are checked against successful actions before hold/close, at most twice per invocation; invalid or failed optional audits fall back to the normal policy. Paired evaluation instructions are in `evals/reality-sim/README.md`.
