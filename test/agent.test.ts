@@ -4,6 +4,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { MAX_TURNS, runCase, type ModelClient } from "../src/agent/loop.ts";
 import { loadCase } from "../src/case/parse.ts";
 import { renderCase } from "../src/agent/prompt.ts";
+import { promptText } from "./helpers.ts";
 import { visibleEvents } from "../src/case/cut.ts";
 import { processCase, processToEnd } from "../src/runner/process.ts";
 import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
@@ -40,10 +41,10 @@ const base = { c, newFrom: 1, model: "fake", policy: "policy", trace: () => {} }
 test("prompt for run 1 shows the request and event 001 only", async () => {
   const s = newState("027", 1);
   const p = await renderCase(c, s, visibleEvents(c, 1, 1), 1);
-  assert.match(p.text, /water keep take hours/);
-  assert.match(p.text, /\[event 001\]/);
-  assert.doesNotMatch(p.text, /\[event 002\]/);
-  assert.match(p.text, /None\. This is the first run on this case\./);
+  assert.match(promptText(p), /water keep take hours/);
+  assert.match(promptText(p), /\[event 001\]/);
+  assert.doesNotMatch(promptText(p), /\[event 002\]/);
+  assert.match(promptText(p), /None\. This is the first run on this case\./);
 });
 
 test("the policy is cached on the system block, and the conversation by the request-level breakpoint", async () => {

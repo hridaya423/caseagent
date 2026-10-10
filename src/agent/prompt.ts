@@ -61,9 +61,8 @@ function getLastContactDays(visible: CaseEvent[]): string {
 }
 
 export type CasePrompt = {
-  text: string;
-  images: Array<{ filename: string; format: "png" | "jpeg"; data: string }>;
-  documents: Array<{ filename: string; data: string }>;
+  // The user turn as the Messages API takes it: the case text, then each image, then each PDF.
+  content: Anthropic.ContentBlockParam[];
   // The prompt text plus the extracted text of every native document: what the agent could read.
   evidence: string;
 };
@@ -91,8 +90,8 @@ export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[]
 
   // Build attachment section and collect images
   const attachmentLines: string[] = [];
-  const images: CasePrompt["images"] = [];
-  const documents: CasePrompt["documents"] = [];
+  const images: Anthropic.ImageBlockParam[] = [];
+  const documents: Anthropic.DocumentBlockParam[] = [];
   const documentTexts: string[] = [];
   let nativeBudget = NATIVE_PDF_TOTAL_BYTES;
 
@@ -102,13 +101,13 @@ export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[]
       const content = await readAttachment(root, filename, { nativeMaxBytes: Math.min(NATIVE_PDF_MAX_BYTES, nativeBudget) });
       if (content.type === "document") {
         nativeBudget -= Buffer.byteLength(content.data, "base64");
-        documents.push({ filename, data: content.data });
+        documents.push({ type: "document", title: filename, source: { type: "base64", media_type: "application/pdf", data: content.data } });
         documentTexts.push(await documentText(root, filename));
         attachmentLines.push(`### ${filename}\n\n${received(filename)}(PDF attached in full: ${content.pages} page${content.pages === 1 ? "" : "s"})`);
       } else if (content.type === "text") {
         attachmentLines.push(`### ${filename}\n\n${received(filename)}${content.text}`);
       } else if (content.type === "image") {
-        images.push({ filename, format: content.format, data: content.data });
+        images.push({ type: "image", source: { type: "base64", media_type: content.format === "png" ? "image/png" : "image/jpeg", data: content.data } });
         attachmentLines.push(`### ${filename}\n\n${received(filename)}(Image file: ${filename})`);
       } else {
         attachmentLines.push(`### ${filename}\n\n${received(filename)}Could not read: ${content.error}`);
@@ -147,5 +146,5 @@ export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[]
     ...documentTexts,
   ].join("\n\n");
 
-  return { text, images, documents, evidence };
+  return { content: [{ type: "text", text }, ...images, ...documents], evidence };
 }

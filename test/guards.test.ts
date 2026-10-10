@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { datesIn, moneyIn, unsupported } from "../src/tools/evidence.ts";
 import { renderCase } from "../src/agent/prompt.ts";
+import { promptText } from "./helpers.ts";
 import { newState } from "../src/case/state.ts";
 import { runTool, type ToolContext } from "../src/tools/index.ts";
 import type { Case } from "../src/case/parse.ts";
@@ -78,5 +79,5 @@ test("the evidence includes visible events but not a refused message's invented 
   const p = await renderCase(c, s, c.events, 1);
   assert.match(p.evidence, /£165/);
   assert.doesNotMatch(p.evidence, /£777/);
-  assert.match(p.text, /£777/);
+  assert.match(promptText(p), /£777/);
 });

@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadCase } from "../src/case/parse.ts";
 import { renderCase } from "../src/agent/prompt.ts";
+import { promptText, documentTitles } from "./helpers.ts";
 import { visibleEvents, initialSeen } from "../src/case/cut.ts";
 import { newState } from "../src/case/state.ts";
 
@@ -19,19 +20,19 @@ async function promptAt(seen: number) {
 
 test("case 003 run 1: no document exists yet", async () => {
   const p = await promptAt(initialSeen(c));
-  assert.doesNotMatch(p.text, /attachment-0[12]/);
-  assert.equal(p.documents.length, 0);
+  assert.doesNotMatch(promptText(p), /attachment-0[12]/);
+  assert.equal(documentTitles(p).length, 0);
 });
 
 test("case 003 at the contractor's reply (event 7): the report is visible, the invoice is not", async () => {
   const p = await promptAt(7);
-  assert.match(p.text, /### attachment-01-checkout-inspection-report\.pdf\n\nReceived with event 004/);
-  assert.doesNotMatch(p.text, /attachment-02-cleaning-invoice/);
-  assert.deepEqual(p.documents.map((d) => d.filename), ["attachment-01-checkout-inspection-report.pdf"]);
+  assert.match(promptText(p), /### attachment-01-checkout-inspection-report\.pdf\n\nReceived with event 004/);
+  assert.doesNotMatch(promptText(p), /attachment-02-cleaning-invoice/);
+  assert.deepEqual(documentTitles(p), ["attachment-01-checkout-inspection-report.pdf"]);
 });
 
 test("case 003 at the landlord's reply (event 23): both documents are visible, the carrier emails are not", async () => {
   const p = await promptAt(23);
-  assert.deepEqual(p.documents.map((d) => d.filename), ["attachment-01-checkout-inspection-report.pdf", "attachment-02-cleaning-invoice.pdf"]);
-  assert.doesNotMatch(p.text, /\[event 020\]/);
+  assert.deepEqual(documentTitles(p), ["attachment-01-checkout-inspection-report.pdf", "attachment-02-cleaning-invoice.pdf"]);
+  assert.doesNotMatch(promptText(p), /\[event 020\]/);
 });

@@ -57,25 +57,7 @@ export async function runCase(opts: {
   const prompt = await renderCase(c, state, visible, opts.newFrom, caseDir);
   const toolContext: ToolContext = { evidence: prompt.evidence, visibleEvents: new Set(visible.map((e) => e.n)) };
 
-  // Build message content with text and images
-  const content: Anthropic.ContentBlockParam[] = [
-    { type: "text", text: prompt.text },
-    ...prompt.images.map((img) => ({
-      type: "image" as const,
-      source: {
-        type: "base64" as const,
-        media_type: img.format === "png" ? ("image/png" as const) : ("image/jpeg" as const),
-        data: img.data,
-      },
-    })),
-    ...prompt.documents.map((doc) => ({
-      type: "document" as const,
-      title: doc.filename,
-      source: { type: "base64" as const, media_type: "application/pdf" as const, data: doc.data },
-    })),
-  ];
-
-  const messages: Anthropic.MessageParam[] = [{ role: "user", content }];
+  const messages: Anthropic.MessageParam[] = [{ role: "user", content: prompt.content }];
   trace("run_start", { case: c.id, run: state.runs, seen: state.seen, model });
 
   const systemText = opts.singleStep ? `${policy}\nExecute exactly one tool action for this invocation. Do not chain actions.` : policy;
