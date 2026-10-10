@@ -8,12 +8,12 @@ import { runCase, type ModelClient } from "../src/agent/loop.ts";
 import { createServer } from "../src/entry/mcp.ts";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { loadPlaybookBank, parsePlaybookBank, playbookContext, projectReferences, retrievePlaybooks, validateSelection } from "../src/playbooks.ts";
+import { loadPlaybookBank, parsePlaybookBank, playbookContext, projectReferences, retrievePlaybooks, validateSelection } from "../src/agent/playbooks.ts";
 import type { Case } from "../src/case/parse.ts";
 import { newState } from "../src/case/state.ts";
 import { evidencePointers, projectSample, referenceCatalogue, summarize, type Trial, type Sample } from "../evals/playbooks/run.ts";
 import { validateEvidence, type ExpectedResults } from "../evals/playbooks/judge/contract.ts";
-import { submissionToolChoice } from "../src/model-submission.ts";
+import { submissionToolChoice } from "../src/agent/model-submission.ts";
 
 const bank = loadPlaybookBank({});
 const response = (name: string, input: unknown): Anthropic.Message => ({

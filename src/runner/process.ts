@@ -6,7 +6,7 @@ import { writeAnswer, writeOutbox } from "./answers.ts";
 import { initialSeen, nextSeen, visibleEvents } from "../case/cut.ts";
 import { loadCase } from "../case/parse.ts";
 import { loadState, newState, saveState, statusLabel, type CaseState } from "../case/state.ts";
-import type { PlaybookOptions } from "../playbooks.ts";
+import type { PlaybookOptions } from "../agent/playbooks.ts";
 
 const MAX_STAGES = 50;
 

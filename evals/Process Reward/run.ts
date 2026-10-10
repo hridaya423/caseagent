@@ -60,7 +60,7 @@ export function gradeRun(actions: CaseState['actions'], expected: Expected): { m
   return { matched: matched === -1 ? null : matched, violations };
 }
 
-// The trace says why a run is incomplete: `error` from src/run.ts, `auto_escalate` from src/agent.ts.
+// The trace says why a run is incomplete: `error` from src/runner/process.ts, `auto_escalate` from src/agent/loop.ts.
 function traceKinds(path: string): Set<string> {
   if (!existsSync(path)) return new Set();
   return new Set(readFileSync(path, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line).kind as string));

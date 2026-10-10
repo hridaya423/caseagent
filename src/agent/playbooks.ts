@@ -2,8 +2,8 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { z } from "zod";
-import type { ModelClient, Trace } from "./agent/loop.ts";
-import { TOOL_SPECS } from "./tools/index.ts";
+import type { ModelClient, Trace } from "./loop.ts";
+import { TOOL_SPECS } from "../tools/index.ts";
 import { submissionToolChoice } from "./model-submission.ts";
 
 const strings = z.array(z.string().min(1));
@@ -42,7 +42,7 @@ export function parsePlaybookBank(value: unknown): PlaybookBank {
 }
 
 export function loadPlaybookBank(options: PlaybookOptions): PlaybookBank {
-  return parsePlaybookBank(options.bank ?? JSON.parse(readFileSync(options.path ?? new URL("../docs/playbooks/property-management-playbooks.json", import.meta.url), "utf8")));
+  return parsePlaybookBank(options.bank ?? JSON.parse(readFileSync(options.path ?? new URL("../../docs/playbooks/property-management-playbooks.json", import.meta.url), "utf8")));
 }
 
 export const bankHash = (bank: PlaybookBank) => createHash("sha256").update(JSON.stringify(bank)).digest("hex");

@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { runBatch } from "../batch.ts";
+import { runBatch } from "../runner/batch.ts";
 import { liveDeps, processCase, processToEnd, summary } from "../runner/process.ts";
 
 const USAGE = `usage:

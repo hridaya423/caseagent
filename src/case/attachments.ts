@@ -4,9 +4,7 @@ import { join } from "node:path";
 // assumes from Node 24+. On Node 22 the modern build crashes the process on any PDF.
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 
-// Set up the worker for pdfjs
-const pdfjsWorkerPath = new URL("../../node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs", import.meta.url);
-pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerPath.href;
+pdfjs.GlobalWorkerOptions.workerSrc = import.meta.resolve("pdfjs-dist/legacy/build/pdf.worker.mjs");
 
 const MAX_CHARS = 8000;
 const TRUNCATION_NOTE = "\n\n[Text truncated due to length]";

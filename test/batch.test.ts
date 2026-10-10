@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
 import type { ModelClient } from "../src/agent/loop.ts";
-import { runBatch } from "../src/batch.ts";
+import { runBatch } from "../src/runner/batch.ts";
 import { withFallback, type RunDeps } from "../src/runner/process.ts";
 
 const PM = "data/public/Property Management";

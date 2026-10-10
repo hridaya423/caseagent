@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { datesIn, moneyIn, unsupported } from "../src/evidence.ts";
+import { datesIn, moneyIn, unsupported } from "../src/tools/evidence.ts";
 import { renderCase } from "../src/agent/prompt.ts";
 import { newState } from "../src/case/state.ts";
 import { runTool, type ToolContext } from "../src/tools/index.ts";

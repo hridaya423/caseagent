@@ -17,26 +17,34 @@ Letting agencies spend most of their case time waiting: for landlord approval, t
 
 ```
 case dir (index.md, history.md, attachments/ -- or loose .eml, .txt, .json, .csv, .md files)
-  -> parse.ts        events; Status/Updated/Completed lines never reach the agent
-  -> messy.ts        .eml headers and MIME attachments, call transcripts, records for loose folders
-  -> cut.ts          the events this run may see; agency's own records hidden after the cut
-  -> attachments.ts  PDF -> native document block or extracted text; images -> image blocks
-  -> prompt.ts       prompt assembly; case text wrapped in <case_data> (evidence, not instructions)
-  -> playbooks.ts    shortlist reviewed workflows, assess useful steps, project references separately
-  -> agent.ts        Claude tool loop, 15 turns max, must end with exactly one end tool
-  -> tools.ts        7 zod-checked tools with guards and refusals (evidence.ts: amounts and dates)
-  -> run.ts          state, traces, answers, outbox; --next resumes, --to-end runs through holds
-  -> batch.ts        worker pool, resumable run-summary.json, RUN_SUMMARY.md
-  -> mcp.ts          the same loop exposed over stdio MCP
+
+src/
+  case/      what a case is and what the agent may see
+    parse.ts        events; Status/Updated/Completed lines never reach the agent
+    messy.ts        .eml headers and MIME attachments, call transcripts, records for loose folders
+    cut.ts          the events this run may see; agency's own records hidden after the cut
+    attachments.ts  PDF -> native document block or extracted text; images -> image blocks
+    state.ts        case memory: status, actions, notes; load and save
+  tools/     what the agent can do
+    index.ts        7 zod-checked tools; every failure returns as text the model can act on
+    guards.ts       the refusal rules; they run before any adapter, so a real API cannot skip them
+    evidence.ts     amounts and dates a message may state
+  agent/     one run of the model
+    prompt.ts       prompt assembly; case text wrapped in <case_data> (evidence, not instructions)
+    loop.ts         Claude tool loop, 15 turns max, must end with exactly one end tool
+    approval.ts     a small model reads the landlord's reply as approved, refused or unclear
+  runner/    files on disk
+    process.ts      state, traces, answers, outbox; --next resumes, --to-end runs through holds
+    answers.ts      ANSWER.md, REASONING.md and the outbox files
+    batch.ts        worker pool, resumable run-summary.json, RUN_SUMMARY.md
+  entry/     cli.ts and mcp.ts: the same runner over the command line and stdio MCP
 ```
+
+Each folder imports only from the folders above it: `case` <- `tools` <- `agent` <- `runner` <- `entry`.
 
 Per case it writes `state/<id>.json` (case memory for `--next`), `traces/<id>.jsonl` (every model call and tool call, with the model that answered; older traces rotated aside), `outbox/<id>/` (one `.eml` per email and one `.sms.txt` per SMS the agent sent), and `ANSWERS/<id>/`. `ANSWER.md` starts with the decision (status, next step, why), puts the escalation handover next when there is one, then the summary, outbox, timeline, approvals and final checks. `REASONING.md` has the cited reason for each action plus the agent's notes. A batch also writes `run-summary.json` and `RUN_SUMMARY.md`: one row per case with its status, next step, messages, runs, time and tokens.
 
 The rules are in `policy.md`, distilled from the 50 public Property Management cases in `data/public/` and the evidence-backed rule bank in `policy_bank/`. Where the cases disagree, the rule follows what most cases did: landlord approval before a repair, completion proven by the contractor or the party that arranged the work, email by default. Rules 18 to 21 (hazards, disputes, tool failures, untrusted content) are our own safety margin; no case shows them.
-
-Workflow references are in `docs/playbooks/property-management-playbooks.json`. Before each model turn, a lexical prefilter shortlists at most four reference-reviewed workflows or decision modules from the current ticket and executed actions. A model then selects at most two playbooks with two useful steps each, or none. Code validates selected IDs and current-evidence IDs. Only the selected steps reach a separate system reference section; examples, source references, case assignments and provenance never enter runtime retrieval. References do not populate ticket facts, approve tools or override policy. The selector receives text evidence; attached image and native PDF contents remain with the acting model.
-
-`PLAYBOOKS=off` runs the baseline agent. Live CLI and MCP dependencies enable references by default; direct `runCase` callers opt in through `playbooks: {}`. `PLAYBOOK_MODEL` optionally sets the selector model and otherwise follows `MODEL`. Selection adds one API request per loop turn when candidates exist. Bank, selector or validation failures are traced as `playbook_error` and fall back to ordinary handling. `playbook_selection` traces record version/hash, candidate IDs, selected steps, reasons, current-evidence IDs, their code-resolved contents and token usage. On resume or after a tool result, selection is assessed again.
 
 Three kinds of guardrails:
 
@@ -65,18 +73,10 @@ npm run reality -- <cases-dir>                         # the submission run: eve
 npm run mcp                                            # stdio MCP server (CASES_DIR, OUT_DIR overridable)
 npm test
 npm run typecheck
-npm run eval:playbooks                                  # 8 tickets, 2 trials, paired baseline/reference runs
 npm run extract                                        # Docling pre-extract of attachments (optional)
 ```
 
 `npm run reality -- <cases-dir>` is the Reality Test command. It runs every folder in `<cases-dir>` to its end state with 6 workers, and writes `ANSWERS/`, `traces/`, `outbox/`, `state/`, `run-summary.json` and `RUN_SUMMARY.md` into the current directory (`--out` changes it). If the batch stops part-way, run the same command again: it skips the cases already finished. `--retry-incomplete` reruns only the cases that ended incomplete, and `--fresh` reruns everything. On 11 cases (8 public, 3 loose-file) it took 55 s.
-To run the paired suite with the current policy, Haiku acting and selecting, and a fixed Sonnet process judge:
-
-```bash
-MODEL=claude-haiku-4-5-20251001 JUDGE_MODEL=claude-sonnet-5-5 npm run eval:playbooks
-```
-
-The eight tickets exercise unknown quote totals, ambiguous quote selection, landlord-managed work, outstanding keys, missing invoices, replacement ownership, emergency handling and unrelated requests. Each ticket includes source derivation and explicit required outcomes, alternatives and critical failures. Expected results, derivation and later events are excluded from the acting model and selector by code. The judge receives only the current evidence, expected results and executed output; its evidence pointers and exact quotations are validated in code. Reports distinguish invalid evaluations from wrong decisions. Both arms use fresh identical case state, the same policy, tools and acting model, and counterbalanced order. Semantic pass/fail and scores come from the common LLM judge; passing also requires one accepted business action.
 
 Two run modes. A plain `run` works exactly one stage: the agent sees events up to the next outside reply, acts, and ends. `--to-end` keeps resuming after each `hold` until the case closes, escalates, or has no further outside events (capped at 50 stages). Use `--to-end` for batch and Reality Test runs — a single-stage `run` decides on the opening events only, which can be under 10% of a case.
 
@@ -91,7 +91,7 @@ mkdir -p data/public && ln -s "$(cd ../HackatonPublicCases && pwd)/Property Mana
 
 ## Models, APIs and external services
 
-- Anthropic Messages API through `@anthropic-ai/sdk`. Model: `claude-sonnet-5-5` by default (set `MODEL`; the batch must finish inside 30 minutes). Prompt caching breakpoints on the system prompt, tool specs and the latest message. A second, small model (`claude-haiku-5-5`, set `APPROVAL_MODEL`) reads the landlord's reply to an approval request as approved, refused or unclear; `assign_contractor` refuses unless the answer is approved, and any classifier failure counts as unclear.
+- Anthropic Messages API through `@anthropic-ai/sdk`. Model: `claude-sonnet-5-5` by default (set `MODEL`; the batch must finish inside 30 minutes). Prompt caching: one breakpoint on the system block (tools and policy, shared across cases) and the request-level `cache_control`, which caches each conversation as it grows. A second, small model (`claude-haiku-5-5`, set `APPROVAL_MODEL`) reads the landlord's reply to an approval request as approved, refused or unclear; `assign_contractor` refuses unless the answer is approved, and any classifier failure counts as unclear.
 - `pdfjs-dist` for PDF text when a file is too large to send natively. `NATIVE_PDF_MAX_MB` (default 5) sets the native-PDF threshold, capped at 100 pages and a 20 MB prompt budget; larger files go as extracted text truncated to 8,000 characters.
 - `@modelcontextprotocol/sdk` for the MCP server. `scripts/extract.py` uses Docling via `uv` for structured markdown of attachments.
 - No live services: messages, approvals and assignments are outbox entries in case state.
@@ -106,8 +106,6 @@ mkdir -p data/public && ln -s "$(cd ../HackatonPublicCases && pwd)/Property Mana
 
 ## Known limitations
 
-- Workflow guidance is reviewed for reference use, not certified execution authority. The paired playbook suite is a small development ablation derived from synthesis cases, not a held-out benchmark. It uses the same fixed process judge for both arms, validates quoted evidence in code, and reports unassessed runs separately. Set `MODEL` and optionally `JUDGE_MODEL`; the eval defaults to Haiku. Results include decisions, blind judge inputs, selected references, pass rates, scores, latency and token usage.
-
 - Large PDFs lose layout: above the size or page cap they degrade to extracted text, and long text is truncated.
 - The recorded-approval detection and the agency-sender match are phrase lists; agency wordings outside them are missed.
 - The amount and date check cannot read images: an amount that appears only in a photo is refused. It does not check weekday-only references ("on Thursday"). Checked against the agency's own 388 messages in the public cases, it would refuse 11. Those messages quote prices and dates that are not in any earlier event, for example a quote the agency received by phone.
@@ -120,3 +118,7 @@ mkdir -p data/public && ln -s "$(cd ../HackatonPublicCases && pwd)/Property Mana
 - Real adapters for email, SMS and the agency's job system; the seam already exists in `runTool`.
 - A watch mode that ingests a new reply and resumes automatically, replacing `--next`.
 - A human-in-the-loop queue for escalations, writing a person's decision back into the case as an event.
+
+## Playbook references
+
+The JSON playbook bank is enabled by default; set `PLAYBOOKS=off` for the baseline. The selector uses only current visible evidence. Selected steps are checked against successful actions before hold/close, at most twice per invocation; invalid or failed optional audits fall back to the normal policy. Paired evaluation instructions are in `evals/reality-sim/README.md`.

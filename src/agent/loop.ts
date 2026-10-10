@@ -1,18 +1,19 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { APPROVAL_MODEL, classifyLandlordReply } from "../approval.ts";
+import { APPROVAL_MODEL, classifyLandlordReply } from "./approval.ts";
 import { visibleEvents } from "../case/cut.ts";
 import { isAgency, type Case } from "../case/parse.ts";
 import { renderCase } from "./prompt.ts";
 import type { CaseState } from "../case/state.ts";
 import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "../tools/index.ts";
-import { playbookContext, type PlaybookOptions } from "../playbooks.ts";
-import { auditStageCompletion } from "../playbook-audit.ts";
+import { playbookContext, type PlaybookOptions } from "./playbooks.ts";
+import { auditStageCompletion } from "./playbook-audit.ts";
 
 export const MAX_TURNS = 15;
 // The agency's own records of a landlord approval that came before the agent's first run.
 // Positive grants only: "landlord approval pending" or "approve the quote with the landlord" must not match.
 const APPROVAL_ON_FILE =
   /landlord(?:'s)? approval (?:confirmed|granted|received|given|on file|obtained)|landlord (?:who |has )?approv(?:ed|es)\b|approved by (?:the )?landlord\b/i;
+const CACHE = { type: "ephemeral" } as const;
 const NUDGE = "End the run now with exactly one of hold, escalate or close_case.";
 
 export type ModelClient = {
@@ -87,13 +88,7 @@ export async function runCase(opts: {
   const systemText = casePolicy(policy, opts.singleStep);
   const retrievalQuery = [c.title, c.request, ...visible.slice(-3).map((e) => e.body)].join("\n");
 
-  // Add cache control to tools - last tool definition gets the breakpoint
-  // strict: the API enforces each input schema, so a call cannot arrive with a required field missing.
-  const toolsWithCache: Anthropic.Tool[] = TOOL_SPECS.map((t, i) => ({
-    ...t,
-    strict: true,
-    ...(i === TOOL_SPECS.length - 1 ? { cache_control: { type: "ephemeral" } } : {}),
-  })) as Anthropic.Tool[];
+  const tools: Anthropic.Tool[] = TOOL_SPECS.map((t) => ({ ...t, strict: true }));
 
   const referenceHistory = new Set<string>();
   let completionChecks = 0;
@@ -110,30 +105,10 @@ export async function runCase(opts: {
       ].filter((e) => e.text.trim()), trace, turn,
     }) : "";
     if (references) referenceHistory.add(references);
-    // Add cache_control to system and message content
-    const systemParam: Anthropic.MessageCreateParamsNonStreaming["system"] = [
-      { type: "text", text: systemText + references, cache_control: { type: "ephemeral" } },
+    const system: Anthropic.TextBlockParam[] = [
+      { type: "text", text: systemText + references, cache_control: CACHE },
     ];
-
-    const messagesForRequest: Anthropic.MessageParam[] = messages.map((msg, idx) => {
-      if (idx === messages.length - 1 && msg.role === "user" && Array.isArray(msg.content)) {
-        // Add cache_control to the last content block of the latest message
-        const content = msg.content.map((block, blockIdx) => {
-          const lastBlock = blockIdx === msg.content.length - 1;
-          return lastBlock && typeof block === "object" ? { ...block, cache_control: { type: "ephemeral" } } : block;
-        }) as Anthropic.MessageParam["content"];
-        return { ...msg, content };
-      }
-      return msg;
-    });
-
-    const resp = await client.messages.create({
-      model,
-      max_tokens: 4096,
-      system: systemParam,
-      tools: toolsWithCache,
-      messages: messagesForRequest,
-    });
+    const resp = await client.messages.create({ model, max_tokens: 4096, cache_control: CACHE, system, tools, messages });
 
     trace("model", { turn, model: resp.model, stop: resp.stop_reason, usage: resp.usage, content: resp.content });
     messages.push({ role: "assistant", content: resp.content });

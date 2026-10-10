@@ -134,7 +134,7 @@ export async function scoreAll(opts: { runDir: string; judge: JudgeFn; concurren
       const answer = readFileSync(answerPath, "utf8");
       const reasoningPath = join(answers, s.id, "REASONING.md");
       const reasoning = existsSync(reasoningPath) ? readFileSync(reasoningPath, "utf8") : "(no REASONING.md)";
-      // src/answers.ts marks a run the agent did not finish with "[incomplete]" and an "**Incomplete:**" line.
+      // src/runner/answers.ts marks a run the agent did not finish with "[incomplete]" and an "**Incomplete:**" line.
       const incomplete = /\[incomplete\]|\*\*Incomplete:\*\*/i.test(answer);
       try {
         const j = await opts.judge({ label, caseDir: join(ROOT, s.case_dir), answer, reasoning });

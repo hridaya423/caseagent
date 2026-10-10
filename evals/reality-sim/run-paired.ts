@@ -14,7 +14,7 @@ if (!Number.isInteger(trials) || trials < 1) throw new Error("Trials must be a p
 const commit = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const casesDir = resolve("evals/reality-sim/cases");
 const samples: { id: string; step: number }[] = JSON.parse(readFileSync("evals/reality-sim/manifest.json", "utf8")).samples.map((s: { id: string; step: number }) => ({ id: s.id, step: s.step }));
-const sessions = [];
+const sessions: { trial: number; arm: "baseline" | "playbooks"; dir: string; client: Client; server: ReturnType<typeof createServer>; results: { id: string; step: number; duration_ms: number; status: unknown; error: string | null }[]; save: () => void }[] = [];
 for (let trial = 1; trial <= trials; trial++) {
   for (const arm of ["baseline", "playbooks"] as const) {
     const dir = `${out}/trial-${trial}/${arm}`;

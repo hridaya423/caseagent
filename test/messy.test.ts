@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadCase } from "../src/case/parse.ts";
-import { parseLooseDate, parseMail } from "../src/messy.ts";
+import { parseLooseDate, parseMail } from "../src/case/messy.ts";
 import { renderCase } from "../src/agent/prompt.ts";
 import { newState } from "../src/case/state.ts";
 import { visibleEvents } from "../src/case/cut.ts";

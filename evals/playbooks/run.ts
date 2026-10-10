@@ -7,10 +7,10 @@ import { z } from "zod";
 import { casePolicy, runCase, type ModelClient } from "../../src/agent/loop.ts";
 import { visibleEvents } from "../../src/case/cut.ts";
 import type { Case } from "../../src/case/parse.ts";
-import { bankHash, loadPlaybookBank } from "../../src/playbooks.ts";
+import { bankHash, loadPlaybookBank } from "../../src/agent/playbooks.ts";
 import { renderCase } from "../../src/agent/prompt.ts";
 import { newState } from "../../src/case/state.ts";
-import { submissionToolChoice } from "../../src/model-submission.ts";
+import { submissionToolChoice } from "../../src/agent/model-submission.ts";
 import { projectExpectations, type ExpectedResults, type JudgeInput } from "./judge/contract.ts";
 import { judgeResponse, responseSchema, validateJudgement, type JudgeReview } from "./judge/schema.ts";
 

@@ -46,6 +46,15 @@ test("prompt for run 1 shows the request and event 001 only", async () => {
   assert.match(p.text, /None\. This is the first run on this case\./);
 });
 
+test("the policy is cached on the system block, and the conversation by the request-level breakpoint", async () => {
+  const { calls, client } = fake([[use("a", "hold", { waiting_for: "Waiting for Tenant", reason: "r" })]]);
+  await runCase({ ...base, state: newState("027", 1), client });
+  const [p] = calls;
+  assert.deepEqual(p.cache_control, { type: "ephemeral" });
+  assert.ok(Array.isArray(p.system) && p.system[0].cache_control);
+  assert.ok(p.tools?.every((t) => !("cache_control" in t)));
+});
+
 test("the run stops at the first end tool", async () => {
   const s = newState("027", 1);
   const { calls, client } = fake([[
