@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
-import { runBatch } from "./batch.ts";
-import { liveDeps, processCase, processToEnd, summary } from "./run.ts";
+import { runBatch } from "../runner/batch.ts";
+import { liveDeps, processCase, processToEnd, summary } from "../runner/process.ts";
 
 const USAGE = `usage:
   npm run case -- run <case-dir> [--next|--to-end] [--out <dir>]

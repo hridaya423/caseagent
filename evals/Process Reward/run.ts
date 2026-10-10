@@ -4,9 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { createServer } from '../../src/mcp.ts';
-import { liveDeps, type RunDeps } from '../../src/run.ts';
-import { isIncomplete, type CaseState } from '../../src/state.ts';
+import { createServer } from '../../src/entry/mcp.ts';
+import { liveDeps, type RunDeps } from '../../src/runner/process.ts';
+import { isIncomplete, type CaseState } from '../../src/case/state.ts';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const repo = resolve(root, '../..');
@@ -60,7 +60,7 @@ export function gradeRun(actions: CaseState['actions'], expected: Expected): { m
   return { matched: matched === -1 ? null : matched, violations };
 }
 
-// The trace says why a run is incomplete: `error` from src/run.ts, `auto_escalate` from src/agent.ts.
+// The trace says why a run is incomplete: `error` from src/runner/process.ts, `auto_escalate` from src/agent/loop.ts.
 function traceKinds(path: string): Set<string> {
   if (!existsSync(path)) return new Set();
   return new Set(readFileSync(path, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line).kind as string));

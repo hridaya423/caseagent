@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { initialSeen, nextSeen, visibleEvents } from "../src/cut.ts";
-import { loadCase } from "../src/parse.ts";
+import { initialSeen, nextSeen, visibleEvents } from "../src/case/cut.ts";
+import { loadCase } from "../src/case/parse.ts";
 
 const PM = "data/public/Property Management";
 

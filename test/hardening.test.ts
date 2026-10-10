@@ -5,10 +5,10 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
-import { runCase, type ModelClient } from "../src/agent.ts";
-import { loadCase, isAgency, type Case, type CaseEvent } from "../src/parse.ts";
-import { processCase, processToEnd, type RunDeps } from "../src/run.ts";
-import { isIncomplete, loadState, newState, saveState } from "../src/state.ts";
+import { runCase, type ModelClient } from "../src/agent/loop.ts";
+import { loadCase, isAgency, type Case, type CaseEvent } from "../src/case/parse.ts";
+import { processCase, processToEnd, type RunDeps } from "../src/runner/process.ts";
+import { isIncomplete, loadState, newState, saveState } from "../src/case/state.ts";
 import { gradeCase } from "../evals/edge-cases/run.ts";
 
 const use = (id: string, name: string, input: Record<string, unknown>) =>

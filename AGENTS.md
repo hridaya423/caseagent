@@ -1,0 +1,20 @@
+# case-agent
+
+## Verify
+
+```bash
+npm test                                               # needs data/public/Property Management (see README)
+npm run typecheck                                      # covers src, test and evals
+node --import tsx 'evals/Process Reward/validate.ts'   # MCP boundary check, no live model calls
+```
+
+## Layout
+
+`src/` has five folders. Each one imports only from the folders before it in this order:
+
+`case` (parse, messy, cut, attachments, state) <- `tools` (index, guards, evidence) <- `agent` (prompt, loop, approval) <- `runner` (process, answers, batch) <- `entry` (cli, mcp)
+
+- The hidden-future rule lives in `src/case/cut.ts`.
+- Every refusal rule lives in `src/tools/guards.ts`. Guards run before adapters.
+- A system escalation (`status.by === "system"`) marks an incomplete run.
+- Paths built from `import.meta.url` are relative to the file's folder. `src/runner/process.ts` reads `../../policy.md`.

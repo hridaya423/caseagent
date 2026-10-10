@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type Anthropic from "@anthropic-ai/sdk";
-import type { ModelClient } from "../src/agent.ts";
+import type { ModelClient } from "../src/agent/loop.ts";
 import { gradeRun, runSuite } from "../evals/Process Reward/run.ts";
 
 const reply = (content: unknown[]) =>

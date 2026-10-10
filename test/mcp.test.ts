@@ -6,8 +6,8 @@ import { join } from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import type { ModelClient } from "../src/agent.ts";
-import { createServer } from "../src/mcp.ts";
+import type { ModelClient } from "../src/agent/loop.ts";
+import { createServer } from "../src/entry/mcp.ts";
 
 type Input = Record<string, unknown>;
 

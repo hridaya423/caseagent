@@ -2,8 +2,8 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { liveDeps, processCase, summary, type RunDeps } from "../../src/run.ts";
-import type { CaseState } from "../../src/state.ts";
+import { liveDeps, processCase, summary, type RunDeps } from "../../src/runner/process.ts";
+import type { CaseState } from "../../src/case/state.ts";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 

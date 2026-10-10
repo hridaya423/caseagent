@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { readAttachment } from "../src/attachments.ts";
+import { readAttachment } from "../src/case/attachments.ts";
 
 const PM = "data/public/Property Management";
 

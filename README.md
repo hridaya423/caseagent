@@ -17,17 +17,30 @@ Letting agencies spend most of their case time waiting: for landlord approval, t
 
 ```
 case dir (index.md, history.md, attachments/ -- or loose .eml, .txt, .json, .csv, .md files)
-  -> parse.ts        events; Status/Updated/Completed lines never reach the agent
-  -> messy.ts        .eml headers and MIME attachments, call transcripts, records for loose folders
-  -> cut.ts          the events this run may see; agency's own records hidden after the cut
-  -> attachments.ts  PDF -> native document block or extracted text; images -> image blocks
-  -> prompt.ts       prompt assembly; case text wrapped in <case_data> (evidence, not instructions)
-  -> agent.ts        Claude tool loop, 15 turns max, must end with exactly one end tool
-  -> tools.ts        7 zod-checked tools with guards and refusals (evidence.ts: amounts and dates)
-  -> run.ts          state, traces, answers, outbox; --next resumes, --to-end runs through holds
-  -> batch.ts        worker pool, resumable run-summary.json, RUN_SUMMARY.md
-  -> mcp.ts          the same loop exposed over stdio MCP
+
+src/
+  case/      what a case is and what the agent may see
+    parse.ts        events; Status/Updated/Completed lines never reach the agent
+    messy.ts        .eml headers and MIME attachments, call transcripts, records for loose folders
+    cut.ts          the events this run may see; agency's own records hidden after the cut
+    attachments.ts  PDF -> native document block or extracted text; images -> image blocks
+    state.ts        case memory: status, actions, notes; load and save
+  tools/     what the agent can do
+    index.ts        7 zod-checked tools; every failure returns as text the model can act on
+    guards.ts       the refusal rules; they run before any adapter, so a real API cannot skip them
+    evidence.ts     amounts and dates a message may state
+  agent/     one run of the model
+    prompt.ts       prompt assembly; case text wrapped in <case_data> (evidence, not instructions)
+    loop.ts         Claude tool loop, 15 turns max, must end with exactly one end tool
+    approval.ts     a small model reads the landlord's reply as approved, refused or unclear
+  runner/    files on disk
+    process.ts      state, traces, answers, outbox; --next resumes, --to-end runs through holds
+    answers.ts      ANSWER.md, REASONING.md and the outbox files
+    batch.ts        worker pool, resumable run-summary.json, RUN_SUMMARY.md
+  entry/     cli.ts and mcp.ts: the same runner over the command line and stdio MCP
 ```
+
+Each folder imports only from the folders above it: `case` <- `tools` <- `agent` <- `runner` <- `entry`.
 
 Per case it writes `state/<id>.json` (case memory for `--next`), `traces/<id>.jsonl` (every model call and tool call, with the model that answered; older traces rotated aside), `outbox/<id>/` (one `.eml` per email and one `.sms.txt` per SMS the agent sent), and `ANSWERS/<id>/`. `ANSWER.md` starts with the decision (status, next step, why), puts the escalation handover next when there is one, then the summary, outbox, timeline, approvals and final checks. `REASONING.md` has the cited reason for each action plus the agent's notes. A batch also writes `run-summary.json` and `RUN_SUMMARY.md`: one row per case with its status, next step, messages, runs, time and tokens.
 
@@ -78,7 +91,7 @@ mkdir -p data/public && ln -s "$(cd ../HackatonPublicCases && pwd)/Property Mana
 
 ## Models, APIs and external services
 
-- Anthropic Messages API through `@anthropic-ai/sdk`. Model: `claude-sonnet-5-5` by default (set `MODEL`; the batch must finish inside 30 minutes). Prompt caching breakpoints on the system prompt, tool specs and the latest message. A second, small model (`claude-haiku-5-5`, set `APPROVAL_MODEL`) reads the landlord's reply to an approval request as approved, refused or unclear; `assign_contractor` refuses unless the answer is approved, and any classifier failure counts as unclear.
+- Anthropic Messages API through `@anthropic-ai/sdk`. Model: `claude-sonnet-5-5` by default (set `MODEL`; the batch must finish inside 30 minutes). Prompt caching: one breakpoint on the system block (tools and policy, shared across cases) and the request-level `cache_control`, which caches each conversation as it grows. A second, small model (`claude-haiku-5-5`, set `APPROVAL_MODEL`) reads the landlord's reply to an approval request as approved, refused or unclear; `assign_contractor` refuses unless the answer is approved, and any classifier failure counts as unclear.
 - `pdfjs-dist` for PDF text when a file is too large to send natively. `NATIVE_PDF_MAX_MB` (default 5) sets the native-PDF threshold, capped at 100 pages and a 20 MB prompt budget; larger files go as extracted text truncated to 8,000 characters.
 - `@modelcontextprotocol/sdk` for the MCP server. `scripts/extract.py` uses Docling via `uv` for structured markdown of attachments.
 - No live services: messages, approvals and assignments are outbox entries in case state.

@@ -1,15 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type Anthropic from "@anthropic-ai/sdk";
-import { MAX_TURNS, runCase, type ModelClient } from "../src/agent.ts";
-import { loadCase } from "../src/parse.ts";
-import { renderCase } from "../src/prompt.ts";
-import { visibleEvents } from "../src/cut.ts";
-import { processCase, processToEnd } from "../src/run.ts";
+import { MAX_TURNS, runCase, type ModelClient } from "../src/agent/loop.ts";
+import { loadCase } from "../src/case/parse.ts";
+import { renderCase } from "../src/agent/prompt.ts";
+import { visibleEvents } from "../src/case/cut.ts";
+import { processCase, processToEnd } from "../src/runner/process.ts";
 import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isIncomplete, newState } from "../src/state.ts";
+import { isIncomplete, newState } from "../src/case/state.ts";
 
 const c = loadCase("data/public/Property Management/027");
 
@@ -44,6 +44,15 @@ test("prompt for run 1 shows the request and event 001 only", async () => {
   assert.match(p.text, /\[event 001\]/);
   assert.doesNotMatch(p.text, /\[event 002\]/);
   assert.match(p.text, /None\. This is the first run on this case\./);
+});
+
+test("the policy is cached on the system block, and the conversation by the request-level breakpoint", async () => {
+  const { calls, client } = fake([[use("a", "hold", { waiting_for: "Waiting for Tenant", reason: "r" })]]);
+  await runCase({ ...base, state: newState("027", 1), client });
+  const [p] = calls;
+  assert.deepEqual(p.cache_control, { type: "ephemeral" });
+  assert.ok(Array.isArray(p.system) && p.system[0].cache_control);
+  assert.ok(p.tools?.every((t) => !("cache_control" in t)));
 });
 
 test("the run stops at the first end tool", async () => {

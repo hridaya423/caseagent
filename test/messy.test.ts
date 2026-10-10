@@ -3,11 +3,11 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadCase } from "../src/parse.ts";
-import { parseLooseDate, parseMail } from "../src/messy.ts";
-import { renderCase } from "../src/prompt.ts";
-import { newState } from "../src/state.ts";
-import { visibleEvents } from "../src/cut.ts";
+import { loadCase } from "../src/case/parse.ts";
+import { parseLooseDate, parseMail } from "../src/case/messy.ts";
+import { renderCase } from "../src/agent/prompt.ts";
+import { newState } from "../src/case/state.ts";
+import { visibleEvents } from "../src/case/cut.ts";
 
 const invoice = readFileSync("data/public/Property Management/003/attachments/attachment-02-cleaning-invoice.pdf");
 

@@ -1,10 +1,10 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { APPROVAL_MODEL, classifyLandlordReply } from "./approval.ts";
-import { visibleEvents } from "./cut.ts";
-import { isAgency, type Case } from "./parse.ts";
+import { visibleEvents } from "../case/cut.ts";
+import { isAgency, type Case } from "../case/parse.ts";
 import { renderCase } from "./prompt.ts";
-import type { CaseState } from "./state.ts";
-import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "./tools.ts";
+import type { CaseState } from "../case/state.ts";
+import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "../tools/index.ts";
 
 export const MAX_TURNS = 15;
 // The agency's own records of a landlord approval that came before the agent's first run.
@@ -12,6 +12,7 @@ export const MAX_TURNS = 15;
 const APPROVAL_ON_FILE =
   /landlord(?:'s)? approval (?:confirmed|granted|received|given|on file|obtained)|landlord (?:who |has )?approv(?:ed|es)\b|approved by (?:the )?landlord\b/i;
 const NUDGE = "End the run now with exactly one of hold, escalate or close_case.";
+const CACHE = { type: "ephemeral" } as const;
 
 export type ModelClient = {
   messages: { create(p: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message> };
@@ -79,39 +80,14 @@ export async function runCase(opts: {
 
   const systemText = opts.singleStep ? `${policy}\nExecute exactly one tool action for this invocation. Do not chain actions.` : policy;
 
-  // Add cache control to tools - last tool definition gets the breakpoint
   // strict: the API enforces each input schema, so a call cannot arrive with a required field missing.
-  const toolsWithCache: Anthropic.Tool[] = TOOL_SPECS.map((t, i) => ({
-    ...t,
-    strict: true,
-    ...(i === TOOL_SPECS.length - 1 ? { cache_control: { type: "ephemeral" } } : {}),
-  })) as Anthropic.Tool[];
+  const tools: Anthropic.Tool[] = TOOL_SPECS.map((t) => ({ ...t, strict: true }));
+  // Two cache breakpoints: the system block caches the tools and the policy across cases; the
+  // request-level one caches each conversation as it grows turn by turn.
+  const system: Anthropic.TextBlockParam[] = [{ type: "text", text: systemText, cache_control: CACHE }];
 
   for (let turn = 1; turn <= MAX_TURNS; turn++) {
-    // Add cache_control to system and message content
-    const systemParam: Anthropic.MessageCreateParamsNonStreaming["system"] = [
-      { type: "text", text: systemText, cache_control: { type: "ephemeral" } },
-    ];
-
-    const messagesForRequest: Anthropic.MessageParam[] = messages.map((msg, idx) => {
-      if (idx === messages.length - 1 && msg.role === "user" && Array.isArray(msg.content)) {
-        // Add cache_control to the last content block of the latest message
-        const content = msg.content.map((block, blockIdx) => {
-          const lastBlock = blockIdx === msg.content.length - 1;
-          return lastBlock && typeof block === "object" ? { ...block, cache_control: { type: "ephemeral" } } : block;
-        }) as Anthropic.MessageParam["content"];
-        return { ...msg, content };
-      }
-      return msg;
-    });
-
-    const resp = await client.messages.create({
-      model,
-      max_tokens: 4096,
-      system: systemParam,
-      tools: toolsWithCache,
-      messages: messagesForRequest,
-    });
+    const resp = await client.messages.create({ model, max_tokens: 4096, cache_control: CACHE, system, tools, messages });
 
     trace("model", { turn, model: resp.model, stop: resp.stop_reason, usage: resp.usage, content: resp.content });
     messages.push({ role: "assistant", content: resp.content });

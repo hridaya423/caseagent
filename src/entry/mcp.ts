@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { liveDeps, processCase, processToEnd, summary, type RunDeps } from "./run.ts";
+import { liveDeps, processCase, processToEnd, summary, type RunDeps } from "../runner/process.ts";
 
 const caseId = { case_id: z.string().regex(/^[\w-]+$/).describe('Case folder name, for example "027".') };
 
@@ -75,7 +75,7 @@ if (import.meta.main) {
     console.error("ANTHROPIC_API_KEY is not set. Copy .env.example to .env and add the key.");
     process.exit(1);
   }
-  const root = fileURLToPath(new URL("..", import.meta.url));
+  const root = fileURLToPath(new URL("../..", import.meta.url));
   const server = createServer({
     casesDir: resolve(root, process.env.CASES_DIR ?? "data/public/Property Management"),
     deps: liveDeps(resolve(root, process.env.OUT_DIR ?? "runs/mcp")),
