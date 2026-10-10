@@ -1,6 +1,6 @@
 {
-  "name": "reality-sim-v1",
-  "sample_count": 37,
+  "name": "reality-sim-v2",
+  "sample_count": 59,
   "samples": [
     {
       "id": "101",
@@ -121,6 +121,86 @@
       "step": 12,
       "label": "labels/115.json",
       "decision": "hold"
+    },
+    {
+      "id": "116",
+      "tier": "A",
+      "case_dir": "cases/116",
+      "step": 3,
+      "label": "labels/116.json",
+      "decision": "ask"
+    },
+    {
+      "id": "117",
+      "tier": "A",
+      "case_dir": "cases/117",
+      "step": 10,
+      "label": "labels/117.json",
+      "decision": "proceed"
+    },
+    {
+      "id": "118",
+      "tier": "A",
+      "case_dir": "cases/118",
+      "step": 8,
+      "label": "labels/118.json",
+      "decision": "proceed"
+    },
+    {
+      "id": "119",
+      "tier": "A",
+      "case_dir": "cases/119",
+      "step": 9,
+      "label": "labels/119.json",
+      "decision": "hold"
+    },
+    {
+      "id": "120",
+      "tier": "A",
+      "case_dir": "cases/120",
+      "step": 27,
+      "label": "labels/120.json",
+      "decision": "proceed"
+    },
+    {
+      "id": "121",
+      "tier": "A",
+      "case_dir": "cases/121",
+      "step": 7,
+      "label": "labels/121.json",
+      "decision": "hold"
+    },
+    {
+      "id": "122",
+      "tier": "A",
+      "case_dir": "cases/122",
+      "step": 8,
+      "label": "labels/122.json",
+      "decision": "proceed"
+    },
+    {
+      "id": "123",
+      "tier": "A",
+      "case_dir": "cases/123",
+      "step": 12,
+      "label": "labels/123.json",
+      "decision": "close"
+    },
+    {
+      "id": "124",
+      "tier": "A",
+      "case_dir": "cases/124",
+      "step": 4,
+      "label": "labels/124.json",
+      "decision": "ask"
+    },
+    {
+      "id": "125",
+      "tier": "A",
+      "case_dir": "cases/125",
+      "step": 7,
+      "label": "labels/125.json",
+      "decision": "proceed"
     },
     {
       "id": "201",
@@ -297,6 +377,102 @@
       "step": 15,
       "label": "labels/312.json",
       "decision": "ask"
+    },
+    {
+      "id": "401",
+      "tier": "E",
+      "case_dir": "cases/401",
+      "step": 15,
+      "label": "labels/401.json",
+      "decision": "ask"
+    },
+    {
+      "id": "402",
+      "tier": "E",
+      "case_dir": "cases/402",
+      "step": 9,
+      "label": "labels/402.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "403",
+      "tier": "E",
+      "case_dir": "cases/403",
+      "step": 11,
+      "label": "labels/403.json",
+      "decision": "hold"
+    },
+    {
+      "id": "404",
+      "tier": "E",
+      "case_dir": "cases/404",
+      "step": 8,
+      "label": "labels/404.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "405",
+      "tier": "E",
+      "case_dir": "cases/405",
+      "step": 14,
+      "label": "labels/405.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "406",
+      "tier": "E",
+      "case_dir": "cases/406",
+      "step": 11,
+      "label": "labels/406.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "407",
+      "tier": "E",
+      "case_dir": "cases/407",
+      "step": 14,
+      "label": "labels/407.json",
+      "decision": "proceed"
+    },
+    {
+      "id": "408",
+      "tier": "E",
+      "case_dir": "cases/408",
+      "step": 11,
+      "label": "labels/408.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "409",
+      "tier": "E",
+      "case_dir": "cases/409",
+      "step": 9,
+      "label": "labels/409.json",
+      "decision": "ask"
+    },
+    {
+      "id": "410",
+      "tier": "E",
+      "case_dir": "cases/410",
+      "step": 12,
+      "label": "labels/410.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "411",
+      "tier": "E",
+      "case_dir": "cases/411",
+      "step": 12,
+      "label": "labels/411.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "412",
+      "tier": "E",
+      "case_dir": "cases/412",
+      "step": 10,
+      "label": "labels/412.json",
+      "decision": "escalate"
     }
   ]
 }

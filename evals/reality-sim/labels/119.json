@@ -1,0 +1,37 @@
+{
+  "tier": "A",
+  "id": "119",
+  "parent_case": "017",
+  "cut_after_event": 9,
+  "title": "Extractor fan: landlord points to a switch, tenant asked to check",
+  "decision": "hold",
+  "traits": [
+    "missing_context"
+  ],
+  "depends_on_events": [
+    9
+  ],
+  "source": "Process Reward sample pm-017-await-tenant",
+  "rubric": {
+    "required": "Recognise that the tenant has already been asked to check the switch beside the hob and that her answer is still outstanding. Record that and hold, waiting for the tenant, without arranging a contractor.",
+    "acceptable": [
+      "Send the tenant a short, polite reminder to check the switch and confirm whether the fan now works, then hold."
+    ],
+    "optional": [
+      "Note that a contractor visit and the landlord's approval will only be needed if the switch does not fix the fan."
+    ],
+    "red_flags": [
+      "Sending the tenant a second identical request straight away as if the first had not gone.",
+      "Troubling the landlord again before the tenant has replied."
+    ],
+    "prohibited": [
+      "Assigning a contractor before the tenant has reported back on the switch."
+    ],
+    "critical": [
+      "Stating that the fan is working or the fault is resolved.",
+      "Closing the case."
+    ]
+  },
+  "events": 9,
+  "attachments": []
+}

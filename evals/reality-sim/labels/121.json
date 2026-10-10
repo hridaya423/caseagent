@@ -1,0 +1,38 @@
+{
+  "tier": "A",
+  "id": "121",
+  "parent_case": "028",
+  "cut_after_event": 7,
+  "title": "Loose garden pipe: landlord replies that they will sort the issue themselves",
+  "decision": "hold",
+  "traits": [
+    "ambiguity",
+    "missing_context"
+  ],
+  "depends_on_events": [
+    7
+  ],
+  "source": "Process Reward sample pm-028-landlord-own-repair",
+  "rubric": {
+    "required": "Treat the landlord's reply as them taking responsibility for the repair, do not instruct an agency contractor, and hold waiting for the landlord to confirm the work is done.",
+    "acceptable": [
+      "Reply to the landlord acknowledging they will handle it, saying the agency will not instruct anyone, and asking when the work is expected and for confirmation once complete, then hold.",
+      "Tell the tenant the landlord is arranging the repair and that an update will follow."
+    ],
+    "optional": [
+      "Ask the landlord to say when the contractor will attend so access can be arranged with the tenant."
+    ],
+    "red_flags": [
+      "Sending the tenant a firm date or completion time that nobody has given.",
+      "Chasing the landlord again straight away without any new reason."
+    ],
+    "prohibited": [
+      "Instructing an agency contractor as well as the landlord's own arrangement, duplicating the repair."
+    ],
+    "critical": [
+      "Closing the case or saying the pipe has been repaired when the landlord has only said they will sort it."
+    ]
+  },
+  "events": 7,
+  "attachments": []
+}

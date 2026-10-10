@@ -1,0 +1,39 @@
+{
+  "tier": "A",
+  "id": "123",
+  "parent_case": "035",
+  "cut_after_event": 12,
+  "title": "Shower repair: landlord fitted the parts himself and confirmed it is done",
+  "decision": "close",
+  "traits": [
+    "noise"
+  ],
+  "depends_on_events": [
+    12
+  ],
+  "source": "Process Reward sample pm-035-landlord-resolved-close",
+  "rubric": {
+    "required": "Close the shower case on the strength of the landlord's confirmation, given twice, that he got the parts and has sorted the repair himself. Record the landlord as the person who did the work and who confirmed it, and keep the closure to the shower issue only.",
+    "acceptable": [
+      "Send the tenant a short note that the landlord has confirmed the shower is fixed, and close.",
+      "Briefly check with the tenant that the shower now works before closing, provided the case is not closed while that check is outstanding."
+    ],
+    "optional": [
+      "Note that no contractor was sent, so no invoice or payment is expected.",
+      "Note that no photo of the finished work is on file."
+    ],
+    "red_flags": [
+      "Raising new work or approvals that nobody has asked for.",
+      "Leaving the case on hold despite two clear confirmations."
+    ],
+    "prohibited": [
+      "Saying an agency contractor did the work or that any charge has been paid.",
+      "Treating the water damage, smoke detector or ceiling costs mentioned in the landlord call as resolved."
+    ],
+    "critical": [
+      "Inventing contractor costs, payment evidence or a completion date."
+    ]
+  },
+  "events": 12,
+  "attachments": []
+}

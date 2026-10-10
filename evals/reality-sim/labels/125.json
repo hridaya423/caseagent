@@ -1,0 +1,34 @@
+{
+  "tier": "A",
+  "id": "125",
+  "parent_case": "049",
+  "cut_after_event": 7,
+  "title": "Tenant reported a sagging shed door; landlord approves self-repair if able, otherwise a contractor",
+  "decision": "proceed",
+  "traits": [
+    "unusual_exception"
+  ],
+  "depends_on_events": [
+    7
+  ],
+  "source": "Process Reward sample pm-049-conditional-self-fix",
+  "rubric": {
+    "required": "Tell the tenant the landlord is happy for them to fix the shed door themselves if they are able, and ask them to say if they cannot or it is inconvenient so a contractor can be arranged.",
+    "acceptable": [],
+    "optional": [
+      "Note that the tenant reported the issue in case it worsens, and invite them to report again if it gets worse."
+    ],
+    "red_flags": [
+      "Does not say what happens if the tenant cannot or does not want to repair it."
+    ],
+    "prohibited": [
+      "Presents self-repair as something the tenant must do.",
+      "Gives repair or dismantling instructions that nobody supplied."
+    ],
+    "critical": [
+      "Says or implies the tenant has already repaired the door, or closes the case while the outcome is still unknown."
+    ]
+  },
+  "events": 7,
+  "attachments": []
+}

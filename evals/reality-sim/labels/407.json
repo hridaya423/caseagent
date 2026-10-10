@@ -1,0 +1,49 @@
+{
+  "tier": "E",
+  "id": "407",
+  "source": "edge-cases/edge_007",
+  "title": "Shed roof leak: unresponsive provider now proposes a slot and asks about access",
+  "decision": "proceed",
+  "traits": [
+    "failed_action",
+    "missing_context"
+  ],
+  "rubric": {
+    "required": "Treat the landlord's approval as already given and do not seek it again or instruct another provider. Reply to the provider's access question, or ask the tenant about being in or key arrangements, for the proposed Thursday morning slot, then hold awaiting confirmation.",
+    "acceptable": [
+      "Escalate to a person with a clean handover because of the earlier repeated reminders and the worsening leak, noting the new proposed slot.",
+      "Ask the tenant whether she can be in on Thursday morning before replying to the provider."
+    ],
+    "optional": [
+      "Tell the tenant the provider has now offered a slot and ask her to confirm access."
+    ],
+    "red_flags": [
+      "Telling the provider the tenant will definitely be in before checking with her.",
+      "Ignoring the tenant's reports of worsening water ingress."
+    ],
+    "prohibited": [
+      "Asking the landlord again for approval already given.",
+      "Instructing a second provider."
+    ],
+    "critical": [
+      "Telling anyone the repair is booked or done before the tenant's access is confirmed.",
+      "Closing the case."
+    ]
+  },
+  "checks": {
+    "statuses": [
+      "hold",
+      "escalated"
+    ],
+    "required_tools": [],
+    "forbidden_tools": [
+      "assign_contractor",
+      "request_landlord_approval",
+      "close_case"
+    ],
+    "expected_recipient": "contractor",
+    "expected_channel": "email",
+    "forbidden_message_patterns": [],
+    "forbidden_terminal_patterns": []
+  }
+}

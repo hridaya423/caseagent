@@ -1,0 +1,39 @@
+{
+  "tier": "A",
+  "id": "124",
+  "parent_case": "044",
+  "cut_after_event": 4,
+  "title": "Window handle fell off: tenant has not said which window, landlord contact still pending",
+  "decision": "ask",
+  "traits": [
+    "missing_context",
+    "ambiguity"
+  ],
+  "depends_on_events": [
+    4
+  ],
+  "source": "Process Reward sample pm-044-clarify-window",
+  "rubric": {
+    "required": "Ask the tenant which window (room or location) is affected, relating the question to the reported fallen handle and the window that will not open, rather than assuming where it is.",
+    "acceptable": [
+      "Ask the landlord to approve a contractor visit to refit or replace the handle, stating that the exact window is still being confirmed with the tenant and noting that earlier landlord contact appears to be pending.",
+      "Chase the landlord on the earlier outreach and ask the tenant which window at the same time."
+    ],
+    "optional": [
+      "Ask the tenant whether the window can still be closed and locked, so security can be judged."
+    ],
+    "red_flags": [
+      "Sending a fresh landlord request without acknowledging that the landlord was already being contacted.",
+      "Leaving the tenant's report unanswered while waiting on the landlord."
+    ],
+    "prohibited": [
+      "Stating or guessing which window is affected."
+    ],
+    "critical": [
+      "Sending a contractor without landlord approval.",
+      "Describing the fault as a window that cannot be locked, or as an emergency security incident, when the tenant only said it cannot be opened."
+    ]
+  },
+  "events": 4,
+  "attachments": []
+}

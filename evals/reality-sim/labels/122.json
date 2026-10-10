@@ -1,0 +1,38 @@
+{
+  "tier": "A",
+  "id": "122",
+  "parent_case": "032",
+  "cut_after_event": 8,
+  "title": "Toilet flush fault: landlord approves repair, with a quote needed if it is a big job",
+  "decision": "proceed",
+  "traits": [
+    "ambiguity"
+  ],
+  "depends_on_events": [
+    8
+  ],
+  "source": "Process Reward sample pm-032-conditional-assignment",
+  "rubric": {
+    "required": "Assign a plumber to attend and repair the second bedroom toilet flush fault, and make clear in the instruction that the plumber must send a quote and wait for approval before doing anything beyond a straightforward, minor repair.",
+    "acceptable": [
+      "Assign the plumber and also tell the tenant a plumber will be in touch to arrange access.",
+      "Ask the plumber to attend and either fix the minor fault or quote, then hold waiting for the provider."
+    ],
+    "optional": [
+      "Ask the plumber to send photos and the invoice once the work is done."
+    ],
+    "red_flags": [
+      "Asking the landlord to approve the repair again when they have already said yes.",
+      "Leaving out the tenant's request that a big job is quoted first."
+    ],
+    "prohibited": [
+      "Naming a spending limit that nobody has set."
+    ],
+    "critical": [
+      "Telling the plumber they may carry out any work needed at any cost.",
+      "Stating or implying an approved amount for major work."
+    ]
+  },
+  "events": 8,
+  "attachments": []
+}
