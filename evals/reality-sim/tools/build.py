@@ -3,7 +3,7 @@
 Usage (from the repo root):
     python3 -I evals/reality-sim/tools/build.py [path/to/public/Property Management]
 
-Tier C cases are written by hand/agents from the cards; this script only writes their labels.
+Tier C (new) and tier E (edge) case folders are kept as written; this script only writes their labels.
 """
 import json
 import re
@@ -158,8 +158,10 @@ def main():
                  "title": p["title"], "events": n, "attachments": att}
         (LABELS / f'{b["id"]}.json').write_text(json.dumps(label, indent=2, ensure_ascii=False) + "\n")
         print(f'{b["id"]}  B  twist of {b["parent"]} ({b["operator"]})  {n} events')
-    for c in work["tier_c"]:
-        (LABELS / f'{c["id"]}.json').write_text(json.dumps({"tier": "C", **c}, indent=2, ensure_ascii=False) + "\n")
+    # Tier C and tier E case folders are kept as written; only their labels come from the work list.
+    for tier in ("C", "E"):
+        for c in work[f"tier_{tier.lower()}"]:
+            (LABELS / f'{c["id"]}.json').write_text(json.dumps({"tier": tier, **c}, indent=2, ensure_ascii=False) + "\n")
     print(f'labels written: {len(list(LABELS.glob("*.json")))}')
     write_manifest(work)
 
@@ -167,7 +169,7 @@ def main():
 def write_manifest(work):
     # One row per case: where it is, its last event number (the decision point) and its label.
     rows = []
-    for tier in ("tier_a", "tier_b", "tier_c"):
+    for tier in ("tier_a", "tier_b", "tier_c", "tier_e"):
         for x in work[tier]:
             history = CASES / x["id"] / "history.md"
             if not history.exists():
@@ -175,7 +177,7 @@ def write_manifest(work):
             last = split_events(history.read_text())[-1]["n"]
             rows.append({"id": x["id"], "tier": tier[-1].upper(), "case_dir": f'cases/{x["id"]}', "step": last,
                          "label": f'labels/{x["id"]}.json', "decision": x["decision"]})
-    (ROOT / "manifest.json").write_text(json.dumps({"name": "reality-sim-v1", "sample_count": len(rows), "samples": rows}, indent=2) + "\n")
+    (ROOT / "manifest.json").write_text(json.dumps({"name": "reality-sim-v2", "sample_count": len(rows), "samples": rows}, indent=2) + "\n")
     print(f"manifest written: {len(rows)} cases")
 
 

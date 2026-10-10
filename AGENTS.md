@@ -5,7 +5,7 @@
 ```bash
 npm test                                               # needs data/public/Property Management (see README)
 npm run typecheck                                      # covers src, test and evals
-node --import tsx 'evals/Process Reward/validate.ts'   # MCP boundary check, no live model calls
+python3 -I evals/reality-sim/tools/validate.py --all    # eval case format and leak check, no live model calls
 ```
 
 ## Layout

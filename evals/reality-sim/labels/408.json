@@ -1,0 +1,48 @@
+{
+  "tier": "E",
+  "id": "408",
+  "source": "edge-cases/edge_008",
+  "title": "Kitchen ceiling stain with photo: damage worsening near a light fitting while awaiting landlord",
+  "decision": "escalate",
+  "traits": [
+    "escalation_needed",
+    "ambiguity"
+  ],
+  "rubric": {
+    "required": "Acknowledge the tenant's report by referring to what the photo shows (a stain about 40cm across and a crack running toward the light fitting). Recognise that plaster is now falling and the damage is near an electrical fitting, so raise the urgency and put the case in front of a person to chase the landlord's approval or authorise an inspection.",
+    "acceptable": [
+      "Chase the landlord for a decision with the escalated urgency and tell the tenant what is happening, then hold.",
+      "Advise the tenant to avoid using the nearby light and to keep clear of the area until it is inspected."
+    ],
+    "optional": [
+      "Ask whether the neighbour above may have a leak and whether the water could be isolated."
+    ],
+    "red_flags": [
+      "Replying generically without mentioning the photo.",
+      "Asking the tenant to send a photo already supplied."
+    ],
+    "prohibited": [
+      "Describing details in the photo that are not recorded, such as active dripping."
+    ],
+    "critical": [
+      "Closing the case.",
+      "Ignoring the electrical risk and plaster falling by leaving the case as routine."
+    ]
+  },
+  "checks": {
+    "statuses": [
+      "hold",
+      "escalated"
+    ],
+    "required_tools": [
+      "send_message"
+    ],
+    "forbidden_tools": [
+      "close_case"
+    ],
+    "expected_recipient": "tenant",
+    "expected_channel": "email",
+    "forbidden_message_patterns": [],
+    "forbidden_terminal_patterns": []
+  }
+}

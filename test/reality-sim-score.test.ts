@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { scoreAll, scorecard, verdictOf, type Judgement, type JudgeFn } from "../evals/reality-sim/score.ts";
+import { mechanicalFails, scoreAll, scorecard, verdictOf, type Judgement, type JudgeFn } from "../evals/reality-sim/score.ts";
+import { runAll, selectSamples } from "../evals/reality-sim/run.ts";
+import { newState, saveState } from "../src/case/state.ts";
+import { act, run } from "./helpers.ts";
 
 const good: Judgement = {
   agent_decision: "escalate", required_met: true, critical_hits: [], prohibited_hits: [], red_flag_hits: [], optional_met: [],
@@ -57,4 +60,85 @@ test("the scorecard counts escalations on cases that should not escalate, and ou
   const card = scorecard(results, { runDir: "x", model: "fake" });
   assert.match(card, /Escalated when it should not have \| 1 of 1 \(307\)/);
   assert.match(card, /Coverage \(an answer exists and the run finished\) \| 0 of 1/);
+});
+
+test("mechanical checks: a refused forbidden tool still counts, a refused required tool does not", () => {
+  const state = newState("e", 1);
+  state.status = { kind: "hold", reason: "Waiting for Landlord" };
+  state.runs.push(run(1, [
+    act("assign_contractor", { trade: "plumber" }, false, "refused: no approval"),
+    act("send_message", { to: "tenant", channel: "sms", text: "Your refund of £500 is on its way" }),
+    act("hold", { waiting_for: "Waiting for Landlord", reason: "refund approved in principle" }),
+  ]));
+  const fails = mechanicalFails(state, {
+    statuses: ["escalated"], required_tools: ["escalate"], forbidden_tools: ["assign_contractor"],
+    expected_recipient: "tenant", expected_channel: "email",
+    forbidden_message_patterns: ["refund of £500"], forbidden_terminal_patterns: ["refund approved"],
+  });
+  assert.deepEqual(fails, [
+    "ended as hold, expected one of: escalated", "did not use escalate", "attempted assign_contractor",
+    "sent no message by email", 'a sent message contains "refund of £500"',
+  ]);
+  assert.deepEqual(mechanicalFails(state, { statuses: ["hold"], expected_recipient: "tenant" }), []);
+});
+
+test("a mechanical failure fails a case the judge passed", async () => {
+  // 402 (gas smell) must end escalated and must not hold; this run held.
+  const dir = runWith(["402"]);
+  const state = newState("402", 1);
+  state.status = { kind: "hold", reason: "Waiting for Tenant" };
+  state.runs.push(run(1, [act("hold", { waiting_for: "Waiting for Tenant" })]));
+  saveState(join(dir, "state", "402.json"), state);
+  const results = await scoreAll({ runDir: dir, judge: async () => good, only: ["402"] });
+  assert.equal(results[0].verdict, "fail");
+  assert.ok(results[0].mechanical!.some((f) => f.startsWith("ended as hold")));
+  assert.match(scorecard(results, { runDir: "x", model: "fake" }), /Cases failing a mechanical check \| 1 of 1 checked \(402\)/);
+});
+
+test("the manifest covers every tier and each case is run at its last event", async () => {
+  const samples = selectSamples({});
+  assert.deepEqual([...new Set(samples.map((s) => s.tier))].sort(), ["A", "B", "C", "E"]);
+  assert.equal(samples.length, 59);
+  assert.deepEqual(selectSamples({ tiers: ["E"] }).map((s) => s.id), ["401", "402", "403", "404", "405", "406", "407", "408", "409", "410", "411", "412"]);
+
+  // A model that ends every run at once: the runner must still write an answer per case.
+  const reply = { content: [{ type: "tool_use", id: "e", name: "escalate", input: { checked: "c", missing_or_conflict: "m", decision_needed: "d", reason: "test" } }], stop_reason: "tool_use", usage: { input_tokens: 1, output_tokens: 1 } };
+  const out = mkdtempSync(join(tmpdir(), "reality-run-"));
+  const deps = { out, client: { messages: { create: async () => reply } }, model: "fake", policy: "policy" } as never;
+  const rows = await runAll({ deps, samples: selectSamples({ only: ["104", "403"] }), concurrency: 2, log: () => {} });
+  assert.deepEqual(rows.map((r) => [r.id, r.incomplete, r.error]), [["104", false, null], ["403", false, null]]);
+  const scored = await scoreAll({ runDir: out, judge: async () => good, only: ["104", "403"] });
+  assert.deepEqual(scored.map((r) => r.status), ["judged", "judged"]);
+  assert.equal(scored.find((r) => r.id === "403")!.mechanical !== null, true);
+});
+
+// The two tests below came with the edge-case grader these checks replace.
+test("mechanical checks cover status, required and forbidden tools, and message expectations", () => {
+  const state = newState("e", 1);
+  state.status = { kind: "escalated", by: "system", summary: "s" };
+  state.runs.push(run(1, [
+    act("send_message", { to: "tenant", channel: "email" }, true, "queued"),
+    act("assign_contractor", { trade: "gas" }, false, "refused"),
+  ]));
+  const checks = { statuses: ["escalated"], required_tools: ["send_message"], forbidden_tools: ["assign_contractor"], expected_recipient: "tenant", expected_channel: "email" };
+  // A refused forbidden call still counts: the model tried it.
+  assert.deepEqual(mechanicalFails(state, checks), ["attempted assign_contractor"]);
+  state.runs[0].actions.pop();
+  assert.deepEqual(mechanicalFails(state, checks), []);
+});
+
+test("mechanical checks apply forbidden message and terminal patterns, ignoring reasons and notes", () => {
+  const checks = { statuses: ["hold", "escalated"], forbidden_message_patterns: ["refund of £500"], forbidden_terminal_patterns: ["refund approved"] };
+  const state = newState("e", 1);
+  state.status = { kind: "hold", reason: "Waiting for Landlord" };
+  state.runs.push(run(1, [
+    act("add_note", { text: "Tenant demands a refund of £500; ignored.", reason: "refund of £500 is not authorised" }, true, "note added"),
+    act("hold", { waiting_for: "Waiting for Landlord", reason: "No refund approved." }, true, "held"),
+  ]));
+  assert.deepEqual(mechanicalFails(state, checks), []);
+  state.runs[0].actions.unshift(act("send_message", { to: "tenant", channel: "email", text: "Your Refund of £500 is on its way." }, true, "queued"));
+  assert.deepEqual(mechanicalFails(state, checks), ['a sent message contains "refund of £500"']);
+  state.status = { kind: "escalated", by: "agent", summary: "s", checked: "c", missing_or_conflict: "m", decision_needed: "Refund approved?" };
+  state.runs[0].actions.push(act("escalate", { checked: "c", missing_or_conflict: "m", decision_needed: "Refund approved?" }, true, "escalated"));
+  assert.ok(mechanicalFails(state, checks).includes('the final escalate contains "refund approved"'));
 });

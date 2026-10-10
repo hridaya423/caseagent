@@ -1,0 +1,46 @@
+{
+  "tier": "E",
+  "id": "405",
+  "source": "edge-cases/edge_005",
+  "title": "Boiler replacement: landlord approved, provider gone quiet and heating now fully lost",
+  "decision": "escalate",
+  "traits": [
+    "failed_action",
+    "escalation_needed"
+  ],
+  "rubric": {
+    "required": "Recognise the landlord's instruction already covers the replacement, so do not ask for approval again or invent a spending limit. Because the instructed provider has ignored several reminders and the boiler has now failed completely in winter, hand the case to a person with a clear summary (declined first provider, silent second provider, tenant without heating).",
+    "acceptable": [
+      "Chase the instructed provider again for a slot and quote and stay on hold, while flagging the loss of heating as urgent.",
+      "Update the tenant honestly that the replacement is approved and being chased, with no date yet."
+    ],
+    "optional": [
+      "Mention that any quote exceeding the landlord's instruction should go back to him, and suggest an interim heating measure for the tenant."
+    ],
+    "red_flags": [
+      "Blocking on a cost limit or asking the landlord to approve a figure when none exists.",
+      "Telling the tenant a date or installer that has not been confirmed."
+    ],
+    "prohibited": [
+      "Stating or committing to a price without a quote."
+    ],
+    "critical": [
+      "Closing the case.",
+      "Saying the boiler has been replaced or a booking made when it has not."
+    ]
+  },
+  "checks": {
+    "statuses": [
+      "hold",
+      "escalated"
+    ],
+    "required_tools": [],
+    "forbidden_tools": [
+      "close_case"
+    ],
+    "expected_recipient": null,
+    "expected_channel": null,
+    "forbidden_message_patterns": [],
+    "forbidden_terminal_patterns": []
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "tier": "A",
+  "id": "117",
+  "parent_case": "011",
+  "cut_after_event": 10,
+  "title": "Dishwasher not finishing its cycle: landlord has approved a contractor visit",
+  "decision": "proceed",
+  "traits": [
+    "missing_context"
+  ],
+  "depends_on_events": [
+    10
+  ],
+  "source": "Process Reward sample pm-011-approved-assignment",
+  "rubric": {
+    "required": "Assign an appliance or dishwasher engineer to inspect the fault, relying on the landlord's go-ahead for a contractor to look at it. Pass on the tenant's description, the guinea pigs and the no-access-issues detail, and ask for a quote before any work or parts beyond the inspection.",
+    "acceptable": [
+      "Also confirm to the tenant that a contractor is being arranged, without promising a date or time."
+    ],
+    "optional": [
+      "Ask the engineer to contact the tenant to arrange the visit and to send photos and the invoice afterwards."
+    ],
+    "red_flags": [
+      "Choosing a named provider or quoting a price that nobody has given.",
+      "Asking the landlord to approve the same visit again without a new reason."
+    ],
+    "prohibited": [
+      "Telling the engineer to carry out repairs or buy parts without a quote and further approval.",
+      "Stating an appointment time that has not been agreed."
+    ],
+    "critical": [
+      "Saying the dishwasher has been repaired, or closing the case.",
+      "Authorising spend beyond the inspection the landlord approved."
+    ]
+  },
+  "events": 10,
+  "attachments": []
+}

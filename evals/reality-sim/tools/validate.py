@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CASES = ROOT / "cases"
 WORK = json.loads((ROOT / "worklist.json").read_text())
 CARDS = {c["id"]: c for c in WORK["tier_c"]}
-ALL_IDS = [x["id"] for t in ("tier_a", "tier_b", "tier_c") for x in WORK[t]]
+ALL_IDS = [x["id"] for t in ("tier_a", "tier_b", "tier_c", "tier_e") for x in WORK[t]]
 CHANNELS = {"Note", "Update", "Hold", "Email", "SMS", "Call"}
 HEAD_RE = re.compile(r'<a id="event-(\d{3})"></a>\n## (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d) UTC — event (\d{3})\n\n- \*\*Channel:\*\* (.+)\n- \*\*From:\*\* (.+)\n- \*\*To:\*\* (.+)\n')
 

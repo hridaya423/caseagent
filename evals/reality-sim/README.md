@@ -1,32 +1,34 @@
-# reality-sim: practice cases for the Reality Test
+# reality-sim: the project's eval
 
-37 practice cases in the same shape as the public cases. Each one stops at a point where someone has to decide what to do, and each has a hidden answer sheet. This is a development set, not the organisers' test.
+59 practice cases in the organisers' format. Each stops at a point where someone has to decide what to do, and each has a hidden answer sheet. One command runs the agent over them and one grades the result. This is a development set, not the organisers' test.
 
-## Layout
+## Run it
 
-```
-cases/<id>/        what the agent is given: index.md, history.md, attachments/
-labels/<id>.json   the answer sheet. NEVER give this folder to the agent.
-score.ts           grades an ANSWERS folder against the labels with a Claude judge
-worklist.json      the source list: cut points, changes, cards and rubrics
-tools/build.py     rebuilds the 1xx and 2xx cases and all labels from worklist.json
-tools/validate.py  checks every case has the public-case shape and no outcome text
-BRIEF.md           the writing instructions used for the 3xx cases
+```bash
+npm run eval -- --score            # run all 59 cases, then grade them
+npm run eval -- --tier E --score   # only one tier (A, B, C or E)
+npm run eval -- --only 301,402     # only some cases, no grading
+npm run eval:score -- runs/eval/<run>   # grade a run made earlier
 ```
 
-## The three kinds of case
+Both need `ANTHROPIC_API_KEY` (see `.env.example`). A run writes to `runs/eval/<timestamp>/` (`--out` to change): the agent's usual `ANSWERS/`, `state/` and `traces/`, a `run.json` with the time each case took, and with `--score` a `score/SCORECARD.md` and `score/results.json`. `--concurrency N` sets how many cases run at once (default 4). `MODEL` picks the agent's model and `JUDGE_MODEL` the judge's (default `claude-opus-5-5`).
 
-| IDs | Count | What it is |
-|---|---|---|
-| 101–115 | 15 | A public case cut short at a decision point. Overview, Outcome, Status and later events removed. |
-| 201–210 | 10 | One of the cuts above with a single change that alters the right answer (a yes becomes a no, a reply is empty, an email bounces, a safety detail appears, an instruction is injected). |
-| 301–312 | 12 | New cases written from a card, covering situations the public set lacks (emergencies, a deposit dispute, a legal letter, an identity request, failed actions, a finished job with nothing to do). Four have a `## Question` section in `index.md`. |
+Each case is run once, from a clean state, with its whole history visible up to its last event, the agency's own events included. That is the `step` in `manifest.json`.
 
-Correct decisions across the set: ask 16, escalate 8, proceed 6, hold 4, close 3.
+## What is in the set
 
-## The answer sheet
+| IDs | Tier | Count | What it is |
+|---|---|---|---|
+| 101–125 | A | 25 | A public case cut short at a decision point. Overview, Outcome, Status and later events removed. 116–125 are the ten decision points from the earlier Process Reward set. |
+| 201–210 | B | 10 | A tier A cut with one change that alters the right answer (a yes becomes a no, a reply is empty, an email bounces, a safety detail appears, an instruction is injected). |
+| 301–312 | C | 12 | New cases written from a card: emergencies, a deposit dispute, a legal letter, an identity request, failed actions, a finished job with nothing to do. Four have a `## Question` section. |
+| 401–412 | E | 12 | The hand-written edge cases (gas, prompt injection, data fishing, unverified identity, a refusing landlord, a vulnerable tenant), formerly `evals/edge-cases`. These also carry mechanical checks. |
 
-Each label has a `rubric` with the six parts the hackathon rules name:
+Correct decisions across the set: ask 20, escalate 16, proceed 12, hold 7, close 4.
+
+## How a case is graded
+
+Each `labels/<id>.json` has a `rubric` with the six parts the hackathon rules name:
 
 - `required`: what a good answer must do
 - `acceptable`: other answers that also pass
@@ -35,62 +37,54 @@ Each label has a `rubric` with the six parts the hackathon rules name:
 - `prohibited`: must not do
 - `critical`: any one of these fails the case
 
-The 1xx rubrics are a reading of the hidden later events plus the policy bank. The recorded history is a reference, not the only right answer; in a few cases (104, 115) the real agency's own handling is what the rubric marks as a failure.
+Two graders run:
 
-## Using it
+1. **The judge.** A Claude model reads the case, the rubric, `ANSWER.md` and `REASONING.md`, and reports what the agent decided, whether the requirement (or an acceptable alternative) was met, and each critical, prohibited and red-flag item the answer commits.
+2. **Mechanical checks** (tier E only, the `checks` in the label). These read the agent's recorded actions in `state/<id>.json`: how the case ended, tools that must or must not be used, who was messaged, and phrases that must not appear in a sent message. They are the checks the earlier edge-case suite used.
 
-**What a case is.** `cases/<id>/` is a complete case folder in the organisers' format. The last event in `history.md` is the decision point: the agent should read everything and say what happens next. All 37 load in this repo's parser (`loadCase`, strict layer).
+A case passes when the requirement is met, nothing critical or prohibited was done, and no mechanical check failed.
 
-**What to give the agent.** The `cases/` folder only. `manifest.json` lists every case with its `case_dir` and `step` (the number of its last event).
+## Reading a scorecard
 
-**How to run this repo's agent on it.** The agent must see the whole history, the agency's own events included. Today that is the MCP tool `run_case` with `step` set to the case's last event:
-
-```bash
-CASES_DIR='evals/reality-sim/cases' OUT_DIR='runs/reality-sim' npm run --silent mcp
-```
-
-```json
-{"name": "run_case", "arguments": {"case_id": "305", "step": 17}}
-```
-
-The CLI modes do not fit yet. A plain `run` shows the agent only the first two to four events of each case. `--to-end` replays the case with the agency's own events hidden, so the agent never sees the approvals, quotes and instructions these cases turn on. A CLI flag for "see everything, decide once" would make `run-all` usable here.
-
-**How to score.** `score.ts` grades an agent's output folder against the labels with a Claude judge:
-
-```bash
-node --env-file-if-exists=.env --import tsx evals/reality-sim/score.ts runs/reality-sim
-```
-
-The argument is the agent's output folder (the one containing `ANSWERS/`). It writes `score/SCORECARD.md` and `score/results.json` inside that folder (`--out` to change). Options: `--concurrency N` (default 4), `--only 301,302`, and `JUDGE_MODEL` (default `claude-opus-5-5`). It needs `ANTHROPIC_API_KEY`.
-
-For each case the judge reads the case, the rubric, `ANSWER.md` and `REASONING.md`, and reports what the agent decided, whether the requirement (or an acceptable alternative) was met, and every critical, prohibited and red-flag item the answer commits. A case passes when the requirement is met and nothing critical or prohibited was done. The scorecard gives the pass rate, coverage (an answer exists and the run finished), escalations where none was called for, missed escalations, and breakdowns by tier, expected decision and problem type.
-
-Three things to know when reading a scorecard:
-
+- The summary gives the pass rate, coverage (an answer exists and the run finished), critical failures, escalations where none was called for, and missed escalations.
 - A case with no `ANSWER.md` is a coverage failure. A case the judge could not grade is listed as unscored and left out of the pass rate.
-- The judge marks failing answers that a careful letting agent could still defend. Those are listed first, as candidates for a rubric that is too strict. Fix the rubric in `worklist.json`, rerun `tools/build.py`, and rescore.
+- Failing answers that the judge thinks a careful letting agent could still defend are listed first. Treat those as rubrics that may be too strict: fix the rubric in `worklist.json`, rerun `tools/build.py`, and rescore.
 - The judge is a model reading our own rubrics. Its verdicts are a development signal, not the organisers' scores.
 
-**Question sections.** 302, 303, 308 and 312 have a `## Question` in `index.md`. The current parser drops it, so the agent does not see the question.
+## Layout
 
-## Rebuilding
-
-```bash
-python3 -I evals/reality-sim/tools/build.py        # needs data/public/Property Management linked, see the main README
-python3 -I evals/reality-sim/tools/validate.py --all
+```
+cases/<id>/        what the agent is given: index.md, history.md, attachments/
+labels/<id>.json   the answer sheet. NEVER give this folder to the agent.
+manifest.json      every case: its folder, tier, decision-point event and label
+worklist.json      the source of every rubric, cut point, change and card
+run.ts             runs the agent over the cases
+score.ts           grades a run
+tools/build.py     rebuilds the tier A and B cases, all labels and the manifest from worklist.json
+tools/validate.py  checks every case has the public-case shape and no outcome text
+BRIEF.md           the writing instructions used for the tier C cases
 ```
 
-`build.py` overwrites the 1xx and 2xx case folders and every label. It does not touch the 3xx case folders.
+## Changing the set
+
+- **Fix a rubric:** edit it in `worklist.json`, then run `python3 -I evals/reality-sim/tools/build.py`. Do not edit `labels/` by hand; the build overwrites it.
+- **Add a cut of a public case:** add a `tier_a` entry with `parent_case` and `cut_after_event`, then build. This needs `data/public/Property Management` linked (see the main README).
+- **Add a written case:** add its folder under `cases/` and an entry under `tier_c` or `tier_e`, then build.
+- **Check:** `python3 -I evals/reality-sim/tools/validate.py --all`.
+
+The build overwrites the tier A and B case folders and every label. It leaves the tier C and E case folders alone.
 
 ## Known limits
 
-- The policy was derived from the same 50 public cases the 1xx cuts come from, so a high score on those shows little about unseen cases. The 2xx and 3xx cases are the better signal.
-- The 3xx cases were written by a model from the cards and checked for format, not each read in full by a person.
+- The policy was derived from the same 50 public cases the tier A cuts come from, so a high score there shows little about unseen cases. Tiers B, C and E are the better signal.
+- The tier C cases were written by a model from the cards, and the tier E and 116–125 rubrics were converted by a model from the earlier tests' expectations. They were checked for format and spot-checked, not each read in full by a person.
+- The parser drops a `## Question` section, so on 302, 303, 308 and 312 the agent does not see the question.
 - 208 has a deliberate gap in event numbers (events 019 and 020 removed).
+- 402: the source test required the safety message by email. That check was dropped, because the rubric asks for the fastest channel.
 
 ## Paired playbook check
 
-`run-paired.ts` uses the same MCP invocation above for both arms, with fresh state, the same policy, tools and actor model. Only playbook selection and completion checking are disabled in the baseline. Each case alternates which arm runs first; the next trial reverses this order. The runner reads only IDs and steps from the manifest and exposes only `cases/` to the server. Use a fresh output directory:
+`run-paired.ts` runs each case through the MCP `run_case` tool at its `step` from the manifest, for both arms, with fresh state, the same policy, tools and actor model. Only playbook selection and completion checking are disabled in the baseline. Each case alternates which arm runs first; the next trial reverses this order. The runner reads only IDs and steps from the manifest and exposes only `cases/` to the server. Use a fresh output directory:
 
 ```bash
 MODEL=claude-sonnet-5-5 PLAYBOOK_MODEL=claude-sonnet-5-5 PLAYBOOKS=on FALLBACK_MODEL='' node --env-file-if-exists=.env --import tsx evals/reality-sim/run-paired.ts runs/reality-sim/paired-v2 2

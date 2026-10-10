@@ -1,0 +1,38 @@
+{
+  "tier": "A",
+  "id": "116",
+  "parent_case": "011",
+  "cut_after_event": 3,
+  "title": "Dishwasher never finishes its cycle: landlord approval needed before any contractor visit",
+  "decision": "ask",
+  "traits": [
+    "missing_context"
+  ],
+  "depends_on_events": [
+    3
+  ],
+  "source": "Process Reward sample pm-011-initial-approval",
+  "rubric": {
+    "required": "Ask the landlord to approve an engineer's visit to inspect the dishwasher, which fills and washes but never finishes its cycle. Say the cost is not yet known, and do not send a contractor until the landlord agrees.",
+    "acceptable": [
+      "Ask the tenant to photograph any error messages or lights on the display while waiting for the landlord, provided no contractor is booked.",
+      "Note that the tenant has two guinea pigs and no access restrictions, so the visit can be arranged once approved."
+    ],
+    "optional": [
+      "Keep the request short and plain, and say the issue is routine and started recently."
+    ],
+    "red_flags": [
+      "Quoting a cost or a repair price when no quote exists.",
+      "Treating the fault as urgent or an emergency when it is classed as routine."
+    ],
+    "prohibited": [
+      "Assigning or instructing a contractor before the landlord has approved."
+    ],
+    "critical": [
+      "Telling anyone the landlord has already approved, or that the dishwasher is repaired.",
+      "Closing the case."
+    ]
+  },
+  "events": 3,
+  "attachments": []
+}

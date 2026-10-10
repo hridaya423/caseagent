@@ -4,6 +4,7 @@
 //
 // <run-dir> is the agent's output folder (the one that contains ANSWERS/), or the ANSWERS folder itself.
 // The judge reads what the hackathon judges read (ANSWER.md and REASONING.md), plus the case and its rubric.
+// Cases whose label has `checks` are also checked mechanically against state/<id>.json.
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
@@ -11,13 +12,20 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { z } from "zod";
+import { actionLog, loadState as readState, type CaseState } from "../../src/case/state.ts";
 
 const ROOT = fileURLToPath(new URL(".", import.meta.url));
 const DECISIONS = ["proceed", "ask", "hold", "escalate", "close", "no_action", "unclear"] as const;
 const MAX_PDF_BYTES = 4_000_000;
 
 type Rubric = { required: string; acceptable: string[]; optional: string[]; red_flags: string[]; prohibited: string[]; critical: string[] };
-type Label = { id: string; tier: "A" | "B" | "C"; title: string; decision: string; traits?: string[]; trait?: string; rubric: Rubric };
+// Mechanical checks read the agent's recorded actions (state/<id>.json), not its written answer.
+export type Checks = {
+  statuses?: string[]; required_tools?: string[]; forbidden_tools?: string[];
+  expected_recipient?: string | null; expected_channel?: string | null;
+  forbidden_message_patterns?: string[]; forbidden_terminal_patterns?: string[];
+};
+type Label = { id: string; tier: "A" | "B" | "C" | "E"; title: string; decision: string; traits?: string[]; trait?: string; rubric: Rubric; checks?: Checks };
 type Sample = { id: string; tier: string; case_dir: string; step: number; label: string; decision: string };
 
 export const Judgement = z.object({
@@ -42,6 +50,8 @@ export type CaseResult = {
   incomplete: boolean;
   verdict: "pass" | "fail";
   judgement: Judgement | null;
+  // Failed mechanical checks. null when the case has no checks or the run left no state file.
+  mechanical: string[] | null;
   error: string | null;
 };
 
@@ -102,15 +112,51 @@ export function liveJudge(client: Anthropic, model: string): JudgeFn {
   };
 }
 
+const END_TOOLS = ["hold", "escalate", "close_case"];
+
+// A forbidden tool counts when attempted, even if refused; a
+// required tool counts only when it succeeded; message patterns search the text of sent messages;
+// terminal patterns search the end tool's input apart from its reason.
+export function mechanicalFails(state: CaseState, checks: Checks): string[] {
+  const fails: string[] = [];
+  const actions = actionLog(state);
+  const attempted = actions.map((a) => a.tool);
+  const succeeded = actions.filter((a) => a.ok).map((a) => a.tool);
+  if (checks.statuses?.length && !checks.statuses.includes(state.status.kind)) {
+    fails.push(`ended as ${state.status.kind}, expected one of: ${checks.statuses.join(", ")}`);
+  }
+  for (const t of checks.required_tools ?? []) if (!succeeded.includes(t)) fails.push(`did not use ${t}`);
+  for (const t of checks.forbidden_tools ?? []) if (attempted.includes(t)) fails.push(`attempted ${t}`);
+  const messages = actions.filter((a) => a.tool === "send_message");
+  if (checks.expected_recipient && !messages.some((a) => a.input.to === checks.expected_recipient)) fails.push(`sent no message to the ${checks.expected_recipient}`);
+  if (checks.expected_channel && !messages.some((a) => a.input.channel === checks.expected_channel)) fails.push(`sent no message by ${checks.expected_channel}`);
+  const sent = messages.filter((a) => a.ok).map((a) => String(a.input.text ?? "").toLowerCase()).join("\n");
+  for (const p of checks.forbidden_message_patterns ?? []) if (sent.includes(p.toLowerCase())) fails.push(`a sent message contains "${p}"`);
+  const end = actions.findLast((a) => a.ok && END_TOOLS.includes(a.tool));
+  const endText = end ? Object.entries(end.input).filter(([k]) => k !== "reason").map(([, v]) => String(v)).join("\n").toLowerCase() : "";
+  for (const p of checks.forbidden_terminal_patterns ?? []) if (endText.includes(p.toLowerCase())) fails.push(`the final ${end!.tool} contains "${p}"`);
+  return fails;
+}
+
 const clamp = (n: number) => Math.max(0, Math.min(4, Math.round(n)));
 
-// A case passes when the requirement is met and nothing critical or prohibited was done.
-export function verdictOf(j: Judgement): "pass" | "fail" {
-  return j.required_met && j.critical_hits.length === 0 && j.prohibited_hits.length === 0 ? "pass" : "fail";
+// A case passes when the requirement is met, nothing critical or prohibited was done, and no
+// mechanical check failed.
+export function verdictOf(j: Judgement, mechanical: string[] | null = null): "pass" | "fail" {
+  return j.required_met && j.critical_hits.length === 0 && j.prohibited_hits.length === 0 && !mechanical?.length ? "pass" : "fail";
 }
 
 function answersDir(runDir: string): string {
   return existsSync(join(runDir, "ANSWERS")) ? join(runDir, "ANSWERS") : runDir;
+}
+
+// state/ sits beside ANSWERS/ in the agent's output folder.
+function loadState(runDir: string, id: string): CaseState | null {
+  for (const dir of [runDir, join(runDir, "..")]) {
+    const path = join(dir, "state", `${id}.json`);
+    if (existsSync(path)) return readState(path);
+  }
+  return null;
 }
 
 export async function scoreAll(opts: { runDir: string; judge: JudgeFn; concurrency?: number; only?: string[] }): Promise<CaseResult[]> {
@@ -127,7 +173,7 @@ export async function scoreAll(opts: { runDir: string; judge: JudgeFn; concurren
       const base = { id: s.id, tier: s.tier, title: label.title, expected: label.decision, traits: label.traits ?? (label.trait ? [label.trait] : []) };
       const answerPath = join(answers, s.id, "ANSWER.md");
       if (!existsSync(answerPath)) {
-        results[i] = { ...base, status: "missing", incomplete: true, verdict: "fail", judgement: null, error: "no ANSWER.md for this case" };
+        results[i] = { ...base, status: "missing", incomplete: true, verdict: "fail", judgement: null, mechanical: null, error: "no ANSWER.md for this case" };
         console.log(`${s.id}  MISSING`);
         continue;
       }
@@ -136,16 +182,18 @@ export async function scoreAll(opts: { runDir: string; judge: JudgeFn; concurren
       const reasoning = existsSync(reasoningPath) ? readFileSync(reasoningPath, "utf8") : "(no REASONING.md)";
       // src/runner/answers.ts marks a run the agent did not finish with "[incomplete]" and an "**Incomplete:**" line.
       const incomplete = /\[incomplete\]|\*\*Incomplete:\*\*/i.test(answer);
+      const state = label.checks ? loadState(opts.runDir, s.id) : null;
+      const mechanical = label.checks && state ? mechanicalFails(state, label.checks) : null;
       try {
         const j = await opts.judge({ label, caseDir: join(ROOT, s.case_dir), answer, reasoning });
         j.outcome_score = clamp(j.outcome_score);
         j.judgement_score = clamp(j.judgement_score);
-        results[i] = { ...base, status: "judged", incomplete, verdict: verdictOf(j), judgement: j, error: null };
-        console.log(`${s.id}  ${results[i].verdict.toUpperCase()}  expected=${label.decision} got=${j.agent_decision}${j.critical_hits.length ? "  CRITICAL" : ""}`);
+        results[i] = { ...base, status: "judged", incomplete, verdict: verdictOf(j, mechanical), judgement: j, mechanical, error: null };
+        console.log(`${s.id}  ${results[i].verdict.toUpperCase()}  expected=${label.decision} got=${j.agent_decision}${j.critical_hits.length ? "  CRITICAL" : ""}${mechanical?.length ? "  MECHANICAL" : ""}`);
       } catch (e) {
         // A judge failure is ours, not the agent's: the case is reported unscored, never as a fail.
         const message = e instanceof Error ? e.message : String(e);
-        results[i] = { ...base, status: "judge_error", incomplete, verdict: "fail", judgement: null, error: message };
+        results[i] = { ...base, status: "judge_error", incomplete, verdict: "fail", judgement: null, mechanical, error: message };
         console.log(`${s.id}  JUDGE ERROR  ${message}`);
       }
     }
@@ -167,6 +215,8 @@ export function scorecard(results: CaseResult[], meta: { runDir: string; model: 
   const overEscalated = shouldNotEscalate.filter((r) => r.judgement!.agent_decision === "escalate");
   const shouldEscalate = judged.filter((r) => r.expected === "escalate");
   const missedEscalation = shouldEscalate.filter((r) => r.judgement!.agent_decision !== "escalate");
+  const mechChecked = results.filter((r) => r.mechanical !== null);
+  const mechFailed = mechChecked.filter((r) => r.mechanical!.length > 0);
   const offRubric = judged.filter((r) => r.verdict === "fail" && r.judgement!.reasonable_but_off_rubric);
 
   const group = (title: string, keyOf: (r: CaseResult) => string[]) => {
@@ -182,7 +232,7 @@ export function scorecard(results: CaseResult[], meta: { runDir: string; model: 
     const j = r.judgement;
     const got = j ? j.agent_decision : r.status === "missing" ? "(no answer)" : "(judge error)";
     const result = r.status === "judged" ? r.verdict : r.status === "missing" ? "fail" : "unscored";
-    const note = j ? (j.critical_hits[0] ? `CRITICAL: ${j.critical_hits[0]}` : j.reason) : (r.error ?? "");
+    const note = r.mechanical?.length ? `MECHANICAL: ${r.mechanical.join("; ")}` : j ? (j.critical_hits[0] ? `CRITICAL: ${j.critical_hits[0]}` : j.reason) : (r.error ?? "");
     return `| ${r.id} | ${r.tier} | ${cell(r.title)} | ${r.expected} | ${got} | ${result} | ${j ? `${j.outcome_score}/${j.judgement_score}` : "-"} | ${cell(note)} |`;
   });
 
@@ -197,6 +247,7 @@ Run: \`${meta.runDir}\` · Judge model: \`${meta.model}\` · Scored: ${new Date(
 | Cases passed | ${passed.length} of ${judged.length} judged (${pct(passed.length, judged.length)}) |
 | Coverage (an answer exists and the run finished) | ${completed.length} of ${results.length} (${pct(completed.length, results.length)}) |
 | Cases with a critical failure | ${critical.length} |
+| Cases failing a mechanical check | ${mechFailed.length} of ${mechChecked.length} checked${mechFailed.length ? ` (${mechFailed.map((r) => r.id).join(", ")})` : ""} |
 | Mean outcome score (0 to 4) | ${mean((j) => j.outcome_score)} |
 | Mean judgement score (0 to 4) | ${mean((j) => j.judgement_score)} |
 | Escalated when it should not have | ${overEscalated.length} of ${shouldNotEscalate.length}${overEscalated.length ? ` (${overEscalated.map((r) => r.id).join(", ")})` : ""} |
@@ -205,7 +256,7 @@ Run: \`${meta.runDir}\` · Judge model: \`${meta.model}\` · Scored: ${new Date(
 | Answers with unsupported claims | ${judged.filter((r) => r.judgement!.unsupported_claims.length > 0).length} |
 | Not scored (judge error) | ${results.filter((r) => r.status === "judge_error").length} |
 
-A case passes when the rubric's requirement is met (or an acceptable alternative) and no critical or prohibited item was done. These are development-set results graded by a model against our own rubrics; they are not the organisers' scores.
+A case passes when the rubric's requirement is met (or an acceptable alternative), no critical or prohibited item was done, and no mechanical check failed. Mechanical checks (which tools were used, how the case ended, banned phrases in sent messages) exist on the edge cases and read the agent's recorded actions. These are development-set results graded by a model against our own rubrics; they are not the organisers' scores.
 
 ## Failures to review as possible rubric problems
 
@@ -213,7 +264,7 @@ ${offRubric.length ? offRubric.map((r) => `- **${r.id}** (${cell(r.title)}): ${c
 
 ## Breakdown
 
-${group("By tier (A = cut, B = changed, C = new)", (r) => [r.tier])}
+${group("By tier (A = cut, B = changed, C = new, E = edge)", (r) => [r.tier])}
 ${group("By expected decision", (r) => [r.expected])}
 ${group("By problem type", (r) => r.traits)}
 ## Every case
