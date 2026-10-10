@@ -1,7 +1,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Case, CaseEvent } from "../case/parse.ts";
-import { isIncomplete, statusLabel, type CaseState, type Action } from "../case/state.ts";
+import { actionLog, isIncomplete, statusLabel, type CaseState } from "../case/state.ts";
 
 const END_TOOLS = new Set(["hold", "escalate", "close_case"]);
 
@@ -9,13 +9,14 @@ export type Decision = { status: string; next: string; why: string };
 
 // The answer a judge or an operator reads first: where the case stands, what happens next, and why.
 export function decisionOf(s: CaseState): Decision {
-  const end = s.actions.findLast((a) => a.ok && END_TOOLS.has(a.tool));
+  const actions = actionLog(s);
+  const end = actions.findLast((a) => a.ok && END_TOOLS.has(a.tool));
   const why = String(end?.input.reason ?? "");
   const st = s.status;
   const status = statusLabel(st);
   switch (st.kind) {
     case "open":
-      return { status, next: "The run stopped before an end action. Resume the case.", why: String(s.actions.at(-1)?.input.reason ?? "") };
+      return { status, next: "The run stopped before an end action. Resume the case.", why: String(actions.at(-1)?.input.reason ?? "") };
     case "hold":
       return { status, next: `Wait for the ${st.reason.replace(/^Waiting for /, "").toLowerCase()}'s reply.`, why };
     case "escalated":
@@ -36,12 +37,9 @@ function summarizeLine(s: string): string {
 }
 
 // Events a run received: those after the previous run's last seen event, up to its own last seen event.
-function runEvents(s: CaseState, visible: CaseEvent[], run: number): CaseEvent[] {
-  const seenIn = (r: number) => Math.max(0, ...s.actions.filter((a) => a.run === r).map((a) => a.afterEvent), ...s.notes.filter((n) => n.run === r).map((n) => n.afterEvent));
-  let from = 0;
-  for (let r = run - 1; r >= 1 && from === 0; r--) from = seenIn(r);
-  const to = seenIn(run) || from;
-  return visible.filter((e) => e.n > from && e.n <= to);
+function runEvents(s: CaseState, visible: CaseEvent[], i: number): CaseEvent[] {
+  const from = s.runs[i - 1]?.seen ?? 0;
+  return visible.filter((e) => e.n > from && e.n <= s.runs[i].seen);
 }
 
 function answerMd(c: Case, s: CaseState, visible: CaseEvent[]): string {
@@ -50,23 +48,18 @@ function answerMd(c: Case, s: CaseState, visible: CaseEvent[]): string {
 
   // Summary
   const summary =
-    `**Final status:** ${statusLabel(s.status)}\n**Runs:** ${s.runs} · **Events seen:** up to event ${s.seen} · **Loaded with:** ${c.layer}` +
+    `**Final status:** ${statusLabel(s.status)}\n**Runs:** ${s.runs.length} · **Events seen:** up to event ${s.seen} · **Loaded with:** ${c.layer}` +
     (isIncomplete(s) ? "\n\n**Incomplete:** the agent did not finish this run, so the system escalated the case to a person." : "") +
     (c.layer === "raw" ? "\n\n**Raw mode loaded:** this case was reconstructed from unstructured files. Review for leaks." : "") +
     (c.warnings?.length ? `\n\n**Loader warnings:** ${c.warnings.join("; ")}` : "") +
     (c.unread?.length ? `\n\n**Files not read:** ${c.unread.join(", ")}` : "");
 
-  // Timeline: group actions by run
-  const runs = new Map<number, Action[]>();
-  for (const action of s.actions) {
-    if (!runs.has(action.run)) runs.set(action.run, []);
-    runs.get(action.run)!.push(action);
-  }
+  const actions = actionLog(s);
 
-  const timelineBlocks = Array.from({ length: s.runs }, (_, i) => {
+  const timelineBlocks = s.runs.map((r, i) => {
     const run = i + 1;
-    const runActions = runs.get(run) || [];
-    const runEvts = runEvents(s, visible, run);
+    const runActions = r.actions;
+    const runEvts = runEvents(s, visible, i);
     const eventLines = runEvts.map((e) => {
       const excerpt = summarizeLine(e.body);
       return `- event ${String(e.n).padStart(3, "0")}: ${e.channel} from ${e.from} · ${excerpt}`;
@@ -81,21 +74,21 @@ function answerMd(c: Case, s: CaseState, visible: CaseEvent[]): string {
   }).join("\n\n");
 
   // Outbox: send_message actions with full text
-  const messages = s.actions.filter((a) => a.tool === "send_message");
+  const messages = actions.filter((a) => a.tool === "send_message");
   const outboxLines = messages.map((m) => {
     const input = m.input as Record<string, unknown>;
     return `**Run ${m.run}, to ${input.to}, ${input.channel}:**\n\n${input.text}`;
   });
 
   // Approvals requested
-  const approvals = s.actions.filter((a) => a.tool === "request_landlord_approval");
+  const approvals = actions.filter((a) => a.tool === "request_landlord_approval");
   const approvalsLines = approvals.map((a) => {
     const input = a.input as Record<string, unknown>;
     return `- Run ${a.run}: **${input.scope}** (${input.cost})`;
   });
 
   // Notes
-  const notes = s.actions.filter((a) => a.tool === "add_note");
+  const notes = actions.filter((a) => a.tool === "add_note");
   const notesLines = notes.map((n) => {
     const input = n.input as Record<string, unknown>;
     return `- Run ${n.run}: ${input.text}`;
@@ -126,10 +119,10 @@ function answerMd(c: Case, s: CaseState, visible: CaseEvent[]): string {
     : st.summary;
 
   // Failed, refused or invalid actions
-  const failed = s.actions.filter((a) => !a.ok);
+  const failed = actions.filter((a) => !a.ok);
   const failedLines = failed.map((f) => {
     const toolName = f.tool;
-    const didRecover = s.actions.some((a) => a.tool === toolName && a.ok && s.actions.indexOf(a) > s.actions.indexOf(f));
+    const didRecover = actions.some((a) => a.tool === toolName && a.ok && actions.indexOf(a) > actions.indexOf(f));
     const recoveryText = didRecover ? " — agent recovered" : "";
     return `- **${toolName}:** ${f.result}${recoveryText}`;
   });
@@ -170,17 +163,15 @@ ${failedLines.length > 0 ? failedLines.join("\n") : "None."}
 }
 
 function reasoningMd(c: Case, s: CaseState, visible: CaseEvent[]): string {
-  // Group actions and notes by run
-  const runs = Math.max(0, ...s.actions.map((a) => a.run), ...s.notes.map((n) => n.run));
-
   const runSections: string[] = [];
-  for (let run = 1; run <= runs; run++) {
-    const runActions = s.actions.filter((a) => a.run === run);
-    const runNotes = s.notes.filter((n) => n.run === run);
+  for (const [i, r] of s.runs.entries()) {
+    const run = i + 1;
+    const runActions = r.actions;
+    const runNotes = r.notes;
 
     if (runActions.length === 0 && runNotes.length === 0) continue;
 
-    const eventsInRun = runEvents(s, visible, run)
+    const eventsInRun = runEvents(s, visible, i)
       .map((e) => `- [event ${String(e.n).padStart(3, "0")}]`)
       .join("\n");
 
@@ -188,7 +179,7 @@ function reasoningMd(c: Case, s: CaseState, visible: CaseEvent[]): string {
       .map((a) => `- **${a.tool}** (${a.ok ? "ok" : "failed"}): ${String(a.input.reason ?? "(no reason given)")}`)
       .join("\n");
 
-    const notes = runNotes.map((n) => n.text).join("\n\n");
+    const notes = runNotes.join("\n\n");
 
     const runSection = `## Run ${run}
 
@@ -218,12 +209,12 @@ ${runSections.join("\n")}`;
 export function writeOutbox(outDir: string, c: Case, s: CaseState): void {
   const dir = join(outDir, "outbox", c.id);
   rmSync(dir, { recursive: true, force: true });
-  const sent = s.actions.filter((a) => a.ok && a.tool === "send_message");
+  const sent = actionLog(s).filter((a) => a.ok && a.tool === "send_message");
   if (sent.length === 0) return;
   mkdirSync(dir, { recursive: true });
   sent.forEach((a, i) => {
     const to = String(a.input.to);
-    const at = c.events.filter((e) => e.n <= a.afterEvent).at(-1)?.at;
+    const at = c.events.filter((e) => e.n <= a.seen).at(-1)?.at;
     const date = at ? new Date(at.replace(" UTC", "Z")) : null;
     const head = [
       `Message-ID: <${c.id}.${a.run}.${i + 1}@northbridge-lettings.case-agent>`,

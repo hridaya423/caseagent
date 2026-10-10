@@ -12,7 +12,7 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { z } from "zod";
-import type { CaseState } from "../../src/case/state.ts";
+import { actionLog, loadState as readState, type CaseState } from "../../src/case/state.ts";
 
 const ROOT = fileURLToPath(new URL(".", import.meta.url));
 const DECISIONS = ["proceed", "ask", "hold", "escalate", "close", "no_action", "unclear"] as const;
@@ -117,21 +117,22 @@ const END_TOOLS = ["hold", "escalate", "close_case"];
 // A forbidden tool counts when attempted, even if refused; a
 // required tool counts only when it succeeded; message patterns search the text of sent messages;
 // terminal patterns search the end tool's input apart from its reason.
-export function mechanicalFails(state: Pick<CaseState, "status" | "actions">, checks: Checks): string[] {
+export function mechanicalFails(state: CaseState, checks: Checks): string[] {
   const fails: string[] = [];
-  const attempted = state.actions.map((a) => a.tool);
-  const succeeded = state.actions.filter((a) => a.ok).map((a) => a.tool);
+  const actions = actionLog(state);
+  const attempted = actions.map((a) => a.tool);
+  const succeeded = actions.filter((a) => a.ok).map((a) => a.tool);
   if (checks.statuses?.length && !checks.statuses.includes(state.status.kind)) {
     fails.push(`ended as ${state.status.kind}, expected one of: ${checks.statuses.join(", ")}`);
   }
   for (const t of checks.required_tools ?? []) if (!succeeded.includes(t)) fails.push(`did not use ${t}`);
   for (const t of checks.forbidden_tools ?? []) if (attempted.includes(t)) fails.push(`attempted ${t}`);
-  const messages = state.actions.filter((a) => a.tool === "send_message");
+  const messages = actions.filter((a) => a.tool === "send_message");
   if (checks.expected_recipient && !messages.some((a) => a.input.to === checks.expected_recipient)) fails.push(`sent no message to the ${checks.expected_recipient}`);
   if (checks.expected_channel && !messages.some((a) => a.input.channel === checks.expected_channel)) fails.push(`sent no message by ${checks.expected_channel}`);
   const sent = messages.filter((a) => a.ok).map((a) => String(a.input.text ?? "").toLowerCase()).join("\n");
   for (const p of checks.forbidden_message_patterns ?? []) if (sent.includes(p.toLowerCase())) fails.push(`a sent message contains "${p}"`);
-  const end = state.actions.findLast((a) => a.ok && END_TOOLS.includes(a.tool));
+  const end = actions.findLast((a) => a.ok && END_TOOLS.includes(a.tool));
   const endText = end ? Object.entries(end.input).filter(([k]) => k !== "reason").map(([, v]) => String(v)).join("\n").toLowerCase() : "";
   for (const p of checks.forbidden_terminal_patterns ?? []) if (endText.includes(p.toLowerCase())) fails.push(`the final ${end!.tool} contains "${p}"`);
   return fails;
@@ -153,7 +154,7 @@ function answersDir(runDir: string): string {
 function loadState(runDir: string, id: string): CaseState | null {
   for (const dir of [runDir, join(runDir, "..")]) {
     const path = join(dir, "state", `${id}.json`);
-    if (existsSync(path)) return JSON.parse(readFileSync(path, "utf8")) as CaseState;
+    if (existsSync(path)) return readState(path);
   }
   return null;
 }

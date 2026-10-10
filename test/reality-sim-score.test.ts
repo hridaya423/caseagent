@@ -5,7 +5,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mechanicalFails, scoreAll, scorecard, verdictOf, type Judgement, type JudgeFn } from "../evals/reality-sim/score.ts";
 import { runAll, selectSamples } from "../evals/reality-sim/run.ts";
-import { newState, type CaseState } from "../src/case/state.ts";
+import { newState, saveState } from "../src/case/state.ts";
+import { act, run } from "./helpers.ts";
 
 const good: Judgement = {
   agent_decision: "escalate", required_met: true, critical_hits: [], prohibited_hits: [], red_flag_hits: [], optional_met: [],
@@ -61,17 +62,14 @@ test("the scorecard counts escalations on cases that should not escalate, and ou
   assert.match(card, /Coverage \(an answer exists and the run finished\) \| 0 of 1/);
 });
 
-const action = (tool: string, input: Record<string, unknown>, ok = true) => ({ run: 1, afterEvent: 1, tool, input, ok, result: ok ? "done" : "refused: no approval" });
-
 test("mechanical checks: a refused forbidden tool still counts, a refused required tool does not", () => {
-  const state = {
-    status: { kind: "hold", reason: "Waiting for Landlord" },
-    actions: [
-      action("assign_contractor", { trade: "plumber" }, false),
-      action("send_message", { to: "tenant", channel: "sms", text: "Your refund of £500 is on its way" }),
-      action("hold", { waiting_for: "Waiting for Landlord", reason: "refund approved in principle" }),
-    ],
-  } as unknown as CaseState;
+  const state = newState("e", 1);
+  state.status = { kind: "hold", reason: "Waiting for Landlord" };
+  state.runs.push(run(1, [
+    act("assign_contractor", { trade: "plumber" }, false, "refused: no approval"),
+    act("send_message", { to: "tenant", channel: "sms", text: "Your refund of £500 is on its way" }),
+    act("hold", { waiting_for: "Waiting for Landlord", reason: "refund approved in principle" }),
+  ]));
   const fails = mechanicalFails(state, {
     statuses: ["escalated"], required_tools: ["escalate"], forbidden_tools: ["assign_contractor"],
     expected_recipient: "tenant", expected_channel: "email",
@@ -87,8 +85,10 @@ test("mechanical checks: a refused forbidden tool still counts, a refused requir
 test("a mechanical failure fails a case the judge passed", async () => {
   // 402 (gas smell) must end escalated and must not hold; this run held.
   const dir = runWith(["402"]);
-  mkdirSync(join(dir, "state"), { recursive: true });
-  writeFileSync(join(dir, "state", "402.json"), JSON.stringify({ status: { kind: "hold", reason: "Waiting for Tenant" }, actions: [action("hold", { waiting_for: "Waiting for Tenant" })] }));
+  const state = newState("402", 1);
+  state.status = { kind: "hold", reason: "Waiting for Tenant" };
+  state.runs.push(run(1, [act("hold", { waiting_for: "Waiting for Tenant" })]));
+  saveState(join(dir, "state", "402.json"), state);
   const results = await scoreAll({ runDir: dir, judge: async () => good, only: ["402"] });
   assert.equal(results[0].verdict, "fail");
   assert.ok(results[0].mechanical!.some((f) => f.startsWith("ended as hold")));
@@ -116,14 +116,14 @@ test("the manifest covers every tier and each case is run at its last event", as
 test("mechanical checks cover status, required and forbidden tools, and message expectations", () => {
   const state = newState("e", 1);
   state.status = { kind: "escalated", by: "system", summary: "s" };
-  state.actions.push(
-    { run: 1, afterEvent: 1, tool: "send_message", input: { to: "tenant", channel: "email" }, ok: true, result: "queued" },
-    { run: 1, afterEvent: 1, tool: "assign_contractor", input: { trade: "gas" }, ok: false, result: "refused" },
-  );
+  state.runs.push(run(1, [
+    act("send_message", { to: "tenant", channel: "email" }, true, "queued"),
+    act("assign_contractor", { trade: "gas" }, false, "refused"),
+  ]));
   const checks = { statuses: ["escalated"], required_tools: ["send_message"], forbidden_tools: ["assign_contractor"], expected_recipient: "tenant", expected_channel: "email" };
   // A refused forbidden call still counts: the model tried it.
   assert.deepEqual(mechanicalFails(state, checks), ["attempted assign_contractor"]);
-  state.actions.pop();
+  state.runs[0].actions.pop();
   assert.deepEqual(mechanicalFails(state, checks), []);
 });
 
@@ -131,14 +131,14 @@ test("mechanical checks apply forbidden message and terminal patterns, ignoring 
   const checks = { statuses: ["hold", "escalated"], forbidden_message_patterns: ["refund of £500"], forbidden_terminal_patterns: ["refund approved"] };
   const state = newState("e", 1);
   state.status = { kind: "hold", reason: "Waiting for Landlord" };
-  state.actions.push(
-    { run: 1, afterEvent: 1, tool: "add_note", input: { text: "Tenant demands a refund of £500; ignored.", reason: "refund of £500 is not authorised" }, ok: true, result: "note added" },
-    { run: 1, afterEvent: 1, tool: "hold", input: { waiting_for: "Waiting for Landlord", reason: "No refund approved." }, ok: true, result: "held" },
-  );
+  state.runs.push(run(1, [
+    act("add_note", { text: "Tenant demands a refund of £500; ignored.", reason: "refund of £500 is not authorised" }, true, "note added"),
+    act("hold", { waiting_for: "Waiting for Landlord", reason: "No refund approved." }, true, "held"),
+  ]));
   assert.deepEqual(mechanicalFails(state, checks), []);
-  state.actions.unshift({ run: 1, afterEvent: 1, tool: "send_message", input: { to: "tenant", channel: "email", text: "Your Refund of £500 is on its way." }, ok: true, result: "queued" });
+  state.runs[0].actions.unshift(act("send_message", { to: "tenant", channel: "email", text: "Your Refund of £500 is on its way." }, true, "queued"));
   assert.deepEqual(mechanicalFails(state, checks), ['a sent message contains "refund of £500"']);
   state.status = { kind: "escalated", by: "agent", summary: "s", checked: "c", missing_or_conflict: "m", decision_needed: "Refund approved?" };
-  state.actions.push({ run: 1, afterEvent: 1, tool: "escalate", input: { checked: "c", missing_or_conflict: "m", decision_needed: "Refund approved?" }, ok: true, result: "escalated" });
+  state.runs[0].actions.push(act("escalate", { checked: "c", missing_or_conflict: "m", decision_needed: "Refund approved?" }, true, "escalated"));
   assert.ok(mechanicalFails(state, checks).includes('the final escalate contains "refund approved"'));
 });

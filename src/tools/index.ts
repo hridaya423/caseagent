@@ -1,6 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { HOLD_REASONS, type CaseState } from "../case/state.ts";
+import { closeChecks, holdReason, type CaseState } from "../case/state.ts";
 import { checkClose, checkMessage, Refusal, requireApproval, requireEvidence, type ToolContext } from "./guards.ts";
 
 export { Refusal, type ToolContext } from "./guards.ts";
@@ -72,7 +72,7 @@ const TOOLS: Record<string, Tool> = {
   }),
   hold: tool({
     description: "End this run. The case waits for the named party.",
-    schema: z.object({ waiting_for: z.enum(HOLD_REASONS), reason }),
+    schema: z.object({ waiting_for: holdReason, reason }),
     end: true,
     apply: (i, s) => {
       s.status = { kind: "hold", reason: i.waiting_for };
@@ -96,14 +96,7 @@ const TOOLS: Record<string, Tool> = {
   }),
   close_case: tool({
     description: "End this run and close the case. Answer every final check.",
-    schema: z.object({
-      outcome: z.enum(["work_completed", "resolved_without_work", "withdrawn"]),
-      work_confirmed_by: z.string().min(1).describe('Who confirmed the result, with the event, for example "tenant [event 007]".'),
-      landlord_informed: z.boolean(),
-      keys: z.enum(["returned", "not_issued", "outstanding"]),
-      invoice: z.enum(["on_file", "not_required", "outstanding"]),
-      reason,
-    }),
+    schema: closeChecks.extend({ reason }),
     end: true,
     guard: checkClose,
     apply: (i, s) => {

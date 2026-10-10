@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { loadCase } from "../src/case/parse.ts";
 import { parseLooseDate, parseMail } from "../src/case/messy.ts";
 import { renderCase } from "../src/agent/prompt.ts";
+import { promptText, documentTitles } from "./helpers.ts";
 import { newState } from "../src/case/state.ts";
 import { visibleEvents } from "../src/case/cut.ts";
 
@@ -94,8 +95,8 @@ test("an attachment extracted from an .eml reaches the prompt as a document from
   const c = loadCase(dir);
   const s = newState(c.id, 1);
   const p = await renderCase(c, s, visibleEvents(c, 1, 1), 1, dir);
-  assert.deepEqual(p.documents.map((d) => d.filename), ["tenant_email.eml--invoice.pdf"]);
-  assert.match(p.text, /Received with event 001/);
+  assert.deepEqual(documentTitles(p), ["tenant_email.eml--invoice.pdf"]);
+  assert.match(promptText(p), /Received with event 001/);
 });
 
 test("two loads of the same messy folder agree", () => {
