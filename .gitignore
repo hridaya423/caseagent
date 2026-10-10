@@ -4,3 +4,4 @@ data/
 runs/
 .DS_Store
 .claude/
+.devin/
