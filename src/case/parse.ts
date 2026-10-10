@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
-import { looksLikeMail, parseMail, parseTranscript, renderRecord, stamp } from "./messy.ts";
+import { looksLikeMail, parseMail, parseTranscript, renderRecord, stamp } from "../messy.ts";
 
 export type CaseEvent = { n: number; at: string; channel: string; from: string; to: string; body: string; attachments: string[] };
 

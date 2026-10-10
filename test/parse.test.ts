@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { isAgency, loadCase } from "../src/parse.ts";
+import { isAgency, loadCase } from "../src/case/parse.ts";
 
 const PM = "data/public/Property Management";
 

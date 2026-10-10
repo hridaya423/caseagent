@@ -1,10 +1,10 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { join } from "node:path";
-import type { Case, CaseEvent } from "./parse.ts";
-import type { CaseState } from "./state.ts";
-import { isAgency } from "./parse.ts";
-import type { AttachmentContent } from "./attachments.ts";
-import { documentText, NATIVE_PDF_MAX_BYTES, readAttachment } from "./attachments.ts";
+import type { Case, CaseEvent } from "../case/parse.ts";
+import type { CaseState } from "../case/state.ts";
+import { isAgency } from "../case/parse.ts";
+import type { AttachmentContent } from "../case/attachments.ts";
+import { documentText, NATIVE_PDF_MAX_BYTES, readAttachment } from "../case/attachments.ts";
 
 function renderEvent(e: CaseEvent): string {
   return `[event ${String(e.n).padStart(3, "0")}] ${e.at} | ${e.channel} | from ${e.from} | to ${e.to}\n${e.body}`;

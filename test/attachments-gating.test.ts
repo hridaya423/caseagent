@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadCase } from "../src/parse.ts";
-import { renderCase } from "../src/prompt.ts";
-import { visibleEvents, initialSeen } from "../src/cut.ts";
-import { newState } from "../src/state.ts";
+import { loadCase } from "../src/case/parse.ts";
+import { renderCase } from "../src/agent/prompt.ts";
+import { visibleEvents, initialSeen } from "../src/case/cut.ts";
+import { newState } from "../src/case/state.ts";
 
 const PM = "data/public/Property Management";
 const c = loadCase(`${PM}/003`);

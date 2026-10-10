@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type Anthropic from "@anthropic-ai/sdk";
-import type { ModelClient } from "../src/agent.ts";
+import type { ModelClient } from "../src/agent/loop.ts";
 import { auditStageCompletion } from "../src/playbook-audit.ts";
 
 const response = (input: unknown, name = "audit_workflow"): Anthropic.Message => ({

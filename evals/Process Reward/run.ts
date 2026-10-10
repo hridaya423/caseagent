@@ -4,9 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { createServer } from '../../src/mcp.ts';
-import { liveDeps, type RunDeps } from '../../src/run.ts';
-import { isIncomplete, type CaseState } from '../../src/state.ts';
+import { createServer } from '../../src/entry/mcp.ts';
+import { liveDeps, type RunDeps } from '../../src/runner/process.ts';
+import { isIncomplete, type CaseState } from '../../src/case/state.ts';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const repo = resolve(root, '../..');

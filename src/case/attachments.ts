@@ -5,7 +5,7 @@ import { join } from "node:path";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 
 // Set up the worker for pdfjs
-const pdfjsWorkerPath = new URL("../node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs", import.meta.url);
+const pdfjsWorkerPath = new URL("../../node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs", import.meta.url);
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerPath.href;
 
 const MAX_CHARS = 8000;

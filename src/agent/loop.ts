@@ -1,12 +1,12 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { APPROVAL_MODEL, classifyLandlordReply } from "./approval.ts";
-import { visibleEvents } from "./cut.ts";
-import { isAgency, type Case } from "./parse.ts";
+import { APPROVAL_MODEL, classifyLandlordReply } from "../approval.ts";
+import { visibleEvents } from "../case/cut.ts";
+import { isAgency, type Case } from "../case/parse.ts";
 import { renderCase } from "./prompt.ts";
-import type { CaseState } from "./state.ts";
-import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "./tools.ts";
-import { playbookContext, type PlaybookOptions } from "./playbooks.ts";
-import { auditStageCompletion } from "./playbook-audit.ts";
+import type { CaseState } from "../case/state.ts";
+import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "../tools/index.ts";
+import { playbookContext, type PlaybookOptions } from "../playbooks.ts";
+import { auditStageCompletion } from "../playbook-audit.ts";
 
 export const MAX_TURNS = 15;
 // The agency's own records of a landlord approval that came before the agent's first run.

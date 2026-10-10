@@ -1,12 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import { runCase, type ModelClient, type Trace } from "./agent.ts";
+import { runCase, type ModelClient, type Trace } from "../agent/loop.ts";
 import { writeAnswer, writeOutbox } from "./answers.ts";
-import { initialSeen, nextSeen, visibleEvents } from "./cut.ts";
-import { loadCase } from "./parse.ts";
-import { loadState, newState, saveState, statusLabel, type CaseState } from "./state.ts";
-import type { PlaybookOptions } from "./playbooks.ts";
+import { initialSeen, nextSeen, visibleEvents } from "../case/cut.ts";
+import { loadCase } from "../case/parse.ts";
+import { loadState, newState, saveState, statusLabel, type CaseState } from "../case/state.ts";
+import type { PlaybookOptions } from "../playbooks.ts";
 
 const MAX_STAGES = 50;
 
@@ -48,7 +48,7 @@ export function liveDeps(out: string): RunDeps {
     out,
     client: withFallback(new Anthropic({ timeout: 120_000, maxRetries: 4 }), process.env.FALLBACK_MODEL ?? "claude-sonnet-5"),
     model: process.env.MODEL ?? "claude-sonnet-5-5",
-    policy: readFileSync(new URL("../policy.md", import.meta.url), "utf8"),
+    policy: readFileSync(new URL("../../policy.md", import.meta.url), "utf8"),
     playbooks: process.env.PLAYBOOKS === "off" ? false : { model: process.env.PLAYBOOK_MODEL ?? process.env.MODEL ?? "claude-sonnet-5-5" },
   };
 }

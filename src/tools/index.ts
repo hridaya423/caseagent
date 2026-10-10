@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { unsupported } from "./evidence.ts";
-import { HOLD_REASONS, type CaseState } from "./state.ts";
+import { unsupported } from "../evidence.ts";
+import { HOLD_REASONS, type CaseState } from "../case/state.ts";
 
 export class Refusal extends Error {}
 

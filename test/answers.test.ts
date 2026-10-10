@@ -3,10 +3,10 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { writeAnswer } from "../src/answers.ts";
-import { visibleEvents } from "../src/cut.ts";
-import { loadCase } from "../src/parse.ts";
-import { newState } from "../src/state.ts";
+import { writeAnswer } from "../src/runner/answers.ts";
+import { visibleEvents } from "../src/case/cut.ts";
+import { loadCase } from "../src/case/parse.ts";
+import { newState } from "../src/case/state.ts";
 
 test("full message text appears in outbox", () => {
   const c = loadCase("data/public/Property Management/027");

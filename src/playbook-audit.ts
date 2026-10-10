@@ -1,5 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import type { ModelClient, Trace } from "./agent.ts";
+import type { ModelClient, Trace } from "./agent/loop.ts";
 import type { CurrentEvidence } from "./playbooks.ts";
 import { submissionToolChoice } from "./model-submission.ts";
 import { z } from "zod";

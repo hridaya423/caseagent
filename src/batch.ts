@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { decisionOf } from "./answers.ts";
-import { processCase, processToEnd, summary, type RunDeps } from "./run.ts";
-import { isIncomplete, loadState } from "./state.ts";
+import { decisionOf } from "./runner/answers.ts";
+import { processCase, processToEnd, summary, type RunDeps } from "./runner/process.ts";
+import { isIncomplete, loadState } from "./case/state.ts";
 
 export type BatchRow = {
   id: string;

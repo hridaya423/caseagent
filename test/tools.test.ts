@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { newState } from "../src/state.ts";
-import { runTool, TOOL_SPECS } from "../src/tools.ts";
+import { newState } from "../src/case/state.ts";
+import { runTool, TOOL_SPECS } from "../src/tools/index.ts";
 
 const closeInput = {
   outcome: "resolved_without_work",

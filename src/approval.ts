@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import type { ModelClient } from "./agent.ts";
-import { caseData } from "./prompt.ts";
-import type { LandlordAnswer as StoredAnswer } from "./state.ts";
+import type { ModelClient } from "./agent/loop.ts";
+import { caseData } from "./agent/prompt.ts";
+import type { LandlordAnswer as StoredAnswer } from "./case/state.ts";
 
 export type LandlordAnswer = StoredAnswer["answer"];
 

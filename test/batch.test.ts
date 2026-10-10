@@ -4,9 +4,9 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
-import type { ModelClient } from "../src/agent.ts";
+import type { ModelClient } from "../src/agent/loop.ts";
 import { runBatch } from "../src/batch.ts";
-import { withFallback, type RunDeps } from "../src/run.ts";
+import { withFallback, type RunDeps } from "../src/runner/process.ts";
 
 const PM = "data/public/Property Management";
 const reply = (content: unknown[], model = "fake") => ({ content, model, stop_reason: "tool_use", usage: { input_tokens: 10, output_tokens: 5 } }) as unknown as Anthropic.Message;

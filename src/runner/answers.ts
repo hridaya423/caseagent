@@ -1,7 +1,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Case, CaseEvent } from "./parse.ts";
-import { isIncomplete, statusLabel, type CaseState, type Action } from "./state.ts";
+import type { Case, CaseEvent } from "../case/parse.ts";
+import { isIncomplete, statusLabel, type CaseState, type Action } from "../case/state.ts";
 
 const END_TOOLS = new Set(["hold", "escalate", "close_case"]);
 

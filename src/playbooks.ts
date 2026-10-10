@@ -2,8 +2,8 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { z } from "zod";
-import type { ModelClient, Trace } from "./agent.ts";
-import { TOOL_SPECS } from "./tools.ts";
+import type { ModelClient, Trace } from "./agent/loop.ts";
+import { TOOL_SPECS } from "./tools/index.ts";
 import { submissionToolChoice } from "./model-submission.ts";
 
 const strings = z.array(z.string().min(1));

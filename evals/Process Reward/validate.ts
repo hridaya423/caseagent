@@ -7,11 +7,11 @@ import { fileURLToPath } from 'node:url';
 import type Anthropic from '@anthropic-ai/sdk';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { createServer } from '../../src/mcp.ts';
-import { loadCase } from '../../src/parse.ts';
-import { TOOL_SPECS } from '../../src/tools.ts';
-import type { ModelClient } from '../../src/agent.ts';
-import type { CaseState } from '../../src/state.ts';
+import { createServer } from '../../src/entry/mcp.ts';
+import { loadCase } from '../../src/case/parse.ts';
+import { TOOL_SPECS } from '../../src/tools/index.ts';
+import type { ModelClient } from '../../src/agent/loop.ts';
+import type { CaseState } from '../../src/case/state.ts';
 
 type Ref = { event: number; file: string; anchor: string; start_line: number; excerpt: string };
 type Sample = {

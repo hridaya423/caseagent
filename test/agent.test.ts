@@ -1,15 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type Anthropic from "@anthropic-ai/sdk";
-import { MAX_TURNS, runCase, type ModelClient } from "../src/agent.ts";
-import { loadCase } from "../src/parse.ts";
-import { renderCase } from "../src/prompt.ts";
-import { visibleEvents } from "../src/cut.ts";
-import { processCase, processToEnd } from "../src/run.ts";
+import { MAX_TURNS, runCase, type ModelClient } from "../src/agent/loop.ts";
+import { loadCase } from "../src/case/parse.ts";
+import { renderCase } from "../src/agent/prompt.ts";
+import { visibleEvents } from "../src/case/cut.ts";
+import { processCase, processToEnd } from "../src/runner/process.ts";
 import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isIncomplete, newState } from "../src/state.ts";
+import { isIncomplete, newState } from "../src/case/state.ts";
 
 const c = loadCase("data/public/Property Management/027");
 
