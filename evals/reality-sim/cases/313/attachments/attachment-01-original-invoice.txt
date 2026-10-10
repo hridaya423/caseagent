@@ -1,0 +1,29 @@
+HARBOUR SERVICES LTD
+Unit 4, Quay Industrial Estate, Cedarford, ZZ3 9ZZ
+Tel: 07700 900214   accounts@harbour-services.example.com
+VAT Reg: GB 000 1234 56
+
+TAX INVOICE
+
+Invoice no: HS-20931
+Invoice date: 04 September 2026
+Your ref: NBL-313-4821
+Customer: Northbridge Lettings (on behalf of the landlord)
+Site: Flat 3, 18 Hawthorn Court, Cedarford, ZZ3 5ZZ
+
+Description                                         Amount
+Rear gutter run, refit 2 brackets and re-seal joint   £208.33
+Replace 3m section of guttering and 2 union clips     £72.50
+Access tower hire (half day)                          £40.00
+Labour (2 hrs)                                        £0.00 (included)
+
+Subtotal                                             £320.83
+VAT 20%                                               £64.17
+TOTAL DUE                                            £385.00
+
+Payment terms: 14 days from invoice date
+Pay by bank transfer:
+Account name: Harbour Services Ltd
+Sort code: 40-11-72
+Account number: 30418826
+Reference: HS-20931

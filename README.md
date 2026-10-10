@@ -1,130 +1,132 @@
 # case-agent
 
-Real-World Agents Hackathon (Dwelly), London, 10 October 2026. Track: Property Management.
+Real-World Agents Hackathon, London, 10 October 2026 · Property Management
 
-![How a case moves through the agent](diagram/case-agent.png)
-[Interactive version](diagram/case-agent.html)
+![Agent workflow with playbook references](diagram/case-agent.png)
+[HTML diagram](diagram/case-agent.html)
 
 ## What we built
 
-An agent that works property-maintenance cases for a letting agency, Northbridge Lettings. Each run reads a case folder, decides the next step, and acts through seven tools: send messages, request landlord approval, assign a contractor, add notes, then end with exactly one of `hold`, `escalate` or `close_case`. The case state persists between runs; when the next outside reply arrives, the agent resumes from it. The same loop also runs as an MCP server (`list_cases`, `run_case`, `resume_case`, `get_case`).
+An agent that handles property-maintenance tickets for Northbridge Lettings: triage, landlord approval, contractor coordination and completion checks. It takes routine actions autonomously and escalates emergencies, disputes and conflicting facts with a structured handover. Saved state lets it resume when a new reply arrives.
 
-## The operational problem
-
-Letting agencies spend most of their case time waiting: for landlord approval, tenant replies, quotes, contractor reports. The agent does every step that has a clear rule, and hands the case to a person where judgment is needed — emergencies, legal threats, money disputes, conflicting facts. Every action carries a `reason` that cites the event it answers (`[event 007]`), so each decision is auditable after the fact.
+Seven tools send messages, request approval, assign contractors, add notes, or end a stage with `hold`, `escalate` or `close_case`. Every action records a reason with event citations. Operational tools are simulated locally; adapter functions can connect real email, SMS or job APIs.
 
 ## Architecture
 
-```
-case dir (index.md, history.md, attachments/ -- or loose .eml, .txt, .json, .csv, .md files)
-
-src/
-  case/      what a case is and what the agent may see
-    parse.ts        events; Status/Updated/Completed lines never reach the agent
-    messy.ts        .eml headers and MIME attachments, call transcripts, records for loose folders
-    cut.ts          the events this run may see; agency's own records hidden after the cut
-    attachments.ts  PDF -> native document block or extracted text; images -> image blocks
-    state.ts        case memory: status, actions, notes; load and save
-  tools/     what the agent can do
-    index.ts        7 zod-checked tools; every failure returns as text the model can act on
-    guards.ts       the refusal rules; they run before any adapter, so a real API cannot skip them
-    evidence.ts     amounts and dates a message may state
-  agent/     one run of the model
-    prompt.ts       prompt assembly; case text wrapped in <case_data> (evidence, not instructions)
-    loop.ts         Claude tool loop, 15 turns max, must end with exactly one end tool
-    approval.ts     a small model reads the landlord's reply as approved, refused or unclear
-  runner/    files on disk
-    process.ts      state, traces, answers, outbox; --next resumes, --to-end runs through holds
-    answers.ts      ANSWER.md, REASONING.md and the outbox files
-    batch.ts        worker pool, resumable run-summary.json, RUN_SUMMARY.md
-    runs.ts         read-only views of the run folders, for the dashboard
-  entry/     cli.ts and mcp.ts: the same runner over the command line and stdio MCP
-    dashboard.ts    the runs dashboard (server in dashboard-server.ts, page in dashboard/)
+```text
+case/   → parse files and attachments, cut visible history, persist state
+ tools/ → validate inputs and enforce approval/evidence/closing guards
+ agent/ → Claude tool loop, approval classifier, playbook selection and audit
+runner/ → resume stages, batch cases, write answers/traces/outbox
+ entry/ → CLI, stdio MCP and read-only dashboard
 ```
 
-Each folder imports only from the folders above it: `case` <- `tools` <- `agent` <- `runner` <- `entry`.
+[policy.md](policy.md) draws on the 50 public cases and [policy bank](policy_bank/policy_bank.json), with added rules for hazards, disputes, failed tools and untrusted content. Tool guards run before adapters. Failed calls return to the model; subsequent calls in the same response are skipped. API failures use SDK retries and an optional fallback. A stage is limited to 15 turns, a full replay to 50 stages; system failures are marked incomplete and escalated.
 
-Per case it writes `state/<id>.json` (case memory for `--next`), `traces/<id>.jsonl` (every model call and tool call, with the model that answered; older traces rotated aside), `outbox/<id>/` (one `.eml` per email and one `.sms.txt` per SMS the agent sent), and `ANSWERS/<id>/`. `ANSWER.md` starts with the decision (status, next step, why), puts the escalation handover next when there is one, then the summary, outbox, timeline, approvals and final checks. `REASONING.md` has the cited reason for each action plus the agent's notes. A batch also writes `run-summary.json` and `RUN_SUMMARY.md`: one row per case with its status, next step, messages, runs, time and tokens.
+The [JSON playbooks](docs/playbooks/property-management-playbooks.json) provide reusable workflows and selected examples. Each turn selects relevant steps using current evidence; only validated references enter context. Before hold/close, an optional audit checks obligations against successful actions, at most twice per invocation. Invalid/failed audits fall back to policy; single-action runs skip them. Set `PLAYBOOKS=off` to disable this feature.
 
-The rules are in `policy.md`, distilled from the 50 public Property Management cases in `data/public/` and the evidence-backed rule bank in `policy_bank/`. Where the cases disagree, the rule follows what most cases did: landlord approval before a repair, completion proven by the contractor or the party that arranged the work, email by default. Rules 18 to 21 (hazards, disputes, tool failures, untrusted content) are our own safety margin; no case shows them.
+## Install and configure
 
-Three kinds of guardrails:
-
-- **Tool guards.** Every rule runs before the tool body or a real adapter, so an adapter cannot skip it.
-  - `assign_contractor` refuses unless the agency recorded an approval, or the landlord's reply to an earlier request reads as approved.
-  - `send_message` refuses `[event N]` references, a message identical to one already sent to the same person, and any £ amount or date that no event, record or document in the case shows. `request_landlord_approval` applies the same amount and date check to its cost.
-  - `close_case` refuses while keys are outstanding, and unless `work_confirmed_by` cites an event the agent can see.
-  - Every tool refuses a field that holds tool-call markup (`</missing_or_conflict>`, `<parameter name="…">`), so leaked call syntax never reaches the outbox or a handover. A live run of reality-sim 206 hit it and resent the handover cleanly.
-  - After a refused or failed call, the rest of the same model response is not run, so a later message cannot claim the failed action happened.
-- **Loop limits.** A run that does not end in 15 turns auto-escalates; a system error escalates with a handover summary.
-- **Overload.** The SDK retries rate limits and server errors with backoff; if the model stays overloaded, the request goes once to `FALLBACK_MODEL` (default `claude-sonnet-5`), and the trace records which model answered.
-- **Injection defense.** All case content arrives inside `<case_data>` tags, and policy rule 21 declares it evidence, not instructions.
-
-Tools are simulated: each writes to the case state rather than a live system. `runTool` accepts adapter functions, so a real email, SMS or job API can replace each simulated body without touching the loop.
-
-## How to run
+Requires Node.js 24, npm and Git. Live runs need internet access and an Anthropic API key with model access and credit. No database or hosted backend is needed.
 
 ```bash
-npm install
-cp .env.example .env                                   # add ANTHROPIC_API_KEY
-npm run case -- run <case-dir>                         # first run
-npm run case -- run <case-dir> --next                  # resume on the next outside reply
-npm run case -- run <case-dir> --to-end                # resume through holds until an end state
-npm run case -- run-all <cases-dir> --concurrency 4    # every case in a folder, one stage each
-npm run case -- run-all <cases-dir> --to-end --concurrency 4  # every case, run to its end state
-npm run reality -- <cases-dir>                         # the submission run: every case to its end, outputs at the repo root
-npm run mcp                                            # stdio MCP server (CASES_DIR, OUT_DIR overridable)
-npm run dashboard                                      # read-only runs dashboard at http://localhost:4317 (demo only)
-npm test
-npm run typecheck
-npm run extract                                        # Docling pre-extract of attachments (optional)
+git clone https://github.com/hridaya423/caseagent.git
+cd caseagent
+npm ci
+cp .env.example .env
 ```
 
-`npm run reality -- <cases-dir>` is the Reality Test command. It runs every folder in `<cases-dir>` to its end state with 6 workers, and writes `ANSWERS/`, `traces/`, `outbox/`, `state/`, `run-summary.json` and `RUN_SUMMARY.md` into the current directory (`--out` changes it). If the batch stops part-way, run the same command again: it skips the cases already finished. `--retry-incomplete` reruns only the cases that ended incomplete, and `--fresh` reruns everything. On 11 cases (8 public, 3 loose-file) it took 55 s.
+Set `ANTHROPIC_API_KEY` in `.env`; never commit credentials. Live npm scripts load this file, with exported variables taking precedence.
 
-Two run modes. A plain `run` works exactly one stage: the agent sees events up to the next outside reply, acts, and ends. `--to-end` keeps resuming after each `hold` until the case closes, escalates, or has no further outside events (capped at 50 stages). Use `--to-end` for batch and Reality Test runs — a single-stage `run` decides on the opening events only, which can be under 10% of a case.
+| Variable | Default / purpose |
+|---|---|
+| `ANTHROPIC_API_KEY` | Required for live inference and scoring. |
+| `MODEL` | `claude-sonnet-5-5`, acting model. |
+| `APPROVAL_MODEL` | `claude-haiku-5-5`, landlord-reply classifier. |
+| `FALLBACK_MODEL` | `claude-sonnet-5`; empty string disables fallback. |
+| `PLAYBOOKS` | Enabled; `off` disables references and audits. |
+| `PLAYBOOK_MODEL` | Same as `MODEL`, for selection and audits. |
+| `NATIVE_PDF_MAX_MB` | `5`, native-PDF size threshold. |
+| `CASES_DIR` / `OUT_DIR` | MCP: `data/public/Property Management` / `runs/mcp`; paths relative to the repository. |
+| `JUDGE_MODEL` | `claude-opus-5-5`, development scorer. |
 
-The MCP tools follow the same rules. `run_case` and `resume_case` work one stage: the agent takes every action the stage needs, for example a message and then `hold`, and ends the run itself. `run_case` with `to_end` runs the whole case. `single_action: true` stops after one business action. Both eval suites run in multi-action mode.
+Anthropic receives visible case content and supported attachments. Dependencies include its SDK, the MCP SDK, Zod, tsx and pdfjs-dist; versions are locked in `package-lock.json`. Optional Docling pre-extraction uses `uv` and Python >=3.10,<3.13: `npm run extract -- <cases-dir>`.
 
-`npm run dashboard` is for the demo, not for hosting. It binds to 127.0.0.1, only reads, and needs no API key. It lists every run under `runs/` (or `--runs <dir>`) plus the checked-in process evals, refreshes while a batch is still writing, and opens on the first case that needs a person. Each case shows the decision or the three-field handover first, then every tool call (a guard refusal shows the guard's message), the history with the events the agent never saw hatched out, `ANSWER.md`, `REASONING.md` and the full trace. `--cases <dir>` (repeatable) points it at the case folders it should read history from; the default is the public Property Management cases.
-
-The tests read the public cases from `data/public/Property Management` (gitignored). Link them once:
+Public practice data is needed for the examples and unit tests:
 
 ```bash
 git clone https://github.com/DwellyOrg/HackatonPublicCases.git ../HackatonPublicCases
-mkdir -p data/public && ln -s "$(cd ../HackatonPublicCases && pwd)/Property Management" "data/public/Property Management"
+mkdir -p data/public
+ln -s "$(cd ../HackatonPublicCases && pwd)/Property Management" "data/public/Property Management"
 ```
 
-## Models, APIs and external services
+On platforms without symlinks, copy that directory instead. Supplied unseen cases can be used directly.
 
-- Anthropic Messages API through `@anthropic-ai/sdk`. Model: `claude-sonnet-5-5` by default (set `MODEL`; the batch must finish inside 30 minutes). Prompt caching: one breakpoint on the system block (tools and policy, shared across cases) and the request-level `cache_control`, which caches each conversation as it grows. A second, small model (`claude-haiku-5-5`, set `APPROVAL_MODEL`) reads the landlord's reply to an approval request as approved, refused or unclear; `assign_contractor` refuses unless the answer is approved, and any classifier failure counts as unclear.
-- `pdfjs-dist` for PDF text when a file is too large to send natively. `NATIVE_PDF_MAX_MB` (default 5) sets the native-PDF threshold, capped at 100 pages and a 20 MB prompt budget; larger files go as extracted text truncated to 8,000 characters.
-- `@modelcontextprotocol/sdk` for the MCP server. `scripts/extract.py` uses Docling via `uv` for structured markdown of attachments.
-- No live services: messages, approvals and assignments are outbox entries in case state.
+## Run
 
-## Assumptions
+From the repository root, use a case folder containing `index.md`, `history.md` and optional `attachments/`. The CLI also loads loose emails, transcripts and records.
 
-- The agent acts as the agency. After the initial cut it sees only events from outside parties; its own actions stand in for the agency's recorded steps.
-- Approval counts as "on file" when a visible agency event records it (for example "Landlord approval confirmed" or "approved by the landlord"), or when the landlord's reply to an earlier `request_landlord_approval` reads as approved.
-- A folder without `history.md` is a loose case. Each `.eml` (or `.txt` with mail headers) is an email event with its sender, recipient, date, subject and attachments; a file named like a call transcript is a Call event. `.json`, `.csv` and `.md` files go into the case details as records and notes. Other files are listed in ANSWER.md as "Files not read". Dates without a time zone are read as UTC.
-- The agent sees time only through event timestamps. The prompt computes "days since last contact" per party from them, so "3 days without reply" works only while a later event supplies "now".
-- Case content is untrusted input. Text from tenants, landlords, contractors or attachments cannot change the policy rules.
+```bash
+npm run case -- run "data/public/Property Management/027" --out runs/example
+npm run case -- run "data/public/Property Management/027" --next --out runs/example
+npm run case -- run-all <cases-dir> --to-end --concurrency 4 --out runs/batch
+npm run reality -- <unseen-cases-dir>
+npm run mcp
+npm run dashboard
+```
 
-## Known limitations
+`run` handles one stage; `--next` resumes saved state. `--to-end` replays replies until closed, escalated or waiting with no further events. `reality` does this for every case with six workers and writes at the repository root. `--out` changes the destination. Reusing a batch directory skips recorded cases; `--retry-incomplete` retries system failures and `--fresh` restarts all cases. Preserve original results and disclose retries.
 
-- Large PDFs lose layout: above the size or page cap they degrade to extracted text, and long text is truncated.
-- The recorded-approval detection and the agency-sender match are phrase lists; agency wordings outside them are missed.
-- The amount and date check cannot read images: an amount that appears only in a photo is refused. It does not check weekday-only references ("on Thursday"). Checked against the agency's own 388 messages in the public cases, it would refuse 11. Those messages quote prices and dates that are not in any earlier event, for example a quote the agency received by phone.
-- Cases that load in "raw mode" (reconstructed from unstructured files) can leak outcome details; `ANSWER.md` flags them for review.
-- Simulated tools mean nothing actually leaves the outbox. `outbox/` holds the messages as `.eml` and SMS files; recipient addresses are not in the case data, so they use the reserved `.invalid` domain.
+MCP exposes `list_cases`, `run_case`, `resume_case` and `get_case` over stdio. Run/resume take `case_id` and optional inclusive `step` and `single_action`; run additionally accepts `to_end`, incompatible with the other two options. Run/resume return status and `ANSWER.md`; get returns both answer and reasoning. MCP requires `index.md`; use CLI for loose folders. `single_action` stops after at most one business action.
+
+The read-only dashboard is at `http://localhost:4317`, needs no key, and shows decisions, handovers, tool calls, history and traces. To inspect submission output: `npm run dashboard -- --runs . --cases <unseen-cases-dir>`.
+
+## Outputs
+
+```text
+ANSWERS/<id>/ANSWER.md       decisions, actions, failures, handover and final result
+ANSWERS/<id>/REASONING.md    per-run notes and cited action reasons
+state/<id>.json             saved state and event cuts
+traces/<id>.jsonl           model/tool calls, errors and usage
+outbox/<id>/                successful email/SMS files
+run-summary.json            batch results
+RUN_SUMMARY.md              coverage, time and token summary
+```
+
+These records show what the system saw, attempted, completed and escalated. Keep the supplied inputs or an accessible reference where publication is permitted. If using `--out`, include the generated `ANSWERS/` at the submission root with its corresponding execution evidence.
+
+## Validation
+
+```bash
+npm test
+npm run typecheck
+python3 -I evals/reality-sim/tools/validate.py --all
+npm run eval -- --score
+```
+
+The [development eval](evals/reality-sim/README.md) has 59 decision points, hidden labels, an Opus judge and mechanical checks for tier E. It is not the organisers' unseen Reality Test. Live evaluation requires the API key; tests and format checks do not. At `4438a46`, 143 tests, typecheck and all 59 format/leak checks passed using existing dependencies.
+
+[Recorded playbook comparisons](evals/results/playbook-paired-v4-2026-10-10/SUMMARY.md) passed 62/74 versus 61/74 without playbooks, with higher latency. This older development run does not prove reliable improvement or evaluate latest main.
+
+## Assumptions and limitations
+
+- The agent acts as the agency; after the initial cut, outside replies advance the case. Time comes from event timestamps rather than a live clock.
+- Approval is an agency-recorded grant or an approved classifier result for a landlord reply. Classifier errors count as unclear; sender/approval phrase matching can miss unfamiliar wording.
+- Large PDFs fall back to text, capped at 8,000 characters. Image-only amounts cannot satisfy the text-based evidence guard. Unread files are flagged.
+- Raw-case reconstruction can leak outcome details. Case content is treated as evidence, but injection resistance is not guaranteed.
+- Messages and assignments remain local simulations. Playbooks add calls and latency; their optional audits are not absolute safety enforcement.
 
 ## Next steps
 
-- An evaluation bench that replays the public cases event by event and grades each decision against the real history.
-- Real adapters for email, SMS and the agency's job system; the seam already exists in `runTool`.
-- A watch mode that ingests a new reply and resumes automatically, replacing `--next`.
-- A human-in-the-loop queue for escalations, writing a person's decision back into the case as an event.
+Connect live operational adapters, ingest replies automatically, add a human escalation queue, and validate multi-stage behaviour on held-out cases with cost and coverage measurements.
 
-## Playbook references
+## Submission and licence
 
-The JSON playbook bank is enabled by default; set `PLAYBOOKS=off` for the baseline. The selector uses only current visible evidence. Selected steps are checked against successful actions before hold/close, at most twice per invocation; invalid or failed optional audits fall back to the normal policy. Paired evaluation instructions are in `evals/reality-sim/README.md`.
+Released under [Apache 2.0](LICENSE); third-party dependencies and data retain their own terms. The final submission must include:
+
+- System-generated unseen `ANSWERS/` and relevant traces; do not manually correct failed outputs.
+- A working-product demo of about 60 seconds or less uploaded **inside the repository**.
+- LinkedIn and X launch-post URLs, each identifying the project and linking to this repository.
+- Team name, track, member names, public repo URL, frozen commit hash, results and video paths, in the submission form and optionally `SUBMISSION.md`.
+
+Those final artefacts were not committed at `4438a46`. Confirm the freeze deadline with organisers: the supplied guide names both 16:30 and 17:00 BST; prepare source/demo for the earlier time and preserve the submitted code and results.

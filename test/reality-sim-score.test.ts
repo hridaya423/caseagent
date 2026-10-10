@@ -102,7 +102,7 @@ test("a mechanical failure fails a case the judge passed", async () => {
 test("the manifest covers every tier and each case is run at its last event", async () => {
   const samples = selectSamples({});
   assert.deepEqual([...new Set(samples.map((s) => s.tier))].sort(), ["A", "B", "C", "E"]);
-  assert.equal(samples.length, 59);
+  assert.equal(samples.length, 77);
   assert.deepEqual(selectSamples({ tiers: ["E"] }).map((s) => s.id), ["401", "402", "403", "404", "405", "406", "407", "408", "409", "410", "411", "412"]);
 
   // A model that ends every run at once: the runner must still write an answer per case.

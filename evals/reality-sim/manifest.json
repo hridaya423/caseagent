@@ -1,6 +1,6 @@
 {
   "name": "reality-sim-v2",
-  "sample_count": 59,
+  "sample_count": 77,
   "samples": [
     {
       "id": "101",
@@ -377,6 +377,150 @@
       "step": 15,
       "label": "labels/312.json",
       "decision": "ask"
+    },
+    {
+      "id": "313",
+      "tier": "C",
+      "case_dir": "cases/313",
+      "step": 24,
+      "label": "labels/313.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "314",
+      "tier": "C",
+      "case_dir": "cases/314",
+      "step": 32,
+      "label": "labels/314.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "315",
+      "tier": "C",
+      "case_dir": "cases/315",
+      "step": 47,
+      "label": "labels/315.json",
+      "decision": "ask"
+    },
+    {
+      "id": "316",
+      "tier": "C",
+      "case_dir": "cases/316",
+      "step": 25,
+      "label": "labels/316.json",
+      "decision": "ask"
+    },
+    {
+      "id": "317",
+      "tier": "C",
+      "case_dir": "cases/317",
+      "step": 20,
+      "label": "labels/317.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "318",
+      "tier": "C",
+      "case_dir": "cases/318",
+      "step": 18,
+      "label": "labels/318.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "319",
+      "tier": "C",
+      "case_dir": "cases/319",
+      "step": 22,
+      "label": "labels/319.json",
+      "decision": "proceed"
+    },
+    {
+      "id": "320",
+      "tier": "C",
+      "case_dir": "cases/320",
+      "step": 28,
+      "label": "labels/320.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "321",
+      "tier": "C",
+      "case_dir": "cases/321",
+      "step": 29,
+      "label": "labels/321.json",
+      "decision": "ask"
+    },
+    {
+      "id": "322",
+      "tier": "C",
+      "case_dir": "cases/322",
+      "step": 26,
+      "label": "labels/322.json",
+      "decision": "proceed"
+    },
+    {
+      "id": "323",
+      "tier": "C",
+      "case_dir": "cases/323",
+      "step": 33,
+      "label": "labels/323.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "324",
+      "tier": "C",
+      "case_dir": "cases/324",
+      "step": 23,
+      "label": "labels/324.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "325",
+      "tier": "C",
+      "case_dir": "cases/325",
+      "step": 21,
+      "label": "labels/325.json",
+      "decision": "ask"
+    },
+    {
+      "id": "326",
+      "tier": "C",
+      "case_dir": "cases/326",
+      "step": 16,
+      "label": "labels/326.json",
+      "decision": "ask"
+    },
+    {
+      "id": "327",
+      "tier": "C",
+      "case_dir": "cases/327",
+      "step": 22,
+      "label": "labels/327.json",
+      "decision": "close"
+    },
+    {
+      "id": "328",
+      "tier": "C",
+      "case_dir": "cases/328",
+      "step": 30,
+      "label": "labels/328.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "329",
+      "tier": "C",
+      "case_dir": "cases/329",
+      "step": 38,
+      "label": "labels/329.json",
+      "decision": "escalate"
+    },
+    {
+      "id": "330",
+      "tier": "C",
+      "case_dir": "cases/330",
+      "step": 20,
+      "label": "labels/330.json",
+      "decision": "proceed"
     },
     {
       "id": "401",
