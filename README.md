@@ -126,7 +126,7 @@ Released under [Apache 2.0](LICENSE); third-party dependencies and data retain t
 
 - System-generated unseen `ANSWERS/` and relevant traces; do not manually correct failed outputs.
 - A working-product demo of about 60 seconds or less uploaded **inside the repository**.
-- LinkedIn and X launch-post URLs, each identifying the project and linking to this repository.
+- Launch posts: [LinkedIn](https://www.linkedin.com/posts/mukeshagrawal2_this-weekend-we-built-case-agent-at-the-real-world-share-7514683014350544896-Ipkf/); X post URL still to add.
 - Team name, track, member names, public repo URL, frozen commit hash, results and video paths, in the submission form and optionally `SUBMISSION.md`.
 
-Those final artefacts were not committed at `4438a46`. Confirm the freeze deadline with organisers: the supplied guide names both 16:30 and 17:00 BST; prepare source/demo for the earlier time and preserve the submitted code and results.
+The unseen results, demo video, X post and team metadata still need to be added. Confirm the freeze deadline with organisers: the supplied guide names both 16:30 and 17:00 BST; prepare source/demo for the earlier time and preserve the submitted code and results.
