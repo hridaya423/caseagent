@@ -77,7 +77,7 @@ export async function runCase(opts: {
   let completionChecks = 0;
   for (let turn = 1; turn <= MAX_TURNS; turn++) {
     // Reassess after each tool result; a resumed run uses only its newly visible state.
-    const currentActions = state.actions.map((a) => ({ tool: a.tool, input: a.input, ok: a.ok, result: a.result }));
+    const currentActions = actionLog(state).map((a) => ({ tool: a.tool, input: a.input, ok: a.ok, result: a.result }));
     const references = opts.playbooks ? await playbookContext({
       options: opts.playbooks, client, model, policy,
       query: `${retrievalQuery}\n${JSON.stringify(currentActions)}`,
@@ -141,12 +141,12 @@ export async function runCase(opts: {
             { id: "visible_prompt_evidence", text: prompt.evidence },
             ...visible.map((e) => ({ id: `event:${e.n}`, text: `${e.at} | ${e.channel} | from ${e.from} | to ${e.to}\n${e.body}` })),
           ],
-          actions: state.actions.filter((a) => a.run === state.runs),
+          actions: run.actions,
           ending: { tool: u.name, input: u.input }, trace,
         });
         if (!audit.ready) {
           const result = `Workflow completion check: this end action was not executed. Review these applicable omissions against current evidence and policy, execute any required actions, or escalate if human judgement is needed: ${JSON.stringify(audit.missing)}`;
-          state.actions.push({ run: state.runs, afterEvent: state.seen, tool: u.name, input: u.input as Record<string, unknown>, ok: false, result });
+          run.actions.push({ tool: u.name, input: u.input as Record<string, unknown>, ok: false, result });
           trace("tool", { name: u.name, input: u.input, ok: false, ends: false, result });
           results.push({ type: "tool_result", tool_use_id: u.id, content: result, is_error: true });
           failed = true;

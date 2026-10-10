@@ -10,7 +10,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { loadPlaybookBank, parsePlaybookBank, playbookContext, projectReferences, retrievePlaybooks, validateSelection } from "../src/agent/playbooks.ts";
 import type { Case } from "../src/case/parse.ts";
-import { newState } from "../src/case/state.ts";
+import { actionLog, newState } from "../src/case/state.ts";
 import { evidencePointers, projectSample, referenceCatalogue, summarize, type Trial, type Sample } from "../evals/playbooks/run.ts";
 import { validateEvidence, type ExpectedResults } from "../evals/playbooks/judge/contract.ts";
 import { submissionToolChoice } from "../src/agent/model-submission.ts";
@@ -85,8 +85,8 @@ test("loop injects selected steps, never hidden events or historical examples, a
   const state = newState(c.id, 1);
   await runCase({ c, state, newFrom: 1, client, model: "fake", policy: "policy", singleStep: true, playbooks: {}, trace: () => {} });
   assert.equal(calls.length, 2);
-  assert.equal(state.actions.length, 1);
-  assert.equal(state.actions[0].tool, "hold");
+  assert.equal(actionLog(state).length, 1);
+  assert.equal(actionLog(state)[0].tool, "hold");
   assert.match(JSON.stringify(calls[1].system), /Workflow references/);
   assert.doesNotMatch(JSON.stringify(calls), /HIDDEN_FUTURE_CANARY|source_references|provenance|representative_examples/);
   assert.equal(state.approvalOnFile, false);
@@ -115,8 +115,8 @@ test("a single-step retry after prose still permits the needed message action", 
   } } };
   const state = newState(c.id, 1);
   await runCase({ c, state, newFrom: 1, client, model: "fake", policy: "policy", singleStep: true, trace: () => {} });
-  assert.equal(state.actions.length, 1);
-  assert.equal(state.actions[0].tool, "send_message");
+  assert.equal(actionLog(state).length, 1);
+  assert.equal(actionLog(state)[0].tool, "send_message");
   assert.equal(state.status.kind, "open");
   assert.doesNotMatch(JSON.stringify(calls[1].messages.at(-1)), /exactly one of hold, escalate or close_case/);
 });
@@ -136,7 +136,7 @@ test("MCP run and resume use playbooks without consuming business actions or exp
     await mcp.callTool({ name: "run_case", arguments: { case_id: "027", step: 1 } });
     await mcp.callTool({ name: "resume_case", arguments: { case_id: "027" } });
     const state = JSON.parse(readFileSync(join(out,"state/027.json"),"utf8"));
-    assert.equal(state.runs, 2); assert.equal(state.actions.length, 2); assert.equal(selections, 2);
+    assert.equal(state.runs.length, 2); assert.equal(actionLog(state).length, 2); assert.equal(selections, 2);
   } finally { await mcp.close(); await server.close(); }
 });
 

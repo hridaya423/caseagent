@@ -9,7 +9,7 @@ import { visibleEvents } from "../../src/case/cut.ts";
 import type { Case } from "../../src/case/parse.ts";
 import { bankHash, loadPlaybookBank } from "../../src/agent/playbooks.ts";
 import { renderCase } from "../../src/agent/prompt.ts";
-import { newState } from "../../src/case/state.ts";
+import { actionLog, newState } from "../../src/case/state.ts";
 import { submissionToolChoice } from "../../src/agent/model-submission.ts";
 import { projectExpectations, type ExpectedResults, type JudgeInput } from "./judge/contract.ts";
 import { judgeResponse, responseSchema, validateJudgement, type JudgeReview } from "./judge/schema.ts";
@@ -124,7 +124,7 @@ export async function runPlaybookSuite(opts: {
     trials: opts.trials, started_at: new Date().toISOString(), bank_hash: bankHash(loadPlaybookBank({})),
     policy_hash: hash(policy), suite_hash: hash(readFileSync(resolve(root, "samples.json"), "utf8")),
     judge_prompt_hash: hash(readFileSync(resolve(root, "judge/system.txt"), "utf8")),
-    code_hash: hash(["src/agent.ts", "src/playbooks.ts", "evals/playbooks/run.ts", "evals/playbooks/judge/schema.ts"].map((path) => readFileSync(resolve(repo,path),"utf8")).join("\n")),
+    code_hash: hash(["src/agent/loop.ts", "src/agent/playbooks.ts", "evals/playbooks/run.ts", "evals/playbooks/judge/schema.ts"].map((path) => readFileSync(resolve(repo,path),"utf8")).join("\n")),
     limitations: ["Development counterfactuals derive from synthesis source cases; this is not held-out generalization.", "Two trials are a smoke ablation, not statistically reliable evidence.", "Semantic scores come from a fixed LLM judge; code validates evidence, structure and critical tools."],
   };
   const save = () => writeFileSync(resolve(opts.out, "results.json"), JSON.stringify({ ...metadata, summary: summarize(results), results }, null, 2) + "\n");
@@ -152,13 +152,15 @@ export async function runPlaybookSuite(opts: {
           if (state.status.kind === "escalated" && state.status.by === "system") runError = state.status.summary;
         } catch (e) { runError = e instanceof Error ? e.message : String(e); }
         const duration = Date.now() - started;
+        const actions = actionLog(state);
+        const notes = state.runs.flatMap((run, i) => run.notes.map((text) => ({ run: i + 1, afterEvent: run.seen, text })));
         // Blind judge: no arm, retrieved guidance, selection reasons, source history or provenance.
         const judgeInput: JudgeInput = {
-          test_case: { id: sample.id, current_policy: casePolicy(policy,true), current_evidence: prompt.text, system_reference_catalogue: referenceCatalogue(),
+          test_case: { id: sample.id, current_policy: casePolicy(policy,true), current_evidence: prompt.evidence, system_reference_catalogue: referenceCatalogue(),
             invocation_contract: { single_business_action: true, open_after_non_end_tool_is_valid: true } },
           expected_results: expected,
-          actual_output: { actions: state.actions.map((a) => ({ tool: a.tool, input: a.input, ok: a.ok, result: a.result })),
-            notes: state.notes.map((n) => n.text), resulting_status: state.status },
+          actual_output: { actions: actions.map((a) => ({ tool: a.tool, input: a.input, ok: a.ok, result: a.result })),
+            notes: notes.map((n) => n.text), resulting_status: state.status },
         };
         let review: JudgeReview | null = null, error = runError;
         if (!runError) {
@@ -169,9 +171,9 @@ export async function runPlaybookSuite(opts: {
           .flatMap((t) => (t.selections as { playbook_id: string; step_ids: string[] }[]).flatMap((s) => s.step_ids.map((id) => `${s.playbook_id}.${id}`)));
         const pass = error || review?.status !== "reviewed" ? null :
           review.comparisons.every((r) => r.result === "met") && !review.critical_failures.length && !review.prohibited_actions.length &&
-          state.actions.length === 1 && state.actions[0].ok && sample.acceptable_tools.includes(state.actions[0].tool);
+          actions.length === 1 && actions[0].ok && sample.acceptable_tools.includes(actions[0].tool);
         const result: Trial = {
-          id: sample.id, trial, arm, duration_ms: duration, actions: state.actions, notes: state.notes,
+          id: sample.id, trial, arm, duration_ms: duration, actions, notes,
           selections: selection, retrieval_match: arm === "baseline" ? null : sample.retrieval_expectation.length ? sample.retrieval_expectation.some((id) => selection.includes(id)) : selection.length === 0,
           selector_errors: traces.filter((t) => t.kind === "playbook_error").length,
           model_requests: calls, input_tokens: inputTokens, output_tokens: outputTokens, judge: review, pass, error,

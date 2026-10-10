@@ -97,3 +97,5 @@ MODEL=claude-sonnet-5-5 PLAYBOOK_MODEL=claude-sonnet-5-5 PLAYBOOKS=on FALLBACK_M
 ```
 
 Score each `trial-N/baseline` and `trial-N/playbooks` folder with the unchanged `score.ts` command and its default Opus judge. Report all trials, failures and judge errors; do not rerun just semantic failures or change rubrics to obtain a gain. These practice cases have informed development, so this comparison is a development check, not held-out evidence of generalisation or statistical proof.
+
+For an exact latest-main comparator, set `BASELINE_REPO` to a separate clean checkout of main. The baseline then imports that checkout's MCP server and dependencies directly and records its own commit, while the playbook arm imports this branch. Both still use the same cases, model and policy; compare the recorded policy hashes before interpreting the results.
