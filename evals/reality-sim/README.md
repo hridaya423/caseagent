@@ -7,6 +7,7 @@
 ```
 cases/<id>/        what the agent is given: index.md, history.md, attachments/
 labels/<id>.json   the answer sheet. NEVER give this folder to the agent.
+score.ts           grades an ANSWERS folder against the labels with a Claude judge
 worklist.json      the source list: cut points, changes, cards and rubrics
 tools/build.py     rebuilds the 1xx and 2xx cases and all labels from worklist.json
 tools/validate.py  checks every case has the public-case shape and no outcome text
@@ -54,7 +55,21 @@ CASES_DIR='evals/reality-sim/cases' OUT_DIR='runs/reality-sim' npm run --silent 
 
 The CLI modes do not fit yet. A plain `run` shows the agent only the first two to four events of each case. `--to-end` replays the case with the agency's own events hidden, so the agent never sees the approvals, quotes and instructions these cases turn on. A CLI flag for "see everything, decide once" would make `run-all` usable here.
 
-**How to score.** Read `ANSWERS/<id>/ANSWER.md` and `REASONING.md` and compare them with `labels/<id>.json`. A `critical` hit fails the case; otherwise check `required` or one of `acceptable` was met. No automatic scorer is included yet.
+**How to score.** `score.ts` grades an agent's output folder against the labels with a Claude judge:
+
+```bash
+node --env-file-if-exists=.env --import tsx evals/reality-sim/score.ts runs/reality-sim
+```
+
+The argument is the agent's output folder (the one containing `ANSWERS/`). It writes `score/SCORECARD.md` and `score/results.json` inside that folder (`--out` to change). Options: `--concurrency N` (default 4), `--only 301,302`, and `JUDGE_MODEL` (default `claude-opus-5-5`). It needs `ANTHROPIC_API_KEY`.
+
+For each case the judge reads the case, the rubric, `ANSWER.md` and `REASONING.md`, and reports what the agent decided, whether the requirement (or an acceptable alternative) was met, and every critical, prohibited and red-flag item the answer commits. A case passes when the requirement is met and nothing critical or prohibited was done. The scorecard gives the pass rate, coverage (an answer exists and the run finished), escalations where none was called for, missed escalations, and breakdowns by tier, expected decision and problem type.
+
+Three things to know when reading a scorecard:
+
+- A case with no `ANSWER.md` is a coverage failure. A case the judge could not grade is listed as unscored and left out of the pass rate.
+- The judge marks failing answers that a careful letting agent could still defend. Those are listed first, as candidates for a rubric that is too strict. Fix the rubric in `worklist.json`, rerun `tools/build.py`, and rescore.
+- The judge is a model reading our own rubrics. Its verdicts are a development signal, not the organisers' scores.
 
 **Question sections.** 302, 303, 308 and 312 have a `## Question` in `index.md`. The current parser drops it, so the agent does not see the question.
 

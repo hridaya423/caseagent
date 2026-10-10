@@ -1,0 +1,60 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { scoreAll, scorecard, verdictOf, type Judgement, type JudgeFn } from "../evals/reality-sim/score.ts";
+
+const good: Judgement = {
+  agent_decision: "escalate", required_met: true, critical_hits: [], prohibited_hits: [], red_flag_hits: [], optional_met: [],
+  unsupported_claims: [], outcome_score: 4, judgement_score: 4, legible: true, reasonable_but_off_rubric: false, reason: "ok",
+};
+
+function runWith(ids: string[], body = "# Case\n\n**Final status:** escalated") {
+  const dir = mkdtempSync(join(tmpdir(), "reality-sim-"));
+  for (const id of ids) {
+    mkdirSync(join(dir, "ANSWERS", id), { recursive: true });
+    writeFileSync(join(dir, "ANSWERS", id, "ANSWER.md"), body);
+    writeFileSync(join(dir, "ANSWERS", id, "REASONING.md"), "# Reasoning");
+  }
+  return dir;
+}
+
+test("a critical or prohibited hit fails a case even when the requirement is met", () => {
+  assert.equal(verdictOf(good), "pass");
+  assert.equal(verdictOf({ ...good, critical_hits: ["Holding for landlord approval."] }), "fail");
+  assert.equal(verdictOf({ ...good, prohibited_hits: ["Quoting a price."] }), "fail");
+  assert.equal(verdictOf({ ...good, required_met: false }), "fail");
+});
+
+test("a case with no ANSWER.md is a coverage failure and is never sent to the judge", async () => {
+  const seen: string[] = [];
+  const judge: JudgeFn = async ({ label }) => { seen.push(label.id); return good; };
+  const results = await scoreAll({ runDir: runWith(["301"]), judge, only: ["301", "302"] });
+  assert.deepEqual(seen, ["301"]);
+  assert.equal(results.find((r) => r.id === "301")!.verdict, "pass");
+  const missing = results.find((r) => r.id === "302")!;
+  assert.equal(missing.status, "missing");
+  assert.equal(missing.verdict, "fail");
+});
+
+test("a judge failure leaves the case unscored and out of the pass rate", async () => {
+  const judge: JudgeFn = async ({ label }) => { if (label.id === "302") throw new Error("overloaded"); return good; };
+  const results = await scoreAll({ runDir: runWith(["301", "302"]), judge, only: ["301", "302"] });
+  assert.equal(results.find((r) => r.id === "302")!.status, "judge_error");
+  const card = scorecard(results, { runDir: "x", model: "fake" });
+  assert.match(card, /Cases passed \| 1 of 1 judged/);
+  assert.match(card, /Not scored \(judge error\) \| 1 /);
+});
+
+test("the scorecard counts escalations on cases that should not escalate, and out-of-range scores are clamped", async () => {
+  // 307 expects close; the fake judge reports that the agent escalated.
+  const judge: JudgeFn = async () => ({ ...good, required_met: false, outcome_score: 9, judgement_score: -3 });
+  const results = await scoreAll({ runDir: runWith(["307"], "**Final status:** escalated [incomplete]"), judge, only: ["307"] });
+  assert.equal(results[0].judgement!.outcome_score, 4);
+  assert.equal(results[0].judgement!.judgement_score, 0);
+  assert.equal(results[0].incomplete, true);
+  const card = scorecard(results, { runDir: "x", model: "fake" });
+  assert.match(card, /Escalated when it should not have \| 1 of 1 \(307\)/);
+  assert.match(card, /Coverage \(an answer exists and the run finished\) \| 0 of 1/);
+});
