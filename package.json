@@ -13,6 +13,7 @@
     "extract": "uv run scripts/extract.py",
     "test": "node --import tsx --test test/*.test.ts",
     "typecheck": "tsc -p .",
+    "eval:playbooks": "node --env-file-if-exists=.env --import tsx evals/playbooks/run.ts",
     "eval:edge": "node --env-file-if-exists=.env --import tsx \"evals/edge-cases/run.ts\"",
     "eval:process": "node --env-file-if-exists=.env --import tsx \"evals/Process Reward/run.ts\"",
     "reality": "node --env-file-if-exists=.env --import tsx src/cli.ts reality"
