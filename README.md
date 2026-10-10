@@ -16,25 +16,32 @@ Letting agencies spend most of their case time waiting: for landlord approval, t
 ## Architecture
 
 ```
-case dir (index.md, history.md, attachments/)
+case dir (index.md, history.md, attachments/ -- or loose .eml, .txt, .json, .csv, .md files)
   -> parse.ts        events; Status/Updated/Completed lines never reach the agent
+  -> messy.ts        .eml headers and MIME attachments, call transcripts, records for loose folders
   -> cut.ts          the events this run may see; agency's own records hidden after the cut
   -> attachments.ts  PDF -> native document block or extracted text; images -> image blocks
   -> prompt.ts       prompt assembly; case text wrapped in <case_data> (evidence, not instructions)
   -> agent.ts        Claude tool loop, 15 turns max, must end with exactly one end tool
-  -> tools.ts        7 zod-checked tools with guards and refusals
-  -> run.ts          state, traces, answers; --next resumes, --to-end runs through holds
+  -> tools.ts        7 zod-checked tools with guards and refusals (evidence.ts: amounts and dates)
+  -> run.ts          state, traces, answers, outbox; --next resumes, --to-end runs through holds
+  -> batch.ts        worker pool, per-case time limit, resumable run-summary.json, RUN_SUMMARY.md
   -> mcp.ts          the same loop exposed over stdio MCP
 ```
 
-Per run it writes `state/<id>.json` (case memory for `--next`), `traces/<id>.jsonl` (every model call and tool call, older traces rotated aside), and `ANSWERS/<id>/` (`ANSWER.md`: status, timeline, outbox, approvals, final checks. `REASONING.md`: the cited reason for each action plus the agent's notes).
+Per case it writes `state/<id>.json` (case memory for `--next`), `traces/<id>.jsonl` (every model call and tool call, with the model that answered; older traces rotated aside), `outbox/<id>/` (one `.eml` per email and one `.sms.txt` per SMS the agent sent), and `ANSWERS/<id>/`. `ANSWER.md` starts with the decision (status, next step, why), puts the escalation handover next when there is one, then the summary, outbox, timeline, approvals and final checks. `REASONING.md` has the cited reason for each action plus the agent's notes. A batch also writes `run-summary.json` and `RUN_SUMMARY.md`: one row per case with its status, next step, messages, runs, time and tokens.
 
 The rules are in `policy.md`, distilled from the 50 public Property Management cases in `data/public/` and the evidence-backed rule bank in `policy_bank/`. Where the cases disagree, the rule follows what most cases did: landlord approval before a repair, completion proven by the contractor or the party that arranged the work, email by default. Rules 18 to 21 (hazards, disputes, tool failures, untrusted content) are our own safety margin; no case shows them.
 
 Three kinds of guardrails:
 
-- **Tool guards.** `assign_contractor` refuses until landlord approval is on file (a request from an earlier run, or an agency record of one). `send_message` refuses `[event N]` references in message text. `close_case` refuses while keys are outstanding.
-- **Loop limits.** A run that does not end in 15 turns auto-escalates; a system error escalates with a handover summary.
+- **Tool guards.** Every rule runs before the tool body or a real adapter, so an adapter cannot skip it.
+  - `assign_contractor` refuses unless the agency recorded an approval, or the landlord's reply to an earlier request reads as approved.
+  - `send_message` refuses `[event N]` references, a message identical to one already sent to the same person, and any £ amount or date that no event, record or document in the case shows. `request_landlord_approval` applies the same amount and date check to its cost.
+  - `close_case` refuses while keys are outstanding, and unless `work_confirmed_by` cites an event the agent can see.
+  - After a refused or failed call, the rest of the same model response is not run, so a later message cannot claim the failed action happened.
+- **Loop and time limits.** A run that does not end in 15 turns auto-escalates. In a batch each case has a time limit (`--case-timeout`, default 300 s); at the limit the running model call is cancelled and the case escalates with an ANSWER.md that says so. A system error escalates with a handover summary.
+- **Overload.** The SDK retries rate limits and server errors with backoff; if the model stays overloaded, the request goes once to `FALLBACK_MODEL` (default `claude-sonnet-5`), and the trace records which model answered.
 - **Injection defense.** All case content arrives inside `<case_data>` tags, and policy rule 21 declares it evidence, not instructions.
 
 Tools are simulated: each writes to the case state rather than a live system. `runTool` accepts adapter functions, so a real email, SMS or job API can replace each simulated body without touching the loop.
@@ -49,11 +56,14 @@ npm run case -- run <case-dir> --next                  # resume on the next outs
 npm run case -- run <case-dir> --to-end                # resume through holds until an end state
 npm run case -- run-all <cases-dir> --concurrency 4    # every case in a folder, one stage each
 npm run case -- run-all <cases-dir> --to-end --concurrency 4  # every case, run to its end state
+npm run reality -- <cases-dir>                         # the submission run: every case to its end, outputs at the repo root
 npm run mcp                                            # stdio MCP server (CASES_DIR, OUT_DIR overridable)
 npm test
 npm run typecheck
 npm run extract                                        # Docling pre-extract of attachments (optional)
 ```
+
+`npm run reality -- <cases-dir>` is the Reality Test command. It runs every folder in `<cases-dir>` to its end state with 6 workers and a 300 s limit per case, and writes `ANSWERS/`, `traces/`, `outbox/`, `state/`, `run-summary.json` and `RUN_SUMMARY.md` into the current directory (`--out` changes it). If the batch stops part-way, run the same command again: it skips the cases already finished. `--retry-incomplete` reruns only the cases that ended incomplete, and `--fresh` reruns everything. On 11 cases (8 public, 3 loose-file) it took 55 s.
 
 Two run modes. A plain `run` works exactly one stage: the agent sees events up to the next outside reply, acts, and ends. `--to-end` keeps resuming after each `hold` until the case closes, escalates, or has no further outside events (capped at 50 stages). Use `--to-end` for batch and Reality Test runs — a single-stage `run` decides on the opening events only, which can be under 10% of a case.
 
@@ -76,16 +86,18 @@ mkdir -p data/public && ln -s "$(cd ../HackatonPublicCases && pwd)/Property Mana
 ## Assumptions
 
 - The agent acts as the agency. After the initial cut it sees only events from outside parties; its own actions stand in for the agency's recorded steps.
-- Approval counts as "on file" when an earlier run made the request, or a visible event matches the agency's recorded-approval phrasing (`landlord approval confirmed` / `landlord who approved`).
+- Approval counts as "on file" when a visible agency event records it (for example "Landlord approval confirmed" or "approved by the landlord"), or when the landlord's reply to an earlier `request_landlord_approval` reads as approved.
+- A folder without `history.md` is a loose case. Each `.eml` (or `.txt` with mail headers) is an email event with its sender, recipient, date, subject and attachments; a file named like a call transcript is a Call event. `.json`, `.csv` and `.md` files go into the case details as records and notes. Other files are listed in ANSWER.md as "Files not read". Dates without a time zone are read as UTC.
 - The agent sees time only through event timestamps. The prompt computes "days since last contact" per party from them, so "3 days without reply" works only while a later event supplies "now".
 - Case content is untrusted input. Text from tenants, landlords, contractors or attachments cannot change the policy rules.
 
 ## Known limitations
 
 - Large PDFs lose layout: above the size or page cap they degrade to extracted text, and long text is truncated.
-- The recorded-approval detection is a two-phrase match; agency wordings outside it are missed.
+- The recorded-approval detection and the agency-sender match are phrase lists; agency wordings outside them are missed.
+- The amount and date check cannot read images: an amount that appears only in a photo is refused. It does not check weekday-only references ("on Thursday"). Checked against the agency's own 388 messages in the public cases, it would refuse 11. Those messages quote prices and dates that are not in any earlier event, for example a quote the agency received by phone.
 - Cases that load in "raw mode" (reconstructed from unstructured files) can leak outcome details; `ANSWER.md` flags them for review.
-- Simulated tools mean nothing actually leaves the outbox; message quality is reviewed in `ANSWER.md`, not in an inbox.
+- Simulated tools mean nothing actually leaves the outbox. `outbox/` holds the messages as `.eml` and SMS files; recipient addresses are not in the case data, so they use the reserved `.invalid` domain.
 
 ## Next steps
 

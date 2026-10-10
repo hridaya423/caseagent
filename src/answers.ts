@@ -1,7 +1,35 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Case, CaseEvent } from "./parse.ts";
 import { isIncomplete, statusLabel, type CaseState, type Action } from "./state.ts";
+
+const END_TOOLS = new Set(["hold", "escalate", "close_case"]);
+
+export type Decision = { status: string; next: string; why: string };
+
+// The answer a judge or an operator reads first: where the case stands, what happens next, and why.
+export function decisionOf(s: CaseState): Decision {
+  const end = s.actions.findLast((a) => a.ok && END_TOOLS.has(a.tool));
+  const why = String(end?.input.reason ?? "");
+  const st = s.status;
+  const status = statusLabel(st);
+  switch (st.kind) {
+    case "open":
+      return { status, next: "The run stopped before an end action. Resume the case.", why: String(s.actions.at(-1)?.input.reason ?? "") };
+    case "hold":
+      return { status, next: `Wait for the ${st.reason.replace(/^Waiting for /, "").toLowerCase()}'s reply.`, why };
+    case "escalated":
+      return st.by === "agent"
+        ? { status, next: `A person decides: ${st.decision_needed}`, why: st.missing_or_conflict }
+        : { status, next: "A person must review the case.", why: st.summary };
+    case "closed":
+      return { status, next: "None. The case is closed.", why: why || `${st.checks.outcome}, confirmed by ${st.checks.work_confirmed_by}` };
+    default: {
+      const _exhaustive: never = st;
+      return _exhaustive;
+    }
+  }
+}
 
 function summarizeLine(s: string): string {
   return s.split("\n")[0].slice(0, 60);
@@ -17,12 +45,16 @@ function runEvents(s: CaseState, visible: CaseEvent[], run: number): CaseEvent[]
 }
 
 function answerMd(c: Case, s: CaseState, visible: CaseEvent[]): string {
+  const d = decisionOf(s);
+  const decision = `- **Status:** ${d.status}\n- **Next step:** ${d.next}${d.why ? `\n- **Why:** ${d.why}` : ""}`;
+
   // Summary
   const summary =
     `**Final status:** ${statusLabel(s.status)}\n**Runs:** ${s.runs} · **Events seen:** up to event ${s.seen} · **Loaded with:** ${c.layer}` +
     (isIncomplete(s) ? "\n\n**Incomplete:** the agent did not finish this run, so the system escalated the case to a person." : "") +
     (c.layer === "raw" ? "\n\n**Raw mode loaded:** this case was reconstructed from unstructured files. Review for leaks." : "") +
-    (c.warnings?.length ? `\n\n**Loader warnings:** ${c.warnings.join("; ")}` : "");
+    (c.warnings?.length ? `\n\n**Loader warnings:** ${c.warnings.join("; ")}` : "") +
+    (c.unread?.length ? `\n\n**Files not read:** ${c.unread.join(", ")}` : "");
 
   // Timeline: group actions by run
   const runs = new Map<number, Action[]>();
@@ -102,19 +134,26 @@ function answerMd(c: Case, s: CaseState, visible: CaseEvent[]): string {
     return `- **${toolName}:** ${f.result}${recoveryText}`;
   });
 
+  // An escalated case leads with the handover, because that is what the person picking it up needs.
+  const escalationSection = `## Escalation\n\n${escalation}\n\n`;
+  const escalated = s.status.kind === "escalated";
   return `# Case ${c.id}: ${c.title}
 
-## Summary
+## Decision
+
+${decision}
+
+${escalated ? escalationSection : ""}## Summary
 
 ${summary}
-
-## Timeline
-
-${timelineBlocks}
 
 ## Outbox
 
 ${outboxLines.length > 0 ? outboxLines.join("\n\n") : "No messages."}
+
+## Timeline
+
+${timelineBlocks}
 
 ## Approvals requested
 
@@ -124,11 +163,7 @@ ${finalChecksSection}
 
 ${notesLines.length > 0 ? notesLines.join("\n") : "None."}
 
-## Escalation
-
-${escalation}
-
-## Failed, refused or invalid actions
+${escalated ? "" : escalationSection}## Failed, refused or invalid actions
 
 ${failedLines.length > 0 ? failedLines.join("\n") : "None."}
 `;
@@ -175,6 +210,48 @@ ${actions || "None."}
   return `# Reasoning for case ${c.id}
 
 ${runSections.join("\n")}`;
+}
+
+// Every message the agent sent, as files a real mail or SMS gateway could take: an .eml per email and
+// a .sms.txt per SMS. Recipient addresses are not in the case data, so they use the reserved
+// .invalid domain. Dates are case time (the event the run saw), so a rerun writes the same files.
+export function writeOutbox(outDir: string, c: Case, s: CaseState): void {
+  const dir = join(outDir, "outbox", c.id);
+  rmSync(dir, { recursive: true, force: true });
+  const sent = s.actions.filter((a) => a.ok && a.tool === "send_message");
+  if (sent.length === 0) return;
+  mkdirSync(dir, { recursive: true });
+  sent.forEach((a, i) => {
+    const to = String(a.input.to);
+    const at = c.events.filter((e) => e.n <= a.afterEvent).at(-1)?.at;
+    const date = at ? new Date(at.replace(" UTC", "Z")) : null;
+    const head = [
+      `Message-ID: <${c.id}.${a.run}.${i + 1}@northbridge-lettings.case-agent>`,
+      ...(date && !Number.isNaN(date.getTime()) ? [`Date: ${date.toUTCString()}`] : []),
+      `X-Case-Id: ${c.id}`,
+      `X-Run: ${a.run}`,
+      `X-Recipient-Role: ${to}`,
+    ];
+    const name = `${String(i + 1).padStart(2, "0")}-run${a.run}-${to}`;
+    if (a.input.channel === "sms") {
+      writeFileSync(join(dir, `${name}.sms.txt`), `${head.join("\n")}\nTo: ${to}\n\n${a.input.text}\n`);
+    } else {
+      writeFileSync(
+        join(dir, `${name}.eml`),
+        [
+          ...head,
+          "From: Northbridge Lettings <maintenance@northbridge-lettings.invalid>",
+          `To: ${to} <${to}@case-${c.id}.invalid>`,
+          `Subject: Re: ${c.title}`,
+          "MIME-Version: 1.0",
+          "Content-Type: text/plain; charset=utf-8",
+          "",
+          String(a.input.text),
+          "",
+        ].join("\r\n"),
+      );
+    }
+  });
 }
 
 export function writeAnswer(outDir: string, c: Case, s: CaseState, visible: CaseEvent[]): void {

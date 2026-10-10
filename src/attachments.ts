@@ -66,6 +66,16 @@ function truncateText(text: string): string {
   return text;
 }
 
+// The text of a PDF sent natively, so tool guards can check figures and dates the model read from it.
+export async function documentText(caseDir: string, filename: string): Promise<string> {
+  const docling = join(caseDir, "attachments", ".docling", `${filename}.md`);
+  try {
+    return existsSync(docling) ? readFileSync(docling, "utf8") : await extractPdfText(join(caseDir, "attachments", filename));
+  } catch {
+    return "";
+  }
+}
+
 export async function readAttachment(
   caseDir: string,
   filename: string,

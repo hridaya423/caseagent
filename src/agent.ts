@@ -4,7 +4,7 @@ import { visibleEvents } from "./cut.ts";
 import { isAgency, type Case } from "./parse.ts";
 import { renderCase } from "./prompt.ts";
 import type { CaseState } from "./state.ts";
-import { runTool, TOOL_SPECS, type ToolAdapter } from "./tools.ts";
+import { runTool, TOOL_SPECS, type ToolAdapter, type ToolContext } from "./tools.ts";
 
 export const MAX_TURNS = 15;
 // The agency's own records of a landlord approval that came before the agent's first run.
@@ -14,7 +14,7 @@ const APPROVAL_ON_FILE =
 const NUDGE = "End the run now with exactly one of hold, escalate or close_case.";
 
 export type ModelClient = {
-  messages: { create(p: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message> };
+  messages: { create(p: Anthropic.MessageCreateParamsNonStreaming, o?: { signal?: AbortSignal }): Promise<Anthropic.Message> };
 };
 
 export type Trace = (kind: string, data: Record<string, unknown>) => void;
@@ -31,6 +31,8 @@ export async function runCase(opts: {
   adapters?: Record<string, ToolAdapter>;
   singleStep?: boolean;
   approvalModel?: string;
+  // Aborts the run between and during model calls, for the per-case time limit.
+  signal?: AbortSignal;
 }): Promise<void> {
   const { c, state, client, model, policy, trace, caseDir, adapters } = opts;
   state.runs += 1;
@@ -46,13 +48,16 @@ export async function runCase(opts: {
     state.landlordAnswer = undefined;
   } else if (state.landlordAnswer?.throughEvent !== replies[replies.length - 1].n || state.landlordAnswer.requestAfter !== request.afterEvent) {
     const asked = `${String(request.input.scope ?? "")} (cost: ${String(request.input.cost ?? "unknown")})`;
-    const answer = await classifyLandlordReply(client, opts.approvalModel ?? APPROVAL_MODEL, asked, replies.map((e) => `${e.at}\n${e.body}`), (error) =>
-      trace("approval_check_error", { error }),
-    );
+    const answer = await classifyLandlordReply(client, opts.approvalModel ?? APPROVAL_MODEL, asked, replies.map((e) => `${e.at}\n${e.body}`), {
+      onError: (error) => trace("approval_check_error", { error }),
+      onUsage: (usage, model) => trace("approval_check_usage", { usage, model }),
+      signal: opts.signal,
+    });
     state.landlordAnswer = { answer, requestAfter: request.afterEvent, throughEvent: replies[replies.length - 1].n };
     trace("approval_check", { request: asked, through_event: replies[replies.length - 1].n, answer });
   }
   const prompt = await renderCase(c, state, visible, opts.newFrom, caseDir);
+  const toolContext: ToolContext = { evidence: prompt.evidence, visibleEvents: new Set(visible.map((e) => e.n)) };
 
   // Build message content with text and images
   const content: Anthropic.ContentBlockParam[] = [
@@ -103,15 +108,16 @@ export async function runCase(opts: {
       return msg;
     });
 
+    opts.signal?.throwIfAborted();
     const resp = await client.messages.create({
       model,
       max_tokens: 4096,
       system: systemParam,
       tools: toolsWithCache,
       messages: messagesForRequest,
-    });
+    }, { signal: opts.signal });
 
-    trace("model", { turn, stop: resp.stop_reason, usage: resp.usage, content: resp.content });
+    trace("model", { turn, model: resp.model, stop: resp.stop_reason, usage: resp.usage, content: resp.content });
     messages.push({ role: "assistant", content: resp.content });
 
     // Extract and store text blocks as notes
@@ -149,7 +155,7 @@ export async function runCase(opts: {
         results.push({ type: "tool_result", tool_use_id: u.id, content: result, is_error: true });
         continue;
       }
-      const out = runTool(u.name, u.input, state, adapters);
+      const out = runTool(u.name, u.input, state, adapters, toolContext);
       state.actions.push({ run: state.runs, afterEvent: state.seen, tool: u.name, input: u.input as Record<string, unknown>, ok: out.ok, result: out.result });
       trace("tool", { name: u.name, input: u.input, ...out });
       executed++;

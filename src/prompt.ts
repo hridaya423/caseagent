@@ -4,7 +4,7 @@ import type { Case, CaseEvent } from "./parse.ts";
 import type { CaseState } from "./state.ts";
 import { isAgency } from "./parse.ts";
 import type { AttachmentContent } from "./attachments.ts";
-import { NATIVE_PDF_MAX_BYTES, readAttachment } from "./attachments.ts";
+import { documentText, NATIVE_PDF_MAX_BYTES, readAttachment } from "./attachments.ts";
 
 function renderEvent(e: CaseEvent): string {
   return `[event ${String(e.n).padStart(3, "0")}] ${e.at} | ${e.channel} | from ${e.from} | to ${e.to}\n${e.body}`;
@@ -64,6 +64,8 @@ export type CasePrompt = {
   text: string;
   images: Array<{ filename: string; format: "png" | "jpeg"; data: string }>;
   documents: Array<{ filename: string; data: string }>;
+  // The prompt text plus the extracted text of every native document: what the agent could read.
+  evidence: string;
 };
 
 // A request may be 32 MB and base64 adds a third, so native PDFs share a 20 MB budget per prompt.
@@ -91,14 +93,17 @@ export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[]
   const attachmentLines: string[] = [];
   const images: CasePrompt["images"] = [];
   const documents: CasePrompt["documents"] = [];
+  const documentTexts: string[] = [];
   let nativeBudget = NATIVE_PDF_TOTAL_BYTES;
 
   if (visibleAttachmentNames.size > 0 && caseDir) {
     for (const filename of Array.from(visibleAttachmentNames).sort()) {
-      const content = await readAttachment(caseDir, filename, { nativeMaxBytes: Math.min(NATIVE_PDF_MAX_BYTES, nativeBudget) });
+      const root = c.attachmentRoots?.[filename] ?? caseDir;
+      const content = await readAttachment(root, filename, { nativeMaxBytes: Math.min(NATIVE_PDF_MAX_BYTES, nativeBudget) });
       if (content.type === "document") {
         nativeBudget -= Buffer.byteLength(content.data, "base64");
         documents.push({ filename, data: content.data });
+        documentTexts.push(await documentText(root, filename));
         attachmentLines.push(`### ${filename}\n\n${received(filename)}(PDF attached in full: ${content.pages} page${content.pages === 1 ? "" : "s"})`);
       } else if (content.type === "text") {
         attachmentLines.push(`### ${filename}\n\n${received(filename)}${content.text}`);
@@ -131,5 +136,16 @@ export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[]
     "Decide the next step as Northbridge Lettings. Act with the tools, then end the run with exactly one of hold, escalate or close_case.",
   ].join("\n\n");
 
-  return { text, images, documents };
+  // Evidence leaves out refused or failed actions: a refused message that invented an amount must
+  // not make the same amount acceptable on the next try.
+  const evidence = [
+    c.details,
+    c.request,
+    ...attachmentLines,
+    ...visible.map(renderEvent),
+    ...state.actions.filter((a) => a.ok).map((a) => JSON.stringify(a.input)),
+    ...documentTexts,
+  ].join("\n\n");
+
+  return { text, images, documents, evidence };
 }

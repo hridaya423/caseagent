@@ -1,5 +1,8 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, join } from "node:path";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { basename, join, resolve } from "node:path";
+import { looksLikeMail, parseMail, parseTranscript, renderRecord, stamp } from "./messy.ts";
 
 export type CaseEvent = { n: number; at: string; channel: string; from: string; to: string; body: string; attachments: string[] };
 
@@ -14,6 +17,11 @@ export type Case = {
   // Layers that recognised the directory but failed to parse it. The case still loads on a later
   // layer, so these are the only sign that a file was read differently than written.
   warnings?: string[];
+  // Attachments that do not live in <case>/attachments, such as files extracted from an .eml:
+  // file name -> the folder whose attachments/ holds it.
+  attachmentRoots?: Record<string, string>;
+  // Files and folders the loader did not read, listed in ANSWER.md so nothing disappears silently.
+  unread?: string[];
 };
 
 // Status, Updated and Completed reveal how the case ended, so they never reach the agent.
@@ -148,34 +156,76 @@ function tryMarkdown(dir: string, strict: boolean): Case | null {
 
 const fileStamp = (path: string) => statSync(path).mtime.toISOString().slice(0, 19).replace("T", " ") + " UTC";
 
+const EVENT_FILE = /\.(eml|txt)$/i;
+const CONTEXT_FILE = /\.(json|csv|md)$/i;
+
+// Attachments inside .eml files are written here, so the attachment reader can open them like any
+// other case file. The path depends only on the case folder, so two loads agree.
+function mailStage(dir: string): string {
+  return join(tmpdir(), "case-agent-mail", createHash("sha1").update(resolve(dir)).digest("hex").slice(0, 12));
+}
+
+type Draft = Omit<CaseEvent, "n" | "at"> & { date: Date | null; mtime: string };
+
+// One event per message file: an email (.eml, or .txt with mail headers) gives sender, recipient,
+// date, subject and attachments; a file named like a call transcript becomes a Call event. JSON,
+// CSV and Markdown files are records and notes, so they go into the case details instead.
 function tryLoose(dir: string): Case | null {
   if (existsSync(join(dir, "history.md"))) return null;
-  const files = readdirSync(dir).filter(
-    (f) => !f.startsWith(".") && f !== "index.md" && /\.(eml|txt|json|csv)$/.test(f)
-  );
-  if (files.length === 0) return null;
-  const events: CaseEvent[] = files.map((f, i) => {
+  const entries = readdirSync(dir, { withFileTypes: true }).filter((e) => !e.name.startsWith(".") && e.name !== "index.md");
+  const files = entries.filter((e) => e.isFile()).map((e) => e.name).sort();
+  const eventFiles = files.filter((f) => EVENT_FILE.test(f));
+  if (eventFiles.length === 0) return null;
+
+  const stage = mailStage(dir);
+  const roots: Record<string, string> = {};
+  const drafts: Draft[] = eventFiles.map((f) => {
     const path = join(dir, f);
-    const content = readFileSync(path, "utf8");
-    const isCall = /call|transcript/i.test(f);
-    return {
-      n: i + 1,
-      at: fileStamp(path),
-      channel: isCall ? "Call" : "Email",
-      from: "",
-      to: "",
-      body: content,
-      attachments: extractAttachmentLinks(content),
-    };
+    const raw = readFileSync(path, "utf8");
+    const mtime = fileStamp(path);
+    if (/\.eml$/i.test(f) || looksLikeMail(raw)) {
+      const mail = parseMail(raw);
+      const names = mail.attachments.map((a) => {
+        const name = `${f}--${a.name}`;
+        mkdirSync(join(stage, "attachments"), { recursive: true });
+        writeFileSync(join(stage, "attachments", name), a.data);
+        roots[name] = stage;
+        return name;
+      });
+      const body = stripHiddenContent(`${mail.subject ? `Subject: ${mail.subject}\n\n` : ""}${mail.body}`).trim();
+      return { date: mail.date, mtime, channel: "Email", from: mail.from, to: mail.to, body, attachments: [...names, ...extractAttachmentLinks(mail.body)] };
+    }
+    const body = stripHiddenContent(raw).trim();
+    if (/call|transcript/i.test(f)) {
+      const t = parseTranscript(raw);
+      return { date: t.date, mtime, channel: "Call", from: t.from, to: t.to, body, attachments: extractAttachmentLinks(raw) };
+    }
+    return { date: null, mtime, channel: "Message", from: "", to: "", body, attachments: extractAttachmentLinks(raw) };
   });
+  // Dates order the events only when every file has one; otherwise the file names keep their order.
+  if (drafts.every((d) => d.date)) drafts.sort((a, b) => a.date!.getTime() - b.date!.getTime());
+  const events: CaseEvent[] = drafts.map(({ date, mtime, ...d }, i) => ({ ...d, n: i + 1, at: date ? stamp(date) : mtime }));
+
+  const index = existsSync(join(dir, "index.md")) ? readFileSync(join(dir, "index.md"), "utf8") : "";
+  const s = sections(index);
+  const records = files
+    .filter((f) => CONTEXT_FILE.test(f))
+    .map((f) => `### ${f}\n${stripHiddenContent(renderRecord(f, readFileSync(join(dir, f), "utf8"))).trim()}`);
+  const details = [stripHiddenContent(s.get("Case details") ?? "").trim(), ...records].filter(Boolean).join("\n\n");
+  const unread = [
+    ...files.filter((f) => !EVENT_FILE.test(f) && !CONTEXT_FILE.test(f)),
+    ...entries.filter((e) => e.isDirectory() && e.name !== "attachments").map((e) => `${e.name}/`),
+  ];
   return {
     id: basename(dir),
-    title: basename(dir),
-    details: "",
-    request: "",
+    title: index.match(/^#\s+(?:Case\s+[^:]+:\s*)?(.+)$/m)?.[1].trim() ?? events.find((e) => e.body.startsWith("Subject: "))?.body.split("\n")[0].slice("Subject: ".length).trim() ?? basename(dir),
+    details,
+    request: stripHiddenContent(s.get("Initial request") ?? "").trim(),
     events,
-    attachments: attachmentNames(dir),
+    attachments: [...attachmentNames(dir), ...Object.keys(roots)],
     layer: "loose",
+    ...(Object.keys(roots).length ? { attachmentRoots: roots } : {}),
+    ...(unread.length ? { unread } : {}),
   };
 }
 
