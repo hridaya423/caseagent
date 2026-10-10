@@ -54,12 +54,18 @@ export async function runCase(opts: {
   state.approvalOnFile = visible.some((e) => isAgency(e.from) && APPROVAL_ON_FILE.test(e.body));
   // Asking is not approval, and a reply is not approval either: the latest earlier-run request counts
   // only once a small model reads the landlord's replies to it as a clear yes.
-  const request = actionLog(state).findLast((a) => a.tool === "request_landlord_approval" && a.ok && a.run < state.runs.length);
+  // Without one, the agency's latest message to the landlord in the history is the request, so a
+  // landlord's "yes, go ahead" that the agent can already see counts in a first run too.
+  const own = actionLog(state).findLast((a) => a.tool === "request_landlord_approval" && a.ok && a.run < state.runs.length);
+  const asking = own ? undefined : visible.findLast((e) => isAgency(e.from) && /landlord/i.test(e.to) && e.body.trim());
+  const request = own
+    ? { seen: own.seen, text: `${String(own.input.scope ?? "")} (cost: ${String(own.input.cost ?? "unknown")})` }
+    : asking && { seen: asking.n, text: asking.body };
   const replies = request ? visible.filter((e) => e.n > request.seen && /landlord/i.test(e.from)) : [];
   if (!request || replies.length === 0) {
     state.landlordAnswer = undefined;
   } else if (state.landlordAnswer?.throughEvent !== replies[replies.length - 1].n || state.landlordAnswer.requestAfter !== request.seen) {
-    const asked = `${String(request.input.scope ?? "")} (cost: ${String(request.input.cost ?? "unknown")})`;
+    const asked = request.text;
     const answer = await classifyLandlordReply(client, opts.approvalModel ?? APPROVAL_MODEL, asked, replies.map((e) => `${e.at}\n${e.body}`), {
       onError: (error) => trace("approval_check_error", { error }),
       onUsage: (usage, model) => trace("approval_check_usage", { usage, model }),

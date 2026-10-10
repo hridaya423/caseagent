@@ -58,7 +58,11 @@ test("the scorecard counts escalations on cases that should not escalate, and ou
   assert.equal(results[0].judgement!.judgement_score, 0);
   assert.equal(results[0].incomplete, true);
   const card = scorecard(results, { runDir: "x", model: "fake" });
-  assert.match(card, /Escalated when it should not have \| 1 of 1 \(307\)/);
+  // A run that did not finish is a coverage failure, not an escalation the agent chose.
+  assert.match(card, /Escalated when it should not have \| 0 of 1 \|/);
+  assert.match(card, /\| 307 \|.*\(did not finish\)/);
+  const finished = await scoreAll({ runDir: runWith(["307"]), judge, only: ["307"] });
+  assert.match(scorecard(finished, { runDir: "x", model: "fake" }), /Escalated when it should not have \| 1 of 1 \(307\)/);
   assert.match(card, /Coverage \(an answer exists and the run finished\) \| 0 of 1/);
 });
 

@@ -212,7 +212,8 @@ export function scorecard(results: CaseResult[], meta: { runDir: string; model: 
   const critical = judged.filter((r) => r.judgement!.critical_hits.length > 0);
   const mean = (f: (j: Judgement) => number) => (judged.length ? (judged.reduce((a, r) => a + f(r.judgement!), 0) / judged.length).toFixed(2) : "n/a");
   const shouldNotEscalate = judged.filter((r) => r.expected !== "escalate");
-  const overEscalated = shouldNotEscalate.filter((r) => r.judgement!.agent_decision === "escalate");
+  // A run that did not finish ends in a system escalation; that is a coverage failure, not the agent's choice.
+  const overEscalated = shouldNotEscalate.filter((r) => !r.incomplete && r.judgement!.agent_decision === "escalate");
   const shouldEscalate = judged.filter((r) => r.expected === "escalate");
   const missedEscalation = shouldEscalate.filter((r) => r.judgement!.agent_decision !== "escalate");
   const mechChecked = results.filter((r) => r.mechanical !== null);
@@ -230,7 +231,7 @@ export function scorecard(results: CaseResult[], meta: { runDir: string; model: 
 
   const rows = results.map((r) => {
     const j = r.judgement;
-    const got = j ? j.agent_decision : r.status === "missing" ? "(no answer)" : "(judge error)";
+    const got = r.incomplete ? "(did not finish)" : j ? j.agent_decision : r.status === "missing" ? "(no answer)" : "(judge error)";
     const result = r.status === "judged" ? r.verdict : r.status === "missing" ? "fail" : "unscored";
     const note = r.mechanical?.length ? `MECHANICAL: ${r.mechanical.join("; ")}` : j ? (j.critical_hits[0] ? `CRITICAL: ${j.critical_hits[0]}` : j.reason) : (r.error ?? "");
     return `| ${r.id} | ${r.tier} | ${cell(r.title)} | ${r.expected} | ${got} | ${result} | ${j ? `${j.outcome_score}/${j.judgement_score}` : "-"} | ${cell(note)} |`;

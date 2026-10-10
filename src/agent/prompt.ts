@@ -131,7 +131,7 @@ export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[]
     `## Earlier events\n${earlier.length ? caseData(earlier.join("\n\n")) : "None."}`,
     `## Your earlier actions\n${actions.join("\n") || "None. This is the first run on this case."}`,
     ...(state.landlordAnswer
-      ? [`Automatic check of the landlord's reply to your latest approval request (through event ${String(state.landlordAnswer.throughEvent).padStart(3, "0")}): ${state.landlordAnswer.answer}. assign_contractor works only on approved.`]
+      ? [`Automatic check of the landlord's reply to the latest approval request (through event ${String(state.landlordAnswer.throughEvent).padStart(3, "0")}): ${state.landlordAnswer.answer}. assign_contractor works only on approved.`]
       : []),
     `## New events since your last run\n${fresh.length ? caseData(fresh.join("\n\n")) : "None."}`,
     "Decide the next step as Northbridge Lettings. Act with the tools, then end the run with exactly one of hold, escalate or close_case.",
