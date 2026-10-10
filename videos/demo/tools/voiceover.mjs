@@ -38,6 +38,6 @@ const clips = await Promise.all(SEGMENTS.map(async (s, i) => {
 
 const inputs = clips.flatMap((c) => ["-i", c.file]);
 const chains = clips.map((c, i) => `[${i + 1}:a]atempo=${c.tempo.toFixed(3)},adelay=${Math.round(c.at * 1000)}|${Math.round(c.at * 1000)}[a${i}]`);
-const mix = `${chains.join(";")};${clips.map((_, i) => `[a${i}]`).join("")}amix=inputs=${clips.length}:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11[a]`;
-execFileSync("ffmpeg", ["-v", "error", "-y", "-i", VIDEO, ...inputs, "-filter_complex", mix, "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", `${DIR}/demo-vo.mp4`]);
+const mix = `${chains.join(";")};${clips.map((_, i) => `[a${i}]`).join("")}amix=inputs=${clips.length}:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11,apad[a]`;
+execFileSync("ffmpeg", ["-v", "error", "-y", "-i", VIDEO, ...inputs, "-filter_complex", mix, "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-t", String(dur(VIDEO)), "-movflags", "+faststart", `${DIR}/demo-vo.mp4`]);
 console.log(`wrote ${DIR}/demo-vo.mp4`);
