@@ -1,0 +1,1042 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case Agent Runs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap">
+<style>
+/* Layout: header band with run picker and run actions, a job bar, two tabs (Run, Case). Cards on a wrapping grid. */
+:root {
+  --bg: #f3f5f8; --surface: #ffffff; --sunken: #f7f8fa; --ink: #17212b; --muted: #5d6a78; --line: #dde3ea;
+  --accent: #2a6496; --alt: #b26a00; --ok: #23794f; --bad: #b42318; --idle: #7c8796;
+  --p-tenant: #6a55c9; --p-landlord: #11806f; --p-contractor: #b0532f;
+  --f-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --r: 8px; --shadow: 0 6px 24px rgba(16, 24, 40, .12);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1318; --surface: #151c23; --sunken: #111820; --ink: #e5ebf1; --muted: #9aa7b5; --line: #26313c;
+    --accent: #74aee0; --alt: #e2a54b; --ok: #55c48f; --bad: #f08a7e; --idle: #8b97a6;
+    --p-tenant: #a99af0; --p-landlord: #4cc2ae; --p-contractor: #ec8b68; --shadow: 0 8px 28px rgba(0, 0, 0, .5); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1318; --surface: #151c23; --sunken: #111820; --ink: #e5ebf1; --muted: #9aa7b5; --line: #26313c;
+  --accent: #74aee0; --alt: #e2a54b; --ok: #55c48f; --bad: #f08a7e; --idle: #8b97a6;
+  --p-tenant: #a99af0; --p-landlord: #4cc2ae; --p-contractor: #ec8b68; --shadow: 0 8px 28px rgba(0, 0, 0, .5); color-scheme: dark;
+}
+:root {
+  --accent-soft: color-mix(in srgb, var(--accent) 11%, var(--surface));
+  --accent-mid: color-mix(in srgb, var(--accent) 38%, var(--surface));
+  --alt-soft: color-mix(in srgb, var(--alt) 13%, var(--surface));
+  --ok-soft: color-mix(in srgb, var(--ok) 12%, var(--surface));
+  --bad-soft: color-mix(in srgb, var(--bad) 12%, var(--surface));
+  --idle-soft: color-mix(in srgb, var(--idle) 14%, var(--surface));
+  --grid: color-mix(in srgb, var(--ink) 8%, transparent);
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-sans); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1280px; margin-inline: auto; padding: 20px 16px 48px; display: grid; gap: 18px; }
+h1, h2, h3, p { margin: 0; }
+button, select, input { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.head { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: var(--r); padding: 18px 20px 14px; display: grid; gap: 10px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.title { font-family: var(--f-serif); font-weight: 400; font-size: 30px; line-height: 1.15; text-wrap: balance; }
+.headrow { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.headrow > * { min-width: 0; }
+.grow { flex: 1 1 auto; }
+select, input { min-width: 0; }
+@media (max-width: 720px) {
+  .head { padding: 16px 14px 12px; }
+  .title { font-size: 24px; flex-basis: 100%; overflow-wrap: anywhere; }
+  .headrow > select, .headrow > input { flex: 1 1 100%; width: 100%; }
+  .headrow > .btn { flex: 1 1 auto; white-space: normal; }
+  .headrow > span.grow:empty { display: none; }
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
+.chip { font-size: 12px; color: var(--muted); background: var(--sunken); border: 1px solid var(--line); border-radius: 4px; padding: 2px 8px; overflow-wrap: anywhere; min-width: 0; }
+.chip b { color: var(--ink); font-weight: 500; }
+.chip code { font-family: var(--f-mono); color: var(--ink); }
+.chip.warn { background: var(--alt-soft); color: var(--ink); border-color: transparent; }
+.lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+select, input[type="text"], input[type="search"] { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); color: var(--ink); max-width: 100%; }
+.btn { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--accent); border-radius: var(--r); padding: 6px 12px; font-weight: 500; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.btn:hover:not(:disabled) { background: var(--accent-soft); }
+.btn.primary { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+.btn.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 85%, var(--ink)); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.small { padding: 3px 9px; font-size: 12px; }
+
+.confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--line); border-left: 3px solid var(--alt); background: var(--alt-soft); border-radius: var(--r); }
+.confirm p { flex: 1 1 22rem; }
+.jobbar { display: grid; gap: 8px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.jobtop { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.progress { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .4s ease-out; }
+.joblog { font-family: var(--f-mono); font-size: 12px; color: var(--muted); max-height: 110px; overflow: auto; white-space: pre-wrap; }
+.msg { padding: 10px 14px; border-radius: var(--r); background: var(--bad-soft); border: 1px solid var(--line); }
+
+.tabs { display: flex; gap: 18px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 2px; color: var(--muted); cursor: pointer; margin-bottom: -1px; font-size: 14px; }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
+.page { display: grid; gap: 18px; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.kpi { padding: 14px 18px; display: grid; gap: 6px; box-shadow: -1px 0 0 var(--line), 0 -1px 0 var(--line); }
+.kpi .k { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.kpi .k::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dot, var(--idle)); }
+.kpi .v { font-family: var(--f-serif); font-size: 30px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.kpi .n { font-size: 12px; color: var(--muted); }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 14px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; position: relative; }
+.card h2 { font-size: 16px; font-weight: 500; }
+.card h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 500; margin-top: 4px; }
+.note { font-size: 12px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+.stack { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--grid); }
+.stack i { display: block; height: 100%; }
+
+.tablewrap { overflow: auto; max-height: 560px; border: 1px solid var(--line); border-radius: var(--r); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: 11px; padding: 8px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--sunken); white-space: nowrap; z-index: 1; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; }
+.rows tbody tr { cursor: pointer; }
+.rows tbody tr:hover td { background: var(--sunken); }
+.rows tbody tr.sel td { background: var(--accent-soft); }
+.rows tbody tr.sel td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+.mono { font-family: var(--f-mono); font-size: 12px; }
+.tool { font-family: var(--f-mono); font-size: 12px; color: var(--accent); background: var(--accent-soft); padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; white-space: nowrap; padding: 2px 9px 2px 7px; border-radius: 999px; background: var(--idle-soft); }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--idle); }
+.pill.ok { background: var(--ok-soft); } .pill.ok::before { background: var(--ok); }
+.pill.acc { background: var(--accent-soft); } .pill.acc::before { background: var(--accent); }
+.pill.alt { background: var(--alt-soft); } .pill.alt::before { background: var(--alt); }
+.pill.bad { background: var(--bad-soft); } .pill.bad::before { background: var(--bad); }
+.muted { color: var(--muted); }
+@media (max-width: 720px) { .hide-sm { display: none; } }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); border: 1px solid var(--line); border-radius: var(--r); background: var(--sunken); overflow: hidden; }
+.fact { padding: 8px 12px; display: grid; gap: 2px; box-shadow: -1px 0 0 var(--line), 0 -1px 0 var(--line); }
+.fact .l { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.fact .v { overflow-wrap: anywhere; }
+.prose { line-height: 1.6; overflow-wrap: anywhere; }
+.quote { border-left: 2px solid var(--accent-mid); padding-left: 12px; }
+
+.flowwrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunken); }
+.flow { min-height: 380px; }
+.flow svg { display: block; font-family: var(--f-sans); }
+.flow .col { cursor: pointer; }
+.flow .col:hover .hit { fill: var(--grid); }
+.flow .col.sel .hit { fill: var(--accent-soft); }
+.lg-line { width: 18px; border-top: 2px solid var(--muted); display: inline-block; }
+.lg-line.dash { border-top-style: dashed; } .lg-line.dot { border-top-style: dotted; border-top-width: 3px; }
+.lg-sq { width: 9px; height: 9px; background: var(--accent); transform: rotate(45deg); display: inline-block; }
+.lg-ring { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--alt); display: inline-block; }
+.lg-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--idle); display: inline-block; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 6px 10px; font-size: 12px; max-width: 300px; z-index: 5; display: grid; gap: 2px; }
+.tip b { font-weight: 500; }
+.tip .k { color: var(--muted); }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; }
+.step { display: grid; grid-template-columns: 3.6rem 16px 1fr; gap: 10px; padding-bottom: 14px; }
+.step .t { font-size: 12px; color: var(--muted); text-align: right; padding-top: 2px; font-variant-numeric: tabular-nums; }
+.node { position: relative; display: flex; justify-content: center; }
+.node::before { content: ""; position: absolute; top: 14px; bottom: -14px; width: 1px; background: var(--line); }
+.step:last-child .node::before { display: none; }
+.node::after { content: ""; width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; background: var(--surface); border: 2px solid var(--idle); position: relative; }
+.step[data-kind="model"] .node::after { border-color: var(--accent); background: var(--accent-soft); }
+.step[data-kind="tool"] .node::after { border-color: var(--ok); background: var(--ok-soft); }
+.step[data-kind="tool"][data-ok="false"] .node::after, .step[data-kind="error"] .node::after, .step[data-kind="auto_escalate"] .node::after { border-color: var(--bad); background: var(--bad-soft); }
+.step .b { display: grid; gap: 6px; min-width: 0; }
+.step .h { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.step .h strong { font-weight: 500; }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--f-mono); font-size: 12px; line-height: 1.55; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 12px; max-height: 300px; overflow: auto; }
+.tracebox { max-height: 760px; overflow: auto; padding-right: 4px; }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--sunken); }
+.seg button { appearance: none; border: 0; background: none; font-family: var(--f-mono); font-size: 12px; padding: 5px 12px; color: var(--muted); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--accent); font-weight: 500; }
+.doc { display: flex; flex-direction: column; gap: 8px; line-height: 1.6; max-height: 680px; overflow: auto; padding: 14px 18px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--r); }
+.doc > * { flex-shrink: 0; }
+.doc h1 { font-family: var(--f-serif); font-weight: 400; font-size: 20px; }
+.doc h2 { font-size: 14px; font-weight: 500; color: var(--accent); padding-top: 8px; border-top: 1px solid var(--line); margin-top: 6px; }
+.doc h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 500; }
+.doc ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 2px; }
+.doc p { overflow-wrap: anywhere; }
+.doc b { font-weight: 600; }
+.doc code { font-family: var(--f-mono); font-size: 12px; background: var(--surface); padding: 0 4px; border-radius: 3px; }
+.doc .tablewrap { max-height: none; overflow-y: visible; background: var(--surface); }
+.doc th { position: static; }
+.doc td { white-space: normal; min-width: 4rem; vertical-align: top; }
+.empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--r); overflow-wrap: anywhere; }
+
+/* Entities (data model) */
+.erwrap { border: 1px solid var(--line); border-radius: var(--r); background: var(--sunken); overflow: hidden; }
+.er svg { display: block; width: 100%; height: auto; font-family: var(--f-sans); }
+.er .tnode { cursor: pointer; }
+.er .tnode:focus { outline: none; }
+.er .tnode:focus-visible .box { stroke: var(--ink) !important; stroke-width: 2.5px !important; stroke-dasharray: 4 2; }
+.er .tnode:hover .box { stroke-width: 2.5px; }
+.typechips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tchip { appearance: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 3px 10px 3px 8px; font: inherit; font-size: 12px; cursor: pointer; max-width: 100%; }
+.tchip .dot, .entchip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--idle)); flex: none; }
+.tchip .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+.tchip:hover { background: var(--sunken); }
+.tchip[aria-pressed="true"] { border-color: var(--c, var(--accent)); background: color-mix(in srgb, var(--c, var(--accent)) 13%, var(--surface)); font-weight: 500; }
+.casechips { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 4px; }
+button.chip { appearance: none; font: inherit; font-size: 12px; cursor: pointer; }
+.casechip { font-family: var(--f-mono); color: var(--accent); padding: 0 6px; }
+.casechip:hover { background: var(--accent-soft); }
+.attrs { font-size: 12px; color: var(--muted); min-width: 12rem; }
+.attrs span + span::before { content: " · "; color: var(--line); }
+.attrs b { font-weight: 400; color: var(--ink); }
+.etable td { vertical-align: top; }
+.etable td:first-child { font-weight: 500; overflow-wrap: anywhere; min-width: 9rem; }
+.entgroups { display: grid; gap: 10px; }
+.entgroup { display: grid; gap: 6px; }
+.entgroup h3 { margin: 0; }
+.entchip { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); text-align: left; }
+.entchip[aria-pressed="true"] { border-color: var(--c, var(--accent)); background: color-mix(in srgb, var(--c, var(--accent)) 13%, var(--surface)); }
+span.entchip { cursor: help; }
+@media (prefers-reduced-motion: reduce) { .progress i { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <p class="eyebrow">Case agent · local runs</p>
+    <div class="headrow">
+      <h1 class="title grow">Case Agent Runs</h1>
+      <label class="lbl" for="run-pick">Run</label>
+      <select id="run-pick" aria-label="Run"></select>
+      <button class="btn" id="refresh" type="button">Reload</button>
+    </div>
+    <ul class="chips" id="chips"></ul>
+    <div class="headrow" id="actions">
+      <span class="lbl">Re-run</span>
+      <select id="mode" aria-label="Run mode">
+        <option value="to-end">To end state (resume through holds)</option>
+        <option value="stage">One stage (first run only)</option>
+        <option value="next">Next stage (resume from saved state)</option>
+      </select>
+      <button class="btn" id="rerun-ran" type="button">Re-run cases in this run</button>
+      <button class="btn" id="rerun-sel" type="button" disabled>Re-run selected (0)</button>
+      <button class="btn" id="rerun-all" type="button">Run all 50 cases</button>
+      <button class="btn" id="rerun-eval" type="button" hidden>Re-run process eval</button>
+      <span class="grow"></span>
+      <input type="text" id="new-name" placeholder="new-run-name" aria-label="New run name" size="16">
+      <button class="btn" id="new-run" type="button">New run</button>
+    </div>
+  </header>
+
+  <div id="confirm" class="confirm" hidden>
+    <p id="confirm-text"></p>
+    <button class="btn primary" id="confirm-yes" type="button">Start</button>
+    <button class="btn" id="confirm-no" type="button">Cancel</button>
+  </div>
+  <div id="error" class="msg" hidden></div>
+  <div id="jobbar" class="jobbar" hidden>
+    <div class="jobtop"><strong id="job-title">Job</strong><span class="pill" id="job-pill">running</span><span class="muted" id="job-count"></span></div>
+    <div class="progress"><i id="job-progress"></i></div>
+    <div class="joblog" id="job-log"></div>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" data-tab="run" aria-selected="true">Run overview</button>
+    <button class="tab" role="tab" data-tab="case" aria-selected="false">Case</button>
+    <button class="tab" role="tab" data-tab="entities" aria-selected="false">Data model</button>
+  </nav>
+
+  <section class="page" data-page="run">
+    <div class="kpis" id="kpis"></div>
+    <div class="card">
+      <div class="headrow"><h2 class="grow">Where each case ended</h2><div class="legend" id="status-legend"></div></div>
+      <div class="stack" id="status-stack"></div>
+    </div>
+    <div class="card">
+      <div class="headrow">
+        <h2 class="grow" id="table-title">Cases</h2>
+        <input type="search" id="search" placeholder="Search case or title" aria-label="Search cases">
+        <select id="status-filter" aria-label="Filter by status"><option value="">All statuses</option></select>
+      </div>
+      <p class="note" id="table-note">Select a row to open the case. Tick cases to re-run them together.</p>
+      <div class="tablewrap">
+        <table class="rows" id="cases-table">
+          <thead><tr id="cases-head"></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" data-page="case" hidden>
+    <div id="case-empty" class="empty">Pick a case from the run overview.</div>
+    <div id="case-body" hidden>
+      <div class="page">
+        <div class="card">
+          <div class="headrow">
+            <div class="grow" style="display:grid;gap:4px">
+              <p class="eyebrow" id="c-eyebrow">Case</p>
+              <h2 id="c-title" style="font-family:var(--f-serif);font-weight:400;font-size:24px">—</h2>
+              <p class="note" id="c-prop"></p>
+            </div>
+            <span id="c-pill"></span>
+            <button class="btn primary" id="c-rerun" type="button">Re-run this case</button>
+            <button class="btn" id="c-next" type="button">Resume next stage</button>
+          </div>
+          <div class="facts" id="c-facts"></div>
+          <h3>Agent's outcome</h3>
+          <p class="prose quote" id="c-outcome"></p>
+          <div id="c-attempts"></div>
+        </div>
+
+        <div class="card" id="ent-card" hidden>
+          <h2>Entities in this case</h2>
+          <p class="note">Things found in this case's history. Select one to jump to the first event that mentions it.</p>
+          <div class="entgroups" id="c-ents"></div>
+        </div>
+
+        <div class="card" id="flow-card">
+          <h2>Case flow and the agent's actions</h2>
+          <div class="legend" id="flow-legend"></div>
+          <div class="flowwrap" id="flow-wrap"><div class="flow" id="flow"></div></div>
+          <p class="note">Each column is one event in the real case history. The top lane shows the actions our agent took, placed after the last event it had seen. Shaded columns are events the agent saw.</p>
+        </div>
+
+        <div class="grid2">
+          <div class="card" id="event-card">
+            <div class="headrow"><h2 class="grow" id="ev-title">Event</h2><span id="ev-pill"></span></div>
+            <div class="facts" id="ev-facts"></div>
+            <pre id="ev-body"></pre>
+          </div>
+          <div class="card">
+            <h2>Trace</h2>
+            <p class="note">Every model call and tool call this run logged, newest run last.</p>
+            <div class="tracebox"><ol class="steps" id="trace"></ol></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="headrow">
+            <h2 class="grow" id="file-title">ANSWER.md</h2>
+            <div class="seg" role="group" aria-label="File">
+              <button type="button" data-file="answer" aria-pressed="true">ANSWER.md</button>
+              <button type="button" data-file="reasoning" aria-pressed="false">REASONING.md</button>
+            </div>
+          </div>
+          <div class="doc" id="doc"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" data-page="entities" hidden>
+    <div id="ent-msg" class="empty" hidden></div>
+    <div id="ent-body" class="page" hidden>
+      <div class="card">
+        <div class="headrow"><h2 class="grow">Entities found across cases</h2><span class="note" id="ent-gen"></span></div>
+        <p class="note">Each case links to the kinds of thing below. Edge labels give the relationship and how many a case can have. Select a type to list its entities.</p>
+        <div class="erwrap"><div class="er" id="er"></div></div>
+      </div>
+      <div class="card">
+        <div class="headrow">
+          <h2 class="grow" id="ent-title">Entities</h2>
+          <input type="search" id="ent-search" placeholder="Search entities" aria-label="Search entities">
+        </div>
+        <div class="typechips" id="ent-types" role="group" aria-label="Entity type"></div>
+        <p class="note" id="ent-desc"></p>
+        <p class="note" id="ent-status" role="status" hidden></p>
+        <div class="tablewrap">
+          <table class="etable" id="ent-table">
+            <thead><tr><th>Label</th><th>Key attributes</th><th>Cases</th><th class="num">Mentions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const fmt = (n) => Number(n || 0).toLocaleString('en-GB');
+  const store = { get(k) { try { return localStorage.getItem('ca.' + k); } catch { return null; } }, set(k, v) { try { localStorage.setItem('ca.' + k, v); } catch {} } };
+
+  const STATUS = {
+    closed: { label: 'Closed', cls: 'ok', color: 'var(--ok)' },
+    escalated: { label: 'Escalated', cls: 'acc', color: 'var(--accent)' },
+    hold: { label: 'On hold', cls: 'alt', color: 'var(--alt)' },
+    open: { label: 'Open', cls: '', color: 'var(--idle)' },
+    incomplete: { label: 'Incomplete', cls: 'bad', color: 'var(--bad)' },
+    not_run: { label: 'Not run', cls: '', color: 'var(--grid)' },
+  };
+  const pill = (status, text) => { const s = STATUS[status] || STATUS.open; return el('span', 'pill ' + s.cls, text || s.label); };
+
+  const S = { config: null, runs: [], runId: store.get('run'), run: null, caseKey: null, caseData: null, selected: new Set(), file: 'answer', event: null, tab: 'run', job: null, pending: null,
+    ent: { data: null, err: null, loading: false, type: store.get('etype') } };
+
+  async function api(path, body) {
+    const opt = body === undefined ? {} : { method: 'POST', headers: { 'content-type': 'application/json', 'x-case-agent': '1' }, body: JSON.stringify(body) };
+    const r = await fetch('/api/' + path, opt);
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || `Request failed (${r.status})`);
+    return data;
+  }
+  function showError(msg) { const e = $('error'); e.hidden = !msg; e.textContent = msg || ''; }
+
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  function showTab(t) {
+    S.tab = t;
+    document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
+    document.querySelectorAll('.page[data-page]').forEach((p) => { p.hidden = p.dataset.page !== t; });
+    if (t === 'case') drawCase();
+    if (t === 'entities') loadEntities();
+  }
+
+  // ---------- loading ----------
+  async function loadConfig() { S.config = await api('config'); }
+  async function loadRuns() {
+    S.runs = await api('runs');
+    const pick = $('run-pick');
+    pick.replaceChildren(...S.runs.map((r) => new Option(`${r.label}  ·  ${r.kind === 'eval' ? 'process eval' : 'batch'}  ·  ${new Date(r.updated).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}`, r.id)));
+    if (!S.runs.some((r) => r.id === S.runId)) S.runId = S.runs[0]?.id ?? null;
+    pick.value = S.runId ?? '';
+  }
+  async function loadRun() {
+    if (!S.runId) { S.run = null; drawRun(); return; }
+    S.run = await api('runs/' + encodeURIComponent(S.runId));
+    drawRun();
+    if (S.caseKey && S.run.cases.some((c) => c.key === S.caseKey)) await loadCase(S.caseKey, false);
+  }
+  async function loadCase(key, switchTab = true) {
+    S.caseKey = key;
+    S.caseData = await api(`runs/${encodeURIComponent(S.runId)}/cases/${encodeURIComponent(key)}`);
+    if (switchTab) { S.event = null; showTab('case'); } else if (S.tab === 'case') drawCase();
+    drawTable();
+  }
+  $('run-pick').addEventListener('change', async () => { S.runId = $('run-pick').value; store.set('run', S.runId); S.caseKey = null; S.selected.clear(); await loadRun().catch((e) => showError(e.message)); });
+  $('refresh').addEventListener('click', () => reloadAll());
+  async function reloadAll() {
+    showError('');
+    S.ent.data = null; S.ent.err = null;
+    if (S.tab === 'entities') loadEntities();
+    try { await loadConfig(); await loadRuns(); await loadRun(); } catch (e) { showError(e.message); }
+  }
+
+  // ---------- run overview ----------
+  function header() {
+    const c = S.config, r = S.run?.run, rep = S.run?.report;
+    const chip = (label, val, mono, warn) => { const li = el('li', 'chip' + (warn ? ' warn' : '')); li.append(document.createTextNode(label ? label + ' ' : '')); li.append(el(mono ? 'code' : 'b', null, val)); return li; };
+    const chips = [];
+    if (r) chips.push(chip('Folder', r.dir, true));
+    if (rep) { chips.push(chip('Model', rep.model, true)); if (rep.code_revision) chips.push(chip('Revision', String(rep.code_revision).slice(0, 7), true)); if (rep.pass_1 != null) chips.push(chip('pass@1', Math.round(rep.pass_1 * 100) + '%')); if ((rep.trials || 1) > 1 && rep.pass_k != null) chips.push(chip(`pass^${rep.trials}`, Math.round(rep.pass_k * 100) + '%')); }
+    else if (c) chips.push(chip('Model', c.model, true));
+    if (c) chips.push(chip('Cases folder', c.casesDir, true));
+    if (c && !c.hasKey) chips.push(chip('', 'ANSWERS read only: set ANTHROPIC_API_KEY in .env and restart to re-run', false, true));
+    $('chips').replaceChildren(...chips);
+    const isEval = r?.kind === 'eval', busy = !!(S.job && S.job.status === 'running');
+    const noKey = !c?.hasKey;
+    $('mode').disabled = isEval; $('rerun-ran').hidden = isEval; $('rerun-sel').hidden = isEval; $('rerun-all').hidden = isEval;
+    $('rerun-eval').hidden = !isEval || !c?.canRunEval;
+    for (const id of ['rerun-ran', 'rerun-sel', 'rerun-all', 'rerun-eval', 'c-rerun', 'c-next']) $(id).disabled = noKey || busy || !r;
+    $('rerun-sel').disabled ||= !S.selected.size;
+    $('rerun-sel').textContent = `Re-run selected (${S.selected.size})`;
+    $('rerun-all').textContent = `Run all ${c?.cases ?? ''} cases`.replace('  ', ' ');
+  }
+
+  function drawRun() {
+    header();
+    const cases = S.run?.cases ?? [];
+    const ran = cases.filter((c) => c.status !== 'not_run');
+    const count = (k) => ran.filter((c) => c.status === k).length;
+    const tokens = ran.reduce((a, c) => a + c.input_tokens + c.output_tokens, 0);
+    const isEval = S.run?.run.kind === 'eval';
+    const kpis = isEval ? [
+      ['Samples', ran.length, `${new Set(ran.map((c) => c.case_id)).size} cases`, 'var(--accent)'],
+      ['Match reference action', ran.filter((c) => c.structural_match).length, 'Same tool and fixed arguments', 'var(--ok)'],
+      ['Different action', ran.filter((c) => !c.structural_match && c.run_outcome === 'completed').length, 'Needs semantic review', 'var(--alt)'],
+      ['Model failures', ran.filter((c) => c.run_outcome === 'model_failure').length, 'Never ended the run', 'var(--bad)'],
+      ['Runtime failures', ran.filter((c) => c.run_outcome === 'runtime_failure').length, 'API or loader errors, unmeasured', 'var(--bad)'],
+      ['Tokens', tokens >= 10000 ? (tokens / 1000).toFixed(1) + 'K' : fmt(tokens), 'Input plus output', 'var(--idle)'],
+    ] : [
+      ['Cases run', ran.length, `of ${cases.length} available`, 'var(--accent)'],
+      ['Closed', count('closed'), 'All final checks answered', 'var(--ok)'],
+      ['Escalated', count('escalated'), 'Handed to a person', 'var(--accent)'],
+      ['On hold', count('hold'), 'Waiting on a reply that never came', 'var(--alt)'],
+      ['Incomplete', count('incomplete'), 'Errors or turn limit hit', 'var(--bad)'],
+      ['Tokens', tokens >= 10000 ? (tokens / 1000).toFixed(1) + 'K' : fmt(tokens), `${fmt(ran.reduce((a, c) => a + c.model_turns, 0))} model turns`, 'var(--idle)'],
+    ];
+    $('kpis').replaceChildren(...kpis.map(([k, v, n, dot]) => { const d = el('div', 'kpi'); d.style.setProperty('--dot', dot); d.append(el('span', 'k', k), el('span', 'v', String(v)), el('span', 'n', n)); return d; }));
+    const order = ['closed', 'escalated', 'hold', 'open', 'incomplete', 'not_run'];
+    const totals = order.map((k) => [k, cases.filter((c) => c.status === k).length]).filter(([, n]) => n);
+    $('status-stack').replaceChildren(...totals.map(([k, n]) => { const i = el('i'); i.style.width = (100 * n / Math.max(1, cases.length)) + '%'; i.style.background = STATUS[k].color; i.title = `${STATUS[k].label}: ${n}`; return i; }));
+    $('status-legend').replaceChildren(...totals.map(([k, n]) => { const s = el('span'); const sw = el('span', 'sw'); sw.style.background = STATUS[k].color; s.append(sw, document.createTextNode(`${STATUS[k].label} ${n}`)); return s; }));
+    const f = $('status-filter'); const keep = f.value;
+    f.replaceChildren(new Option('All statuses', ''), ...totals.map(([k, n]) => new Option(`${STATUS[k].label} (${n})`, k))); f.value = totals.some(([k]) => k === keep) ? keep : '';
+    $('table-title').textContent = isEval ? 'Eval samples' : 'Cases';
+    $('table-note').textContent = isEval ? 'Select a row to open the sample. Re-run the whole process eval from the header.' : 'Select a row to open the case. Tick cases to re-run them together.';
+    drawTable();
+  }
+
+  $('search').addEventListener('input', drawTable);
+  $('status-filter').addEventListener('change', drawTable);
+  function drawTable() {
+    const cases = S.run?.cases ?? [];
+    const isEval = S.run?.run.kind === 'eval';
+    const q = $('search').value.trim().toLowerCase(), st = $('status-filter').value;
+    const cols = isEval
+      ? ['Sample', 'Case', 'Event', 'Agent action', 'Reference', 'Outcome', 'Tokens']
+      : ['', 'Case', 'Title', 'Status', 'Stages', 'Actions', 'Last action', 'Tokens', 'Updated'];
+    $('cases-head').replaceChildren(...cols.map((c, i) => { const th = el('th', /Tokens|Actions|Stages|Event/.test(c) ? 'num' : '', c); if (['Tokens', 'Updated', 'Stages'].includes(c)) th.classList.add('hide-sm'); return th; }));
+    const rows = cases.filter((c) => (!st || c.status === st) && (!q || c.case_id.includes(q) || (c.title || '').toLowerCase().includes(q) || (c.sample_id || '').includes(q)));
+    $('cases-table').querySelector('tbody').replaceChildren(...rows.map((c) => {
+      const tr = el('tr'); tr.dataset.key = c.key; if (c.key === S.caseKey) tr.className = 'sel';
+      const td = (text, cls) => el('td', cls, text);
+      const toolCell = () => { const t = el('td'); if (c.last_tool) t.append(el('span', 'tool', c.last_tool)); else t.append(el('span', 'muted', '—')); return t; };
+      if (isEval) {
+        const ref = el('td'); ref.append(c.structural_match ? el('span', 'pill ok', 'Match') : el('span', 'pill alt', 'Different'));
+        const out = el('td'); out.append(el('span', 'pill ' + (c.run_outcome === 'completed' ? 'ok' : 'bad'), c.run_outcome || '—'));
+        tr.append(td(c.sample_id, 'mono'), td(c.case_id, 'mono'), td(String(c.step ?? ''), 'num'), toolCell(), ref, out, td(fmt(c.input_tokens + c.output_tokens), 'num hide-sm'));
+      } else {
+        const box = el('td'); const cb = el('input'); cb.type = 'checkbox'; cb.checked = S.selected.has(c.case_id); cb.setAttribute('aria-label', 'Select case ' + c.case_id);
+        cb.addEventListener('click', (e) => { e.stopPropagation(); cb.checked ? S.selected.add(c.case_id) : S.selected.delete(c.case_id); header(); });
+        box.append(cb);
+        const status = el('td'); status.append(pill(c.status, c.status === 'not_run' ? 'Not run' : c.status_label));
+        const upd = c.updated ? new Date(c.updated).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+        tr.append(box, td(c.case_id, 'mono'), td(c.title), status, td(c.runs ? String(c.runs) : '—', 'num hide-sm'), td(c.actions ? String(c.actions) : '—', 'num'), toolCell(), td(c.status === 'not_run' ? '—' : fmt(c.input_tokens + c.output_tokens), 'num hide-sm'), td(upd, 'hide-sm muted'));
+      }
+      return tr;
+    }));
+  }
+  $('cases-table').addEventListener('click', (e) => { const tr = e.target.closest('tbody tr'); if (tr) loadCase(tr.dataset.key).catch((er) => showError(er.message)); });
+
+  // ---------- re-runs ----------
+  function ask(text, go) { S.pending = go; $('confirm-text').textContent = text; $('confirm').hidden = false; $('confirm-yes').focus(); }
+  $('confirm-no').addEventListener('click', () => { $('confirm').hidden = true; S.pending = null; });
+  $('confirm-yes').addEventListener('click', async () => { $('confirm').hidden = true; const go = S.pending; S.pending = null; if (go) try { await go(); } catch (e) { showError(e.message); } });
+  const modeText = () => ({ 'to-end': 'to their end state', stage: 'for one stage', next: 'for their next stage' })[$('mode').value];
+
+  async function start(cases, mode) {
+    showError('');
+    const r = await api(`runs/${encodeURIComponent(S.runId)}/rerun`, { cases, mode });
+    watch(r.job, r.new_run);
+  }
+  $('rerun-ran').addEventListener('click', () => { const n = (S.run?.cases ?? []).filter((c) => c.status !== 'not_run').length; ask(`Re-run the ${n} cases already in this run ${modeText()}? Each case's previous answer is kept under history/. This calls the model for every case.`, () => start('ran', $('mode').value)); });
+  $('rerun-sel').addEventListener('click', () => ask(`Re-run ${S.selected.size} selected case${S.selected.size === 1 ? '' : 's'} ${modeText()}?`, () => start([...S.selected], $('mode').value)));
+  $('rerun-all').addEventListener('click', () => ask(`Run all ${S.config?.cases} cases ${modeText()} into ${S.run?.run.dir}? This is the Reality Test style batch and calls the model many times.`, () => start('all', $('mode').value)));
+  $('rerun-eval').addEventListener('click', () => ask('Re-run the process eval? Results go to a new folder under runs/process-eval/ and this one stays as it is.', () => start([], 'eval')));
+  $('c-rerun').addEventListener('click', () => { const c = S.caseData; if (c) ask(`Re-run case ${c.case_id} ${modeText()}? The current answer is kept under history/.`, () => start([c.case_id], $('mode').value)); });
+  $('c-next').addEventListener('click', () => { const c = S.caseData; if (c) ask(`Resume case ${c.case_id} with the next outside reply?`, () => start([c.case_id], 'next')); });
+  $('new-run').addEventListener('click', async () => {
+    try { const r = await api('runs', { name: $('new-name').value.trim() }); $('new-name').value = ''; S.runId = r.id; store.set('run', r.id); await loadRuns(); await loadRun(); } catch (e) { showError(e.message); }
+  });
+
+  let poll = null;
+  function watch(job, newRun) {
+    S.job = job; drawJob(); header();
+    clearInterval(poll);
+    let lastDone = job.done;
+    poll = setInterval(async () => {
+      try {
+        S.job = await api('jobs/' + job.id); drawJob();
+        if (S.job.done !== lastDone || S.job.status !== 'running') { lastDone = S.job.done; await loadRun(); }
+        if (S.job.status !== 'running') {
+          clearInterval(poll); header();
+          if (newRun) { await loadRuns(); if (S.runs.some((r) => r.id === newRun)) { S.runId = newRun; $('run-pick').value = newRun; await loadRun(); } }
+        }
+      } catch (e) { showError(e.message); clearInterval(poll); }
+    }, 2000);
+  }
+  function drawJob() {
+    const j = S.job; $('jobbar').hidden = !j; if (!j) return;
+    $('job-title').textContent = j.mode === 'eval' ? 'Process eval' : `Re-run · ${j.cases.length} case${j.cases.length === 1 ? '' : 's'} · ${j.mode}`;
+    const p = $('job-pill'); p.className = 'pill ' + (j.status === 'running' ? 'acc' : j.status === 'done' && !j.failed ? 'ok' : 'bad'); p.textContent = j.status === 'running' ? 'Running' : j.status === 'done' ? (j.failed ? `Done, ${j.failed} with problems` : 'Done') : 'Stopped';
+    $('job-count').textContent = j.mode === 'eval' ? '' : `${j.done} of ${j.total} finished`;
+    $('job-progress').style.width = (j.mode === 'eval' && j.status === 'running' ? 35 : 100 * j.done / j.total) + '%';
+    $('job-log').textContent = j.log.slice(-12).map((l) => `${l.t.slice(11, 19)}  ${l.msg}`).join('\n');
+    $('job-log').scrollTop = 1e9;
+  }
+
+  // ---------- case view ----------
+  const LANES = [
+    { id: 'Agent', label: 'Our agent', color: 'var(--accent)' },
+    { id: 'Tenant', label: 'Tenant', color: 'var(--p-tenant)' },
+    { id: 'Agency', label: 'Agency (real)', color: 'var(--idle)' },
+    { id: 'Landlord', label: 'Landlord', color: 'var(--p-landlord)' },
+    { id: 'Contractor', label: 'Contractor', color: 'var(--p-contractor)' },
+    { id: 'Internal', label: 'Agency workflow', color: 'var(--idle)' },
+  ];
+  const STAGES = { triage: 'Triage', approval: 'Landlord approval', provider: 'Provider selection', works: 'Provider assigned', visit: 'Visit booked', result: 'Work result', checks: 'Final checks', closed: 'Closed' };
+  const STAGE_I = Object.keys(STAGES);
+  const laneColor = (id) => (LANES.find((l) => l.id === id) || LANES[5]).color;
+  const TOOL_COLOR = { send_message: 'var(--accent)', request_landlord_approval: 'var(--p-landlord)', assign_contractor: 'var(--p-contractor)', add_note: 'var(--idle)', hold: 'var(--alt)', escalate: 'var(--bad)', close_case: 'var(--ok)' };
+
+  function drawCase() {
+    const d = S.caseData;
+    $('case-empty').hidden = !!d; $('case-body').hidden = !d;
+    if (!d) return;
+    const st = d.state, info = d.info || { title: d.case_id, events: [] };
+    const status = !st ? 'not_run' : st.incomplete ? 'incomplete' : st.status.kind;
+    $('c-eyebrow').textContent = `Case ${d.case_id}${info.source_role ? ' · reported by ' + info.source_role.toLowerCase() : ''}${S.run?.run.kind === 'eval' ? ' · eval sample ' + d.key.replaceAll('~', '/') : ''}`;
+    $('c-title').textContent = info.title || d.case_id;
+    $('c-prop').textContent = info.property || '';
+    $('c-pill').replaceChildren(pill(status, st ? (STATUS[status]?.label + (st.status.kind === 'hold' ? ': ' + st.status.reason : '')) : 'Not run'));
+    $('c-next').hidden = !(st && st.status.kind === 'hold') || S.run?.run.kind === 'eval';
+    $('c-rerun').hidden = S.run?.run.kind === 'eval';
+    const models = d.trace.filter((r) => r.kind === 'model');
+    const facts = [
+      ['Stages run', st ? String(st.runs) : '—'], ['Events seen', st ? `${st.seen} of ${info.events.length}` : '—'],
+      ['Actions', st ? String(st.actions.length) : '—'], ['Failed or refused', st ? String(st.actions.filter((a) => !a.ok).length) : '—'],
+      ['Model turns', String(models.length)], ['Tokens', fmt(models.reduce((a, r) => a + (r.input_tokens || 0) + (r.output_tokens || 0), 0))],
+    ];
+    $('c-facts').replaceChildren(...facts.map(([l, v]) => { const f = el('div', 'fact'); f.append(el('span', 'l', l), el('span', 'v', v)); return f; }));
+    let outcome = 'This case has not been run in this folder yet.';
+    if (st) {
+      const s = st.status;
+      if (s.kind === 'escalated') outcome = s.summary || (s.decision_needed ? 'Decision needed: ' + s.decision_needed : 'Escalated to a person.');
+      else if (s.kind === 'closed') outcome = `Closed (${s.checks.outcome.replaceAll('_', ' ')}). Confirmed by ${s.checks.work_confirmed_by}; landlord informed: ${s.checks.landlord_informed ? 'yes' : 'no'}; keys ${s.checks.keys.replaceAll('_', ' ')}; invoice ${s.checks.invoice.replaceAll('_', ' ')}.`;
+      else if (s.kind === 'hold') outcome = `On hold: ${s.reason}.`;
+      else outcome = 'Open: the last stage did not end with hold, escalate or close.';
+      const end = [...st.actions].reverse().find((a) => ['hold', 'escalate', 'close_case'].includes(a.tool) && a.ok);
+      if (end?.input?.reason) outcome += '\n\nWhy: ' + end.input.reason;
+    }
+    $('c-outcome').textContent = outcome; $('c-outcome').style.whiteSpace = 'pre-wrap';
+    const at = $('c-attempts');
+    if (d.attempts.length) {
+      const h = el('h3', null, `Earlier attempts (${d.attempts.length})`);
+      const ul = el('ul', 'chips');
+      d.attempts.slice(0, 8).forEach((a) => { const li = el('li', 'chip'); li.append(document.createTextNode(a.stamp.slice(0, 16).replace('T', ' ') + ' ')); li.append(pill(a.status, a.status_label)); ul.append(li); });
+      at.replaceChildren(h, ul);
+    } else at.replaceChildren();
+    drawCaseEntities();
+    drawLegend(); drawFlow(); drawEvent(); drawTrace(); drawDoc();
+  }
+
+  function drawLegend() {
+    const item = (node, text) => { const s = el('span'); s.append(node, document.createTextNode(text)); return s; };
+    const sw = (c, round) => { const e = el('span', 'sw'); e.style.background = c; if (round) e.style.borderRadius = '50%'; return e; };
+    $('flow-legend').replaceChildren(
+      item(sw('var(--accent)', true), 'Agent message'), item(sw('var(--p-landlord)', true), 'Approval request'), item(sw('var(--p-contractor)', true), 'Contractor assigned'),
+      item(sw('var(--alt)', true), 'Hold'), item(sw('var(--bad)', true), 'Escalate'), item(sw('var(--ok)', true), 'Close'),
+      item(el('span', 'lg-line'), 'Email'), item(el('span', 'lg-line dash'), 'SMS'), item(el('span', 'lg-line dot'), 'Call'),
+      item(el('span', 'lg-sq'), 'Milestone'), item(el('span', 'lg-ring'), 'Hold (real)'),
+    );
+  }
+
+  function tipIn(card) { let t = card.querySelector('.tip'); if (!t) { t = el('div', 'tip'); t.hidden = true; card.append(t); } return t; }
+  function place(tip, card, ev) {
+    const r = card.getBoundingClientRect(); tip.hidden = false;
+    let x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 14;
+    if (x + tip.offsetWidth > r.width - 8) x = ev.clientX - r.left - tip.offsetWidth - 14;
+    tip.style.left = Math.max(4, x) + 'px'; tip.style.top = Math.max(4, y) + 'px';
+  }
+
+  function drawFlow() {
+    const box = $('flow'), wrap = $('flow-wrap'), card = $('flow-card');
+    box.replaceChildren();
+    const d = S.caseData, evs = d.info?.events ?? [], st = d.state;
+    if (!evs.length) { box.append(el('div', 'empty', d.info?.error ? 'Case could not be loaded: ' + d.info.error : 'This case is not in the cases folder, so there is no history to draw.')); return; }
+    const n = evs.length, avail = wrap.clientWidth || 900;
+    const left = 118, right = 20, top = 44, laneH = 44, bottom = 34;
+    const step = Math.max(20, (avail - left - right) / n);
+    const W = Math.max(avail, left + right + step * n), H = top + laneH * LANES.length + bottom;
+    const svg = d3.select(box).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `Event flow for case ${d.case_id}`);
+    const x = (i) => left + step * (i + 0.5);
+    const idx = (num) => evs.findIndex((e) => e.n === num);
+    const ly = (id) => top + laneH * LANES.findIndex((l) => l.id === id) + laneH / 2;
+    const seen = st ? st.seen : 0, firstSeen = st ? st.initialSeen : 0;
+
+    // seen region
+    if (seen > 0) { const k = Math.max(0, idx(seen)); svg.append('rect').attr('x', left).attr('y', top).attr('width', step * (k + 1)).attr('height', laneH * LANES.length).style('fill', 'var(--accent-soft)').style('opacity', .55); }
+    // stage band
+    const segs = [];
+    evs.forEach((e, i) => { const last = segs.at(-1); if (last && last.st === e.stage) last.end = i; else segs.push({ st: e.stage, start: i, end: i }); });
+    segs.forEach((s) => {
+      const k = STAGE_I.indexOf(s.st), x0 = left + step * s.start, x1 = left + step * (s.end + 1);
+      svg.append('rect').attr('x', x0 + 1).attr('y', 8).attr('width', Math.max(1, x1 - x0 - 2)).attr('height', 20).attr('rx', 3).style('fill', `color-mix(in srgb, var(--accent) ${14 + k * 9}%, var(--surface))`);
+      const t = svg.append('text').attr('x', x0 + 7).attr('y', 22).attr('font-size', 11).style('fill', k >= 5 ? 'var(--surface)' : 'var(--ink)').text(STAGES[s.st]);
+      if (t.node().getComputedTextLength() > x1 - x0 - 12) t.remove();
+    });
+    svg.append('text').attr('x', 12).attr('y', 22).attr('font-size', 11).style('fill', 'var(--muted)').text('Stage');
+    // lanes
+    LANES.forEach((l, i) => {
+      const y0 = top + laneH * i;
+      if (i === 0) svg.append('rect').attr('x', 0).attr('y', y0).attr('width', W).attr('height', laneH).style('fill', 'var(--accent-soft)').style('opacity', .6);
+      svg.append('line').attr('x1', left).attr('x2', W - right).attr('y1', y0 + laneH / 2).attr('y2', y0 + laneH / 2).style('stroke', 'var(--line)');
+      if (i) svg.append('line').attr('x1', 0).attr('x2', W).attr('y1', y0).attr('y2', y0).style('stroke', 'var(--line)').style('opacity', .6);
+      svg.append('circle').attr('cx', 16).attr('cy', y0 + laneH / 2).attr('r', 4).style('fill', l.color);
+      svg.append('text').attr('x', 26).attr('y', y0 + laneH / 2).attr('dy', '0.35em').attr('font-size', 12).style('fill', 'var(--ink)').style('font-weight', i === 0 ? 600 : 400).text(l.label);
+    });
+    // day ticks
+    let lastX = -1e9, lastDay = '';
+    evs.forEach((e, i) => {
+      const day = e.at.slice(0, 10); if (day === lastDay) return; lastDay = day;
+      const xi = left + step * i;
+      svg.append('line').attr('x1', xi).attr('x2', xi).attr('y1', top).attr('y2', H - bottom + 4).style('stroke', 'var(--line)').style('stroke-dasharray', '1 3');
+      if (xi - lastX > 54) { const dt = new Date(e.at.replace(' UTC', 'Z').replace(' ', 'T')); svg.append('text').attr('x', xi + 2).attr('y', H - bottom + 18).attr('font-size', 11).style('fill', 'var(--muted)').text(isNaN(dt) ? day : dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })); lastX = xi; }
+    });
+    // first-run cut
+    if (firstSeen < n) {
+      const xc = left + step * (firstSeen <= 0 ? 0 : idx(firstSeen) + 1);
+      svg.append('line').attr('x1', xc).attr('x2', xc).attr('y1', top).attr('y2', H - bottom + 4).style('stroke', 'var(--alt)').style('stroke-width', 1.5).style('stroke-dasharray', '5 4');
+      const t = svg.append('text').attr('y', top - 4).attr('font-size', 11).style('fill', 'var(--alt)').style('font-weight', 600).text(`First stage saw events 1–${firstSeen}`);
+      const tw = t.node().getComputedTextLength(); t.attr('x', xc + 6 + tw > W - right ? xc - 6 - tw : xc + 6);
+    }
+    // real events
+    const tip = tipIn(card);
+    const cols = svg.append('g').selectAll('g').data(evs).join('g').attr('class', (e) => 'col' + (e.n === S.event ? ' sel' : ''))
+      .on('click', (ev, e) => { S.event = e.n; drawFlow(); drawEvent(); drawCaseEntities(); })
+      .on('mousemove', (ev, e) => { tip.replaceChildren(el('span', 'k', `Event ${e.n} · ${e.at}`), el('b', null, `${e.channel} · ${e.from_raw} → ${e.to_raw}`), document.createTextNode(e.headline.slice(0, 150) + (e.headline.length > 150 ? '…' : ''))); place(tip, card, ev); })
+      .on('mouseleave', () => { tip.hidden = true; });
+    cols.append('rect').attr('class', 'hit').attr('x', (e, i) => left + step * i).attr('y', top + laneH).attr('width', step).attr('height', laneH * (LANES.length - 1)).attr('rx', 3).style('fill', 'transparent');
+    cols.each(function (e, i) {
+      const g = d3.select(this), xi = x(i);
+      if (e.kind === 'message' && e.from_party !== e.to_party && e.to_party !== 'Internal') {
+        const y1 = ly(e.from_party), y2 = ly(e.to_party), dir = y2 > y1 ? 1 : -1, col = laneColor(e.from_party);
+        g.append('line').attr('x1', xi).attr('x2', xi).attr('y1', y1).attr('y2', y2 - dir * 6).style('stroke', col).style('stroke-width', 2).style('stroke-linecap', 'round').style('stroke-dasharray', e.channel === 'SMS' ? '4 3' : e.channel === 'Call' ? '1.5 3' : null);
+        g.append('path').attr('d', `M${xi - 4.5},${y2 - dir * 8} L${xi + 4.5},${y2 - dir * 8} L${xi},${y2 - dir} Z`).style('fill', col);
+        g.append('circle').attr('cx', xi).attr('cy', y1).attr('r', 3.5).style('fill', col);
+      } else if (e.kind === 'message') {
+        g.append('circle').attr('cx', xi).attr('cy', ly(e.from_party)).attr('r', 4).style('fill', laneColor(e.from_party));
+      } else {
+        const y = ly('Internal');
+        if (e.kind === 'milestone') g.append('rect').attr('x', xi - 4.5).attr('y', y - 4.5).attr('width', 9).attr('height', 9).attr('transform', `rotate(45 ${xi} ${y})`).style('fill', 'var(--accent)');
+        else if (e.kind === 'hold') g.append('circle').attr('cx', xi).attr('cy', y).attr('r', 4.5).style('fill', 'var(--surface)').style('stroke', 'var(--alt)').style('stroke-width', 2);
+        else g.append('circle').attr('cx', xi).attr('cy', y).attr('r', 3).style('fill', 'var(--idle)');
+      }
+      g.append('text').attr('x', xi).attr('y', H - bottom).attr('dy', '-0.3em').attr('text-anchor', 'middle').attr('font-size', 9).style('fill', 'var(--muted)').style('opacity', step >= 24 || e.n % 5 === 0 ? 1 : 0).text(e.n);
+    });
+    // agent actions
+    if (st) {
+      const byCol = new Map();
+      st.actions.forEach((a) => { const k = Math.max(0, idx(a.afterEvent)); if (!byCol.has(k)) byCol.set(k, []); byCol.get(k).push(a); });
+      const yA = ly('Agent');
+      for (const [k, acts] of byCol) {
+        const xi = left + step * (k + 1);
+        const span = Math.min(step * 0.9, 12 * acts.length), x0 = xi - span / 2;
+        acts.forEach((a, j) => {
+          const ax = acts.length === 1 ? xi : x0 + (span * j) / (acts.length - 1);
+          const g = svg.append('g').style('cursor', 'default')
+            .on('mousemove', (ev) => { tip.replaceChildren(el('span', 'k', `Stage ${a.run} · after event ${a.afterEvent}`), el('b', null, a.tool + (a.ok ? '' : ' (failed or refused)')), document.createTextNode(String(a.input?.reason ?? a.result).slice(0, 220))); place(tip, card, ev); })
+            .on('mouseleave', () => { tip.hidden = true; });
+          const col = TOOL_COLOR[a.tool] || 'var(--accent)';
+          if (a.tool === 'escalate') g.append('path').attr('d', `M${ax},${yA - 7} L${ax + 7},${yA + 5} L${ax - 7},${yA + 5} Z`).style('fill', col);
+          else if (a.tool === 'close_case') g.append('rect').attr('x', ax - 6).attr('y', yA - 6).attr('width', 12).attr('height', 12).attr('rx', 2).style('fill', col);
+          else if (a.tool === 'hold') g.append('circle').attr('cx', ax).attr('cy', yA).attr('r', 5.5).style('fill', 'var(--surface)').style('stroke', col).style('stroke-width', 2.5);
+          else g.append('circle').attr('cx', ax).attr('cy', yA).attr('r', 5).style('fill', col);
+          if (!a.ok) g.append('line').attr('x1', ax - 6).attr('x2', ax + 6).attr('y1', yA + 6).attr('y2', yA - 6).style('stroke', 'var(--bad)').style('stroke-width', 2);
+          if (a.tool === 'send_message' && a.ok && a.input?.to) {
+            const target = { tenant: 'Tenant', landlord: 'Landlord', contractor: 'Contractor' }[a.input.to];
+            if (target) g.append('line').attr('x1', ax).attr('x2', ax).attr('y1', yA + 6).attr('y2', ly(target) - 5).style('stroke', col).style('stroke-width', 1.2).style('stroke-dasharray', '2 3').style('opacity', .7);
+          }
+        });
+      }
+    }
+    if (S.event) { const i = idx(S.event); if (i >= 0) { const xi = x(i); if (xi > wrap.scrollLeft + wrap.clientWidth - 40 || xi < wrap.scrollLeft + left) wrap.scrollLeft = Math.max(0, xi - wrap.clientWidth / 2); } }
+  }
+
+  function drawEvent() {
+    const d = S.caseData, evs = d.info?.events ?? [];
+    if (!evs.length) { $('ev-title').textContent = 'Event'; $('ev-facts').replaceChildren(); $('ev-body').textContent = '—'; $('ev-pill').replaceChildren(); return; }
+    let e = evs.find((x) => x.n === S.event); if (!e) e = evs.find((x) => x.n === d.state?.seen) || evs[0];
+    $('ev-title').textContent = `Event ${e.n} of ${evs.length}`;
+    const f = [['When', e.at], ['Channel', e.channel], ['From', e.from_raw], ['To', e.to_raw], ['Stage', STAGES[e.stage] || 'Triage']];
+    $('ev-facts').replaceChildren(...f.map(([l, v]) => { const x = el('div', 'fact'); x.append(el('span', 'l', l), el('span', 'v', v)); return x; }));
+    $('ev-body').textContent = e.body;
+    const seen = d.state ? e.n <= d.state.seen : false;
+    $('ev-pill').replaceChildren(el('span', 'pill ' + (seen ? 'ok' : 'alt'), seen ? 'Seen by the agent' : 'Not seen by the agent'));
+  }
+
+  function drawTrace() {
+    const tr = S.caseData.trace;
+    if (!tr.length) { $('trace').replaceChildren(el('li', 'empty', 'No trace for this case yet.')); return; }
+    const t0 = new Date(tr[0].t).getTime();
+    $('trace').replaceChildren(...tr.map((e) => {
+      const li = el('li', 'step'); li.dataset.kind = e.kind; if (e.kind === 'tool') li.dataset.ok = String(!!e.ok);
+      li.append(el('span', 't', '+' + ((new Date(e.t).getTime() - t0) / 1000).toFixed(1) + 's'), el('span', 'node'));
+      const b = el('div', 'b'), h = el('div', 'h');
+      const label = { run_start: `Stage ${e.run ?? ''} started`, model: `Model turn ${e.turn ?? ''}`, tool: 'Tool executed', error: 'Error', auto_escalate: 'Turn limit reached' }[e.kind] || e.kind;
+      h.append(el('strong', null, label));
+      if (e.tool) h.append(el('span', 'tool', e.tool));
+      if (e.kind === 'tool') h.append(el('span', 'pill ' + (e.ok ? 'ok' : 'bad'), e.ok ? 'ok' : 'failed'));
+      if (e.kind === 'model') h.append(el('span', 'muted', `${fmt(e.input_tokens)} in · ${fmt(e.output_tokens)} out · ${e.stop}`));
+      b.append(h); if (e.detail) b.append(el('pre', null, e.detail));
+      li.append(b); return li;
+    }));
+  }
+
+  function inline(parent, text) {
+    for (const p of text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g)) {
+      if (!p) continue;
+      if (p.startsWith('**') && p.endsWith('**')) parent.append(el('b', null, p.slice(2, -2)));
+      else if (p.startsWith('`') && p.endsWith('`')) parent.append(el('code', null, p.slice(1, -1)));
+      else parent.append(document.createTextNode(p));
+    }
+  }
+  function renderMd(box, md) {
+    box.replaceChildren();
+    if (!md) { box.append(el('p', 'muted', 'No file for this case yet.')); return; }
+    let list = null, para = [], table = null;
+    const flushPara = () => { if (para.length) { const p = el('p'); inline(p, para.join(' ')); box.append(p); para = []; } };
+    for (const raw of md.split('\n')) {
+      const line = raw.trimEnd();
+      if (/^\|/.test(line)) {
+        flushPara(); list = null;
+        const cells = line.replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+        if (cells.every((c) => /^:?-*:?$/.test(c))) continue;
+        if (!table) { const w = el('div', 'tablewrap'), t = el('table'), th = el('thead'), tb = el('tbody'); t.append(th, tb); w.append(t); box.append(w); table = { th, tb, head: true }; }
+        const tr = el('tr'); cells.forEach((c) => { const x = el(table.head ? 'th' : 'td'); inline(x, c); tr.append(x); });
+        (table.head ? table.th : table.tb).append(tr); table.head = false; continue;
+      }
+      table = null;
+      const h = line.match(/^(#{1,3})\s+(.*)$/);
+      if (h) { flushPara(); list = null; box.append(el('h' + h[1].length, null, h[2])); continue; }
+      const li = line.match(/^\s*[-*]\s+(.*)$/);
+      if (li) { flushPara(); if (!list) { list = el('ul'); box.append(list); } const item = el('li'); inline(item, li[1]); list.append(item); continue; }
+      if (!line.trim()) { flushPara(); list = null; continue; }
+      list = null; para.push(line.trim());
+    }
+    flushPara();
+  }
+  document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => { S.file = b.dataset.file; drawDoc(); }));
+  function drawDoc() {
+    document.querySelectorAll('.seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.file === S.file)));
+    $('file-title').textContent = S.file === 'answer' ? 'ANSWER.md' : 'REASONING.md';
+    renderMd($('doc'), S.file === 'answer' ? S.caseData.answer_md : S.caseData.reasoning_md);
+  }
+  // ---------- entities (data model) ----------
+  const ETYPE_COLOR = { property: 'var(--p-landlord)', issue: 'var(--bad)', organisation: 'var(--p-contractor)', staff: 'var(--p-tenant)', job_ref: 'var(--idle)', money: 'var(--ok)', visit: 'var(--alt)', document: 'var(--accent)' };
+  const ETYPE_LABEL = { property: 'Property', issue: 'Issue', organisation: 'Organisation', staff: 'Staff', job_ref: 'Job reference', money: 'Money', visit: 'Visit', document: 'Document' };
+  const ETYPE_ORDER = Object.keys(ETYPE_LABEL);
+  const typeColor = (t) => ETYPE_COLOR[t] || 'var(--idle)';
+  const typeLabel = (t) => S.ent.data?.types?.find((x) => x.type === t)?.label || ETYPE_LABEL[t] || t;
+  const money = (v) => { const n = Number(v); return isNaN(n) ? String(v) : '£' + n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  const present = (v) => v !== '' && v != null;
+  function attrPairs(ent) {
+    const a = ent.attrs || {};
+    if (ent.type === 'money') {
+      const out = [];
+      if (present(a.amount)) out.push(['amount', money(a.amount)]);
+      if (present(a.kind)) out.push(['kind', String(a.kind).replaceAll('_', ' ')]);
+      if (present(a.vat)) out.push(['vat', String(a.vat).replaceAll('_', ' ')]);
+      for (const [k, v] of Object.entries(a)) if (!['amount', 'kind', 'vat'].includes(k) && present(v)) out.push([k.replaceAll('_', ' '), String(v)]);
+      return out;
+    }
+    return Object.entries(a).filter(([, v]) => present(v)).map(([k, v]) => [k.replaceAll('_', ' '), String(v)]);
+  }
+  const attrText = (ent) => attrPairs(ent).map(([k, v]) => `${k}: ${v}`).join('\n');
+
+  async function loadEntities(force) {
+    if (S.ent.loading) return;
+    if (S.ent.data && !force) { drawEntities(); return; }
+    S.ent.loading = true; S.ent.err = null; drawEntities();
+    try {
+      const d = await api('entities');
+      if (!Array.isArray(d.types) || !Array.isArray(d.entities)) throw new Error('the server sent an unexpected response');
+      d.relationships = Array.isArray(d.relationships) ? d.relationships : [];
+      S.ent.data = d;
+    } catch (e) { S.ent.data = null; S.ent.err = e.message; }
+    S.ent.loading = false;
+    if (S.tab === 'entities') drawEntities();
+    if (S.tab === 'case' && S.caseData) drawCaseEntities();
+  }
+
+  function drawEntities() {
+    const msg = $('ent-msg'), body = $('ent-body'), d = S.ent.data;
+    if (!d) {
+      body.hidden = true; msg.hidden = false;
+      msg.textContent = S.ent.loading ? 'Loading the data model…'
+        : S.ent.err ? `Could not load the data model: ${S.ent.err}. The /api/entities endpoint may not be available on this server yet. Restart the dashboard after updating, then press Reload.`
+        : 'The data model has not been loaded yet.';
+      return;
+    }
+    if (!d.types.length) { body.hidden = true; msg.hidden = false; msg.textContent = 'No entities have been found in the cases yet.'; return; }
+    msg.hidden = true; body.hidden = false;
+    if (!d.types.some((t) => t.type === S.ent.type)) S.ent.type = (d.types.find((t) => t.count > 0) || d.types[0]).type;
+    const gen = d.generated_at ? new Date(d.generated_at) : null;
+    $('ent-gen').textContent = gen && !isNaN(gen) ? 'Built ' + gen.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+    drawER(); drawTypeChips(); drawEntityTable();
+  }
+
+  function selectType(t) {
+    S.ent.type = t; store.set('etype', t); $('ent-status').hidden = true;
+    drawER(); drawTypeChips(); drawEntityTable();
+  }
+
+  function drawTypeChips() {
+    const d = S.ent.data;
+    $('ent-types').replaceChildren(...d.types.map((t) => {
+      const b = el('button', 'tchip'); b.type = 'button'; b.style.setProperty('--c', typeColor(t.type));
+      b.setAttribute('aria-pressed', String(t.type === S.ent.type));
+      b.append(el('span', 'dot'), document.createTextNode(t.label), el('span', 'n', fmt(t.count)));
+      b.addEventListener('click', () => selectType(t.type));
+      return b;
+    }));
+  }
+
+  function drawER() {
+    const box = $('er'), d = S.ent.data;
+    box.replaceChildren();
+    const types = d.types;
+    const W = Math.max(260, box.clientWidth || 800);
+    const narrow = W < 640;
+    const nw = narrow ? Math.min(136, W * 0.42) : 140, nh = 44;
+    const cw = narrow ? 70 : 104, chh = narrow ? 44 : 52;
+    let H, cx, cy, pos;
+    if (!narrow) {
+      H = 420; cx = W / 2; cy = H / 2;
+      const rx = Math.min(W / 2 - nw / 2 - 14, 400), ry = H / 2 - nh / 2 - 14;
+      pos = types.map((t, i) => { const a = -Math.PI / 2 + (2 * Math.PI * i) / types.length; return { x: cx + rx * Math.cos(a), y: cy + ry * Math.sin(a) }; });
+    } else {
+      const gap = 56; H = 16 + gap * types.length; cx = 8 + cw / 2; cy = H / 2;
+      pos = types.map((t, i) => ({ x: W - 8 - nw / 2, y: 8 + gap * i + gap / 2 }));
+    }
+    const caseCount = new Set(d.entities.flatMap((e) => e.cases || [])).size;
+    const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'group').attr('aria-label', 'Entity relationship diagram: each case links to these entity types');
+    const edges = svg.append('g'), nodes = svg.append('g');
+    types.forEach((t, i) => {
+      const p = pos[i], sel = t.type === S.ent.type, col = typeColor(t.type);
+      const r = d.relationships.find((x) => x.to === t.type);
+      const text = r ? `${r.label} · ${r.cardinality}` : '';
+      const g = edges.append('g');
+      if (!narrow) {
+        g.append('line').attr('x1', cx).attr('y1', cy).attr('x2', p.x).attr('y2', p.y).style('stroke', sel ? col : 'var(--line)').style('stroke-width', sel ? 2 : 1.25);
+        if (text) {
+          const lx = cx + (p.x - cx) * 0.56, ly = cy + (p.y - cy) * 0.56;
+          const bg = g.append('rect').attr('rx', 3).style('fill', 'var(--sunken)');
+          const tx = g.append('text').attr('x', lx).attr('y', ly).attr('dy', '0.35em').attr('text-anchor', 'middle').attr('font-size', 10.5).style('fill', sel ? 'var(--ink)' : 'var(--muted)').text(text);
+          const bb = tx.node().getBBox(); bg.attr('x', bb.x - 4).attr('y', bb.y - 2).attr('width', bb.width + 8).attr('height', bb.height + 4);
+        }
+      } else {
+        const x0 = cx + cw / 2, x1 = p.x - nw / 2, mx = (x0 + x1) / 2;
+        g.append('path').attr('d', `M${x0},${cy} C${mx},${cy} ${mx},${p.y} ${x1},${p.y}`).style('fill', 'none').style('stroke', sel ? col : 'var(--line)').style('stroke-width', sel ? 2 : 1.25);
+        if (text) {
+          const bg = g.append('rect').attr('rx', 3).style('fill', 'var(--sunken)');
+          const tx = g.append('text').attr('x', x1 - 6).attr('y', p.y - 6).attr('text-anchor', 'end').attr('font-size', 10).style('fill', sel ? 'var(--ink)' : 'var(--muted)').text(text);
+          if (tx.node().getComputedTextLength() > x1 - x0 - 30) tx.text(r.cardinality);
+          const bb = tx.node().getBBox(); bg.attr('x', bb.x - 3).attr('y', bb.y - 1).attr('width', bb.width + 6).attr('height', bb.height + 2);
+        }
+      }
+      const n = nodes.append('g').attr('class', 'tnode').attr('tabindex', 0).attr('role', 'button')
+        .attr('aria-pressed', String(sel)).attr('aria-label', `${t.label}: ${t.count} entities${r ? ', ' + text : ''}`)
+        .attr('transform', `translate(${p.x - nw / 2},${p.y - nh / 2})`)
+        .on('click', () => selectType(t.type))
+        .on('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectType(t.type); } });
+      n.append('title').text(t.description || t.label);
+      n.append('rect').attr('class', 'box').attr('width', nw).attr('height', nh).attr('rx', 6)
+        .style('fill', sel ? `color-mix(in srgb, ${col} 16%, var(--surface))` : 'var(--surface)').style('stroke', col).style('stroke-width', sel ? 2.5 : 1.5);
+      n.append('rect').attr('x', 0).attr('y', 6).attr('width', 4).attr('height', nh - 12).attr('rx', 2).style('fill', col);
+      const lab = n.append('text').attr('x', 12).attr('y', 18).attr('font-size', 12.5).style('fill', 'var(--ink)').style('font-weight', 500).text(t.label);
+      while (lab.node().getComputedTextLength() > nw - 18 && lab.text().length > 3) lab.text(lab.text().slice(0, -2) + '…');
+      n.append('text').attr('x', 12).attr('y', 34).attr('font-size', 11).style('fill', 'var(--muted)').text(`${fmt(t.count)} ${t.count === 1 ? 'entity' : 'entities'}`);
+    });
+    const c = nodes.append('g').attr('transform', `translate(${cx - cw / 2},${cy - chh / 2})`);
+    c.append('title').text('Case: one property maintenance case history');
+    c.append('rect').attr('width', cw).attr('height', chh).attr('rx', 8).style('fill', 'var(--accent)');
+    c.append('text').attr('x', cw / 2).attr('y', chh / 2 - (caseCount ? 5 : 0)).attr('dy', '0.35em').attr('text-anchor', 'middle').attr('font-size', narrow ? 13 : 15).style('fill', 'var(--surface)').style('font-weight', 600).text('Case');
+    if (caseCount) c.append('text').attr('x', cw / 2).attr('y', chh / 2 + 12).attr('dy', '0.35em').attr('text-anchor', 'middle').attr('font-size', 10.5).style('fill', 'var(--surface)').style('opacity', .85).text(`${fmt(caseCount)} cases`);
+  }
+
+  $('ent-search').addEventListener('input', () => { if (S.ent.data) drawEntityTable(); });
+  function drawEntityTable() {
+    const d = S.ent.data, t = d.types.find((x) => x.type === S.ent.type);
+    const q = $('ent-search').value.trim().toLowerCase();
+    $('ent-title').textContent = t ? t.label : 'Entities';
+    $('ent-desc').textContent = t?.description || '';
+    const all = d.entities.filter((e) => e.type === S.ent.type);
+    const rows = all.filter((e) => !q || (e.label || '').toLowerCase().includes(q) || attrText(e).toLowerCase().includes(q) || (e.cases || []).some((c) => String(c).includes(q)))
+      .sort((a, b) => (b.cases?.length || 0) - (a.cases?.length || 0) || String(a.label).localeCompare(String(b.label), 'en-GB'));
+    const LIMIT = 400, shown = rows.slice(0, LIMIT);
+    const tb = $('ent-table').querySelector('tbody');
+    if (!rows.length) { const tr = el('tr'), td = el('td', 'muted', all.length ? 'No entities match the search.' : 'No entities of this type.'); td.colSpan = 4; tr.append(td); tb.replaceChildren(tr); return; }
+    tb.replaceChildren(...shown.map((e) => {
+      const tr = el('tr');
+      const lab = el('td', null, e.label);
+      const at = el('td', 'attrs'); const pairs = attrPairs(e);
+      if (!pairs.length) at.append(el('span', null, '—'));
+      pairs.slice(0, 5).forEach(([k, v]) => { const s = el('span'); s.append(document.createTextNode(k + ': '), el('b', null, v.length > 70 ? v.slice(0, 68) + '…' : v)); at.append(s); });
+      if (pairs.length > 5 || pairs.some(([, v]) => v.length > 70)) at.title = attrText(e);
+      const cs = el('td'); const ids = e.cases || [];
+      cs.append(el('span', null, `${fmt(ids.length)} ${ids.length === 1 ? 'case' : 'cases'}`));
+      if (ids.length) {
+        const wrap = el('div', 'casechips');
+        ids.slice(0, 4).forEach((id) => { const b = el('button', 'chip casechip', id); b.type = 'button'; b.title = 'Open case ' + id; b.addEventListener('click', () => openCaseFromEntity(id, e.id)); wrap.append(b); });
+        if (ids.length > 4) wrap.append(el('span', 'note', `+${ids.length - 4} more`));
+        cs.append(wrap);
+      }
+      tr.append(lab, at, cs, el('td', 'num', fmt(e.mentions)));
+      return tr;
+    }));
+    if (rows.length > LIMIT) { const tr = el('tr'), td = el('td', 'muted', `Showing the first ${LIMIT} of ${fmt(rows.length)}. Narrow the search to see more.`); td.colSpan = 4; tr.append(td); tb.append(tr); }
+  }
+
+  async function openCaseFromEntity(caseId, entId) {
+    const note = $('ent-status'), cases = S.run?.cases ?? [];
+    const row = S.run?.run.kind === 'eval' ? cases.find((c) => c.case_id === caseId) : (cases.find((c) => c.key === caseId) || cases.find((c) => c.case_id === caseId));
+    if (!row) { note.textContent = `Case ${caseId} is not in the selected run${S.run ? ' (' + S.run.run.dir + ')' : ''}. Pick a run that includes it.`; note.hidden = false; return; }
+    note.hidden = true;
+    try { await loadCase(row.key); } catch (e) { showError(e.message); return; }
+    const ce = (S.caseData?.info?.entities || []).find((x) => x.id === entId);
+    if (ce?.events?.length) { S.event = ce.events[0]; drawFlow(); drawEvent(); drawCaseEntities(); }
+  }
+
+  function drawCaseEntities() {
+    const card = $('ent-card'), box = $('c-ents'), list = S.caseData?.info?.entities;
+    if (!Array.isArray(list)) { card.hidden = true; return; }
+    card.hidden = false;
+    if (!list.length) { box.replaceChildren(el('p', 'muted', 'No entities were found in this case.')); return; }
+    const order = [...(S.ent.data?.types?.map((t) => t.type) ?? []), ...ETYPE_ORDER];
+    const groups = new Map();
+    list.forEach((e) => { if (!groups.has(e.type)) groups.set(e.type, []); groups.get(e.type).push(e); });
+    const keys = [...groups.keys()].sort((a, b) => { const ia = order.indexOf(a), ib = order.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
+    box.replaceChildren(...keys.map((t) => {
+      const g = el('div', 'entgroup');
+      g.append(el('h3', null, `${typeLabel(t)} (${groups.get(t).length})`));
+      const ul = el('div', 'chips');
+      groups.get(t).forEach((e) => {
+        const evs = Array.isArray(e.events) ? e.events : [];
+        const tip = [attrText(e), evs.length ? `Events: ${evs.join(', ')}` : 'Not tied to an event'].filter(Boolean).join('\n');
+        const c = el(evs.length ? 'button' : 'span', 'chip entchip'); c.style.setProperty('--c', typeColor(t)); c.title = tip;
+        c.append(el('span', 'dot'), document.createTextNode(e.label));
+        if (evs.length) {
+          c.type = 'button'; c.setAttribute('aria-pressed', String(evs.includes(S.event)));
+          c.addEventListener('click', () => { S.event = evs[0]; drawFlow(); drawEvent(); drawCaseEntities(); });
+        }
+        ul.append(c);
+      });
+      g.append(ul); return g;
+    }));
+  }
+
+  let rsz; window.addEventListener('resize', () => { clearTimeout(rsz); rsz = setTimeout(() => { if (S.tab === 'case' && S.caseData) drawFlow(); if (S.tab === 'entities' && S.ent.data) drawER(); }, 150); });
+
+  // ---------- start ----------
+  (async () => {
+    await reloadAll();
+    try { const jobs = await api('jobs'); const live = jobs.find((j) => j.status === 'running'); if (live) watch(live); } catch {}
+  })();
+})();
+</script>
+</body>
+</html>

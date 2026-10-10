@@ -91,3 +91,13 @@ mkdir -p data/public && ln -s "$(cd ../HackatonPublicCases && pwd)/Property Mana
 - Real adapters for email, SMS and the agency's job system; the seam already exists in `runTool`.
 - A watch mode that ingests a new reply and resumes automatically, replacing `--next`.
 - A human-in-the-loop queue for escalations, writing a person's decision back into the case as an event.
+
+## Runs dashboard
+
+`npm run dashboard` starts a local dashboard at http://127.0.0.1:4317 (localhost only).
+
+- Reads every run under `runs/` (batch runs with `state/`, eval runs with `results.json`) plus `evals/results/`.
+- Shows all 50 public cases: status, flow diagram, trace, ANSWER/REASONING, and entities found in the case.
+- **Data model** tab: properties, issues, organisations, staff, job refs, money, visits and documents extracted from the cases (`GET /api/entities`).
+- Re-run one case, selected cases, or all 50 (modes: to-end, stage, next). The previous result is archived to `history/<case>/<stamp>/` first. Re-runs need `ANTHROPIC_API_KEY`.
+- Env: `DASHBOARD_PORT`, `CASES_DIR`, `RUNS_DIR`, `MODEL`, `DASHBOARD_CONCURRENCY`.
