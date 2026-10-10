@@ -128,5 +128,3 @@ Released under [Apache 2.0](LICENSE); third-party dependencies and data retain t
 - A working-product demo of about 60 seconds or less uploaded **inside the repository**.
 - LinkedIn and X launch-post URLs, each identifying the project and linking to this repository.
 - Team name, track, member names, public repo URL, frozen commit hash, results and video paths, in the submission form and optionally `SUBMISSION.md`.
-
-Those final artefacts were not committed at `4438a46`. Confirm the freeze deadline with organisers: the supplied guide names both 16:30 and 17:00 BST; prepare source/demo for the earlier time and preserve the submitted code and results.
