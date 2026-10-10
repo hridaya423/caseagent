@@ -90,7 +90,7 @@ test("a model that never ends the run is escalated to a person", async () => {
 test("processToEnd: hold, then close, then stop before the later events", async () => {
   const f = fake([
     [use("a", "hold", { waiting_for: "Waiting for Tenant", reason: "Asked the tenant to try a plunger." })],
-    [use("b", "close_case", { outcome: "resolved_without_work", work_confirmed_by: "tenant", landlord_informed: false, keys: "not_issued", invoice: "not_required", reason: "Tenant resolved it." })],
+    [use("b", "close_case", { outcome: "resolved_without_work", work_confirmed_by: "tenant [event 007]", landlord_informed: false, keys: "not_issued", invoice: "not_required", reason: "Tenant resolved it." })],
     [use("c", "hold", { waiting_for: "Waiting for Tenant", reason: "Should never run." })],
   ]);
   const out = mkdtempSync(join(tmpdir(), "to-end-"));

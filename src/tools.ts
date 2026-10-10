@@ -1,5 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { unsupported } from "./evidence.ts";
 import { HOLD_REASONS, type CaseState } from "./state.ts";
 
 export class Refusal extends Error {}
@@ -7,11 +8,18 @@ export class Refusal extends Error {}
 export type ToolOutcome = { ok: boolean; result: string; ends: boolean };
 export type ToolAdapter = (input: Record<string, unknown>, state: CaseState) => string;
 
+// What the agent could see in this run: the prompt text plus the text of attached documents, and
+// the numbers of the visible events. agent.ts always passes it; without it the evidence checks are skipped.
+export type ToolContext = { evidence: string; visibleEvents: Set<number> };
+
+// Every rule lives in a guard, which runs before apply or an adapter, so a real adapter cannot skip it.
+type Guard<I> = (state: CaseState, input: I, ctx?: ToolContext) => void;
+
 type Tool = {
   description: string;
   schema: z.ZodType;
   end: boolean;
-  guard?: (state: CaseState) => void;
+  guard?: Guard<Record<string, unknown>>;
   apply: (input: Record<string, unknown>, state: CaseState) => string;
 };
 
@@ -19,10 +27,46 @@ function tool<S extends z.ZodType>(d: {
   description: string;
   schema: S;
   end?: boolean;
-  guard?: (state: CaseState) => void;
+  guard?: Guard<z.infer<S>>;
   apply: (input: z.infer<S>, state: CaseState) => string;
 }): Tool {
-  return { description: d.description, schema: d.schema, end: d.end ?? false, guard: d.guard, apply: (input, state) => d.apply(input as z.infer<S>, state) };
+  return {
+    description: d.description,
+    schema: d.schema,
+    end: d.end ?? false,
+    guard: d.guard && ((state, input, ctx) => d.guard!(state, input as z.infer<S>, ctx)),
+    apply: (input, state) => d.apply(input as z.infer<S>, state),
+  };
+}
+
+function requireEvidence(text: string, ctx: ToolContext | undefined, what: string): void {
+  if (!ctx) return;
+  const { amounts, dates } = unsupported(text, ctx.evidence);
+  const named = [...amounts, ...dates];
+  if (named.length) {
+    throw new Refusal(
+      `${what} states ${named.join(", ")}, which no event, record or document in the case shows. State only amounts and dates from the case; write "plus VAT" rather than a total you worked out, and ask for a date rather than proposing one.`,
+    );
+  }
+}
+
+const normaliseText = (t: string) => t.replace(/\s+/g, " ").trim().toLowerCase();
+
+function checkMessage(state: CaseState, i: { to: string; text: string }, ctx?: ToolContext): void {
+  if (/\[event \d+\]/i.test(i.text)) throw new Refusal("the message text contains an event reference. Event references belong in reason only; rewrite the text without them.");
+  const same = state.actions.find((a) => a.ok && a.tool === "send_message" && a.input.to === i.to && normaliseText(String(a.input.text)) === normaliseText(i.text));
+  if (same) throw new Refusal(`the same message already went to the ${i.to} in run ${same.run}. Do not send it again; write only what is new, or send nothing.`);
+  requireEvidence(i.text, ctx, "the message");
+}
+
+// The person who confirmed the result must be traceable to an event the agent saw.
+function checkClose(state: CaseState, i: { keys: string; work_confirmed_by: string }, ctx?: ToolContext): void {
+  if (i.keys === "outstanding") throw new Refusal("keys are outstanding. Confirm the key return first, or hold the case.");
+  if (!ctx) return;
+  const cited = [...i.work_confirmed_by.matchAll(/event\s*0*(\d+)/gi)].map((m) => Number(m[1]));
+  if (!cited.some((n) => ctx.visibleEvents.has(n))) {
+    throw new Refusal('work_confirmed_by must cite the event that confirms the result, for example "contractor [event 027]". No event you can see is cited, so the result is not proven; hold the case or ask for confirmation.');
+  }
 }
 
 // The landlord answers in a later run, so a request made in this run does not count yet. A request
@@ -49,10 +93,8 @@ const TOOLS: Record<string, Tool> = {
       text: z.string().min(1),
       reason,
     }),
-    apply: (i) => {
-      if (/\[event \d+\]/i.test(i.text)) throw new Refusal("the message text contains an event reference. Event references belong in reason only; rewrite the text without them.");
-      return `${i.channel} to ${i.to} queued in the outbox`;
-    },
+    guard: checkMessage,
+    apply: (i) => `${i.channel} to ${i.to} queued in the outbox`,
   }),
   request_landlord_approval: tool({
     description: "Ask the landlord to approve work or a cost. Use this before any contractor visit or any spend.",
@@ -61,6 +103,7 @@ const TOOLS: Record<string, Tool> = {
       cost: z.string().min(1).describe('The known cost or quote, for example "£165 + VAT", or "unknown".'),
       reason,
     }),
+    guard: (_s, i, ctx) => requireEvidence(`${i.scope}\n${i.cost}`, ctx, "the approval request"),
     apply: (i) => `approval request for "${i.scope}" (cost: ${i.cost}) sent to the landlord`,
   }),
   assign_contractor: tool({
@@ -109,8 +152,8 @@ const TOOLS: Record<string, Tool> = {
       reason,
     }),
     end: true,
+    guard: checkClose,
     apply: (i, s) => {
-      if (i.keys === "outstanding") throw new Refusal("keys are outstanding. Confirm the key return first, or hold the case.");
       const { reason: _reason, ...checks } = i;
       s.status = { kind: "closed", checks };
       return "case closed";
@@ -122,7 +165,8 @@ export function runTool(
   name: string,
   input: unknown,
   state: CaseState,
-  adapters?: Record<string, ToolAdapter>
+  adapters?: Record<string, ToolAdapter>,
+  ctx?: ToolContext,
 ): ToolOutcome {
   const t = TOOLS[name];
   if (!t) return { ok: false, ends: false, result: `unknown tool "${name}"` };
@@ -130,7 +174,7 @@ export function runTool(
   if (!parsed.success) return { ok: false, ends: false, result: `invalid input:\n${z.prettifyError(parsed.error)}` };
   const apply = adapters?.[name] ?? t.apply;
   try {
-    t.guard?.(state);
+    t.guard?.(state, parsed.data as Record<string, unknown>, ctx);
     return { ok: true, ends: t.end, result: apply(parsed.data as Record<string, unknown>, state) };
   } catch (e) {
     if (e instanceof Refusal) return { ok: false, ends: false, result: `refused: ${e.message}` };

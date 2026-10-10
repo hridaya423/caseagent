@@ -22,7 +22,7 @@ const deps = (client: ModelClient): RunDeps => ({ out: mkdtempSync(join(tmpdir()
 const ev = (n: number, from: string, body = "body", channel = "Email"): CaseEvent => ({ n, at: "2026-01-01 00:00:00 UTC", channel, from, to: "Agency", body, attachments: [] });
 const mkCase = (events: CaseEvent[]): Case => ({ id: "x", title: "x", details: "", request: "", attachments: [], layer: "strict", events });
 const hold = (id = "h") => use(id, "hold", { waiting_for: "Waiting for Tenant", reason: "r" });
-const close = use("c", "close_case", { outcome: "resolved_without_work", work_confirmed_by: "tenant", landlord_informed: true, keys: "not_issued", invoice: "not_required", reason: "r" });
+const close = use("c", "close_case", { outcome: "resolved_without_work", work_confirmed_by: "tenant [event 001]", landlord_informed: true, keys: "not_issued", invoice: "not_required", reason: "r" });
 
 test("resume throws on a closed case instead of reopening it", async () => {
   const d = deps(fake([[close]]));

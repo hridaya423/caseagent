@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { runCase, type ModelClient, type Trace } from "./agent.ts";
-import { writeAnswer } from "./answers.ts";
+import { writeAnswer, writeOutbox } from "./answers.ts";
 import { initialSeen, nextSeen, visibleEvents } from "./cut.ts";
 import { loadCase } from "./parse.ts";
 import { loadState, newState, saveState, statusLabel, type CaseState } from "./state.ts";
@@ -20,10 +20,32 @@ function startTrace(tracePath: string): void {
 
 export type RunDeps = { out: string; client: ModelClient; model: string; policy: string };
 
+// Errors the SDK already retried with backoff: rate limits, overload, server errors, lost connections.
+const OVERLOAD = new Set([429, 500, 502, 503, 504, 529]);
+const isOverload = (e: unknown) =>
+  (e instanceof Error && /^APIConnection(Timeout)?Error$/.test(e.name)) || OVERLOAD.has((e as { status?: number }).status ?? 0);
+
+// When the model stays overloaded after the SDK's retries, the same request goes to the fallback model
+// once. The trace records which model answered, so a fallback answer is visible.
+export function withFallback(client: ModelClient, fallback: string | undefined): ModelClient {
+  return {
+    messages: {
+      create: async (p) => {
+        try {
+          return await client.messages.create(p);
+        } catch (e) {
+          if (!fallback || fallback === p.model || !isOverload(e)) throw e;
+          return client.messages.create({ ...p, model: fallback });
+        }
+      },
+    },
+  };
+}
+
 export function liveDeps(out: string): RunDeps {
   return {
     out,
-    client: new Anthropic({ timeout: 120_000, maxRetries: 3 }),
+    client: withFallback(new Anthropic({ timeout: 120_000, maxRetries: 4 }), process.env.FALLBACK_MODEL ?? "claude-sonnet-5"),
     model: process.env.MODEL ?? "claude-sonnet-5-5",
     policy: readFileSync(new URL("../policy.md", import.meta.url), "utf8"),
   };
@@ -38,7 +60,12 @@ function markSystemFailure(state: CaseState, label: string, message: string, cas
   state.status = { kind: "escalated", by: "system", summary: `${label}: ${message}. A person must review case ${caseId}.` };
 }
 
-export async function processCase(deps: RunDeps, dir: string, next: boolean, options: { step?: number; singleStep?: boolean } = {}): Promise<CaseState> {
+export async function processCase(
+  deps: RunDeps,
+  dir: string,
+  next: boolean,
+  options: { step?: number; singleStep?: boolean } = {},
+): Promise<CaseState> {
   const { out, client, model, policy } = deps;
 
   let c: ReturnType<typeof loadCase>;
@@ -93,11 +120,13 @@ export async function processCase(deps: RunDeps, dir: string, next: boolean, opt
   try {
     await runCase({ c, state: state!, newFrom, client, model, policy, trace, singleStep: options.singleStep, caseDir: dir });
   } catch (e) {
-    markSystemFailure(state!, "System error", e instanceof Error ? e.message : String(e), c.id);
-    trace("error", { message: e instanceof Error ? e.message : String(e) });
+    const message = e instanceof Error ? e.message : String(e);
+    markSystemFailure(state!, "System error", message, c.id);
+    trace("error", { message });
   }
   saveState(statePath, state!);
   writeAnswer(out, c, state!, visibleEvents(c, state!.initialSeen, state!.seen));
+  writeOutbox(out, c, state!);
   return state!;
 }
 
