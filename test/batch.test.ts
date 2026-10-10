@@ -6,7 +6,7 @@ import { join } from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
 import type { ModelClient } from "../src/agent.ts";
 import { runBatch } from "../src/batch.ts";
-import { processToEnd, withFallback, type RunDeps } from "../src/run.ts";
+import { withFallback, type RunDeps } from "../src/run.ts";
 
 const PM = "data/public/Property Management";
 const reply = (content: unknown[], model = "fake") => ({ content, model, stop_reason: "tool_use", usage: { input_tokens: 10, output_tokens: 5 } }) as unknown as Anthropic.Message;
@@ -21,20 +21,6 @@ function counting(content: unknown[]) {
   const client: ModelClient = { messages: { create: async () => (calls.n++, reply(content)) } };
   return { calls, client };
 }
-
-test("a case that runs past its time limit is cancelled and escalates with an ANSWER.md that says so", async () => {
-  const hangs: ModelClient = {
-    messages: { create: (_p, o) => new Promise((_res, rej) => o?.signal?.addEventListener("abort", () => rej(new Error("request aborted")))) },
-  };
-  const d = deps(hangs);
-  const started = Date.now();
-  const state = await processToEnd(d, `${PM}/027`, { timeLimitMs: 150 });
-  assert.ok(Date.now() - started < 2000);
-  assert.equal(state.status.kind === "escalated" && state.status.by, "system");
-  assert.match(state.status.kind === "escalated" ? state.status.summary : "", /^Time limit: the case did not finish within 0 s/);
-  assert.match(readFileSync(join(d.out, "ANSWERS/027/ANSWER.md"), "utf8"), /Time limit/);
-  assert.match(readFileSync(join(d.out, "traces/027.jsonl"), "utf8"), /"kind":"time_limit"/);
-});
 
 test("withFallback retries an overloaded request once on the fallback model, and only then", async () => {
   const models: string[] = [];
@@ -51,8 +37,6 @@ test("withFallback retries an overloaded request once on the fallback model, and
   assert.equal((await withFallback(flaky(529), "spare").messages.create(params)).model, "spare");
   assert.deepEqual(models, ["main", "spare"]);
   await assert.rejects(() => withFallback(flaky(400), "spare").messages.create(params), /400/);
-  const aborted = AbortSignal.abort();
-  await assert.rejects(() => withFallback(flaky(529), "spare").messages.create(params, { signal: aborted }), /529/);
 });
 
 function casesDir(): string {

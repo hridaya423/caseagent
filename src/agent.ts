@@ -14,7 +14,7 @@ const APPROVAL_ON_FILE =
 const NUDGE = "End the run now with exactly one of hold, escalate or close_case.";
 
 export type ModelClient = {
-  messages: { create(p: Anthropic.MessageCreateParamsNonStreaming, o?: { signal?: AbortSignal }): Promise<Anthropic.Message> };
+  messages: { create(p: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message> };
 };
 
 export type Trace = (kind: string, data: Record<string, unknown>) => void;
@@ -31,8 +31,6 @@ export async function runCase(opts: {
   adapters?: Record<string, ToolAdapter>;
   singleStep?: boolean;
   approvalModel?: string;
-  // Aborts the run between and during model calls, for the per-case time limit.
-  signal?: AbortSignal;
 }): Promise<void> {
   const { c, state, client, model, policy, trace, caseDir, adapters } = opts;
   state.runs += 1;
@@ -51,7 +49,6 @@ export async function runCase(opts: {
     const answer = await classifyLandlordReply(client, opts.approvalModel ?? APPROVAL_MODEL, asked, replies.map((e) => `${e.at}\n${e.body}`), {
       onError: (error) => trace("approval_check_error", { error }),
       onUsage: (usage, model) => trace("approval_check_usage", { usage, model }),
-      signal: opts.signal,
     });
     state.landlordAnswer = { answer, requestAfter: request.afterEvent, throughEvent: replies[replies.length - 1].n };
     trace("approval_check", { request: asked, through_event: replies[replies.length - 1].n, answer });
@@ -108,14 +105,13 @@ export async function runCase(opts: {
       return msg;
     });
 
-    opts.signal?.throwIfAborted();
     const resp = await client.messages.create({
       model,
       max_tokens: 4096,
       system: systemParam,
       tools: toolsWithCache,
       messages: messagesForRequest,
-    }, { signal: opts.signal });
+    });
 
     trace("model", { turn, model: resp.model, stop: resp.stop_reason, usage: resp.usage, content: resp.content });
     messages.push({ role: "assistant", content: resp.content });

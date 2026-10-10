@@ -30,12 +30,12 @@ const isOverload = (e: unknown) =>
 export function withFallback(client: ModelClient, fallback: string | undefined): ModelClient {
   return {
     messages: {
-      create: async (p, o) => {
+      create: async (p) => {
         try {
-          return await client.messages.create(p, o);
+          return await client.messages.create(p);
         } catch (e) {
-          if (!fallback || fallback === p.model || o?.signal?.aborted || !isOverload(e)) throw e;
-          return client.messages.create({ ...p, model: fallback }, o);
+          if (!fallback || fallback === p.model || !isOverload(e)) throw e;
+          return client.messages.create({ ...p, model: fallback });
         }
       },
     },
@@ -64,7 +64,7 @@ export async function processCase(
   deps: RunDeps,
   dir: string,
   next: boolean,
-  options: { step?: number; singleStep?: boolean; signal?: AbortSignal } = {},
+  options: { step?: number; singleStep?: boolean } = {},
 ): Promise<CaseState> {
   const { out, client, model, policy } = deps;
 
@@ -118,12 +118,11 @@ export async function processCase(
   }
 
   try {
-    await runCase({ c, state: state!, newFrom, client, model, policy, trace, singleStep: options.singleStep, caseDir: dir, signal: options.signal });
+    await runCase({ c, state: state!, newFrom, client, model, policy, trace, singleStep: options.singleStep, caseDir: dir });
   } catch (e) {
-    const timedOut = options.signal?.aborted === true;
-    const message = timedOut ? String((options.signal!.reason as Error)?.message ?? options.signal!.reason) : e instanceof Error ? e.message : String(e);
-    markSystemFailure(state!, timedOut ? "Time limit" : "System error", message, c.id);
-    trace(timedOut ? "time_limit" : "error", { message });
+    const message = e instanceof Error ? e.message : String(e);
+    markSystemFailure(state!, "System error", message, c.id);
+    trace("error", { message });
   }
   saveState(statePath, state!);
   writeAnswer(out, c, state!, visibleEvents(c, state!.initialSeen, state!.seen));
@@ -134,29 +133,17 @@ export async function processCase(
 // Runs the first stage, then resumes while the case is on hold and an outside event remains.
 // A case that still has outside events after MAX_STAGES stages did not finish; it escalates
 // instead of reporting the same "hold" as a case that is genuinely waiting.
-// With timeLimitMs, the whole case (every stage) must finish in time; the running model call is
-// cancelled at the limit and the case escalates with an ANSWER.md that says so.
-export async function processToEnd(deps: RunDeps, dir: string, opts: { timeLimitMs?: number } = {}): Promise<CaseState> {
-  const controller = new AbortController();
-  const timer = opts.timeLimitMs
-    ? setTimeout(() => controller.abort(new Error(`the case did not finish within ${Math.round(opts.timeLimitMs! / 1000)} s`)), opts.timeLimitMs)
-    : undefined;
-  try {
-    const signal = controller.signal;
-    let state = await processCase(deps, dir, false, { signal });
-    for (let stage = 1; stage < MAX_STAGES && state.status.kind === "hold" && !signal.aborted; stage++) {
-      if (nextSeen(loadCase(dir), state.seen) === null) break;
-      state = await processCase(deps, dir, true, { signal });
-    }
-    if (state.status.kind === "hold" && nextSeen(loadCase(dir), state.seen) !== null) {
-      const c = loadCase(dir);
-      if (signal.aborted) markSystemFailure(state, "Time limit", String((signal.reason as Error).message), c.id);
-      else markSystemFailure(state, `Stopped at the ${MAX_STAGES}-stage resume limit`, "the case still has outside events", c.id);
-      saveState(join(deps.out, "state", `${c.id}.json`), state);
-      writeAnswer(deps.out, c, state, visibleEvents(c, state.initialSeen, state.seen));
-    }
-    return state;
-  } finally {
-    clearTimeout(timer);
+export async function processToEnd(deps: RunDeps, dir: string): Promise<CaseState> {
+  let state = await processCase(deps, dir, false);
+  for (let stage = 1; stage < MAX_STAGES && state.status.kind === "hold"; stage++) {
+    if (nextSeen(loadCase(dir), state.seen) === null) break;
+    state = await processCase(deps, dir, true);
   }
+  if (state.status.kind === "hold" && nextSeen(loadCase(dir), state.seen) !== null) {
+    const c = loadCase(dir);
+    markSystemFailure(state, `Stopped at the ${MAX_STAGES}-stage resume limit`, "the case still has outside events", c.id);
+    saveState(join(deps.out, "state", `${c.id}.json`), state);
+    writeAnswer(deps.out, c, state, visibleEvents(c, state.initialSeen, state.seen));
+  }
+  return state;
 }

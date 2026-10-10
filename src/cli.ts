@@ -3,9 +3,9 @@ import { runBatch } from "./batch.ts";
 import { liveDeps, processCase, processToEnd, summary } from "./run.ts";
 
 const USAGE = `usage:
-  npm run case -- run <case-dir> [--next|--to-end] [--case-timeout S] [--out <dir>]
-  npm run case -- run-all <cases-dir> [--to-end|--next] [--limit N] [--concurrency N] [--case-timeout S] [--fresh] [--retry-incomplete] [--out <dir>]
-  npm run reality -- <cases-dir> [--concurrency N] [--case-timeout S] [--fresh] [--retry-incomplete] [--out <dir>]
+  npm run case -- run <case-dir> [--next|--to-end] [--out <dir>]
+  npm run case -- run-all <cases-dir> [--to-end|--next] [--limit N] [--concurrency N] [--fresh] [--retry-incomplete] [--out <dir>]
+  npm run reality -- <cases-dir> [--concurrency N] [--fresh] [--retry-incomplete] [--out <dir>]
 
 reality runs every case to the end and writes ANSWERS/, traces/, outbox/, state/,
 run-summary.json and RUN_SUMMARY.md into --out (default: the current directory).
@@ -20,7 +20,6 @@ const { values, positionals } = parseArgs({
     out: { type: "string", default: "." },
     limit: { type: "string" },
     concurrency: { type: "string" },
-    "case-timeout": { type: "string" },
     fresh: { type: "boolean", default: false },
     "retry-incomplete": { type: "boolean", default: false },
   },
@@ -43,7 +42,6 @@ const positiveInt = (v: string | undefined, name: string, fallback?: number): nu
 };
 const concurrency = positiveInt(values.concurrency, "concurrency", reality ? 6 : 4)!;
 const limit = positiveInt(values.limit, "limit");
-const caseTimeout = positiveInt(values["case-timeout"], "case-timeout", cmd === "run" ? undefined : 300);
 if (values.next && values["to-end"]) {
   console.error("--next and --to-end cannot be combined.");
   process.exit(1);
@@ -54,10 +52,9 @@ if (!process.env.ANTHROPIC_API_KEY) {
 }
 
 const deps = liveDeps(values.out);
-const timeLimitMs = caseTimeout === undefined ? undefined : caseTimeout * 1000;
 
 if (cmd === "run") {
-  const state = values["to-end"] ? await processToEnd(deps, target, { timeLimitMs }) : await processCase(deps, target, values.next);
+  const state = values["to-end"] ? await processToEnd(deps, target) : await processCase(deps, target, values.next);
   console.log(summary(state));
 } else {
   const started = Date.now();
@@ -67,7 +64,6 @@ if (cmd === "run") {
     concurrency,
     toEnd: reality || values["to-end"],
     next: values.next,
-    timeLimitMs,
     fresh: values.fresh,
     retryIncomplete: values["retry-incomplete"],
     limit,

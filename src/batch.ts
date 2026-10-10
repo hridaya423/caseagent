@@ -28,7 +28,6 @@ export type BatchOptions = {
   toEnd: boolean;
   // One stage per case: continue each saved case at its next outside event, instead of starting it.
   next?: boolean;
-  timeLimitMs?: number;
   // Rerun every case, instead of skipping the ones a previous batch in the same output finished.
   fresh?: boolean;
   // Rerun only the cases a previous batch left incomplete (system escalations) or failed on.
@@ -115,15 +114,7 @@ export async function runBatch(o: BatchOptions): Promise<BatchRow[]> {
       const started = Date.now();
       let row: BatchRow;
       try {
-        let state;
-        if (o.toEnd) state = await processToEnd(deps, dir, { timeLimitMs: o.timeLimitMs });
-        else {
-          const controller = new AbortController();
-          const timer = o.timeLimitMs
-            ? setTimeout(() => controller.abort(new Error(`the case did not finish within ${Math.round(o.timeLimitMs! / 1000)} s`)), o.timeLimitMs)
-            : undefined;
-          state = await processCase(deps, dir, o.next ?? false, { signal: controller.signal }).finally(() => clearTimeout(timer));
-        }
+        const state = o.toEnd ? await processToEnd(deps, dir) : await processCase(deps, dir, o.next ?? false);
         const d = decisionOf(state);
         row = {
           id: state.caseId,

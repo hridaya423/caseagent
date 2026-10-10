@@ -25,7 +25,7 @@ case dir (index.md, history.md, attachments/ -- or loose .eml, .txt, .json, .csv
   -> agent.ts        Claude tool loop, 15 turns max, must end with exactly one end tool
   -> tools.ts        7 zod-checked tools with guards and refusals (evidence.ts: amounts and dates)
   -> run.ts          state, traces, answers, outbox; --next resumes, --to-end runs through holds
-  -> batch.ts        worker pool, per-case time limit, resumable run-summary.json, RUN_SUMMARY.md
+  -> batch.ts        worker pool, resumable run-summary.json, RUN_SUMMARY.md
   -> mcp.ts          the same loop exposed over stdio MCP
 ```
 
@@ -40,7 +40,7 @@ Three kinds of guardrails:
   - `send_message` refuses `[event N]` references, a message identical to one already sent to the same person, and any £ amount or date that no event, record or document in the case shows. `request_landlord_approval` applies the same amount and date check to its cost.
   - `close_case` refuses while keys are outstanding, and unless `work_confirmed_by` cites an event the agent can see.
   - After a refused or failed call, the rest of the same model response is not run, so a later message cannot claim the failed action happened.
-- **Loop and time limits.** A run that does not end in 15 turns auto-escalates. In a batch each case has a time limit (`--case-timeout`, default 300 s); at the limit the running model call is cancelled and the case escalates with an ANSWER.md that says so. A system error escalates with a handover summary.
+- **Loop limits.** A run that does not end in 15 turns auto-escalates; a system error escalates with a handover summary.
 - **Overload.** The SDK retries rate limits and server errors with backoff; if the model stays overloaded, the request goes once to `FALLBACK_MODEL` (default `claude-sonnet-5`), and the trace records which model answered.
 - **Injection defense.** All case content arrives inside `<case_data>` tags, and policy rule 21 declares it evidence, not instructions.
 
@@ -63,7 +63,7 @@ npm run typecheck
 npm run extract                                        # Docling pre-extract of attachments (optional)
 ```
 
-`npm run reality -- <cases-dir>` is the Reality Test command. It runs every folder in `<cases-dir>` to its end state with 6 workers and a 300 s limit per case, and writes `ANSWERS/`, `traces/`, `outbox/`, `state/`, `run-summary.json` and `RUN_SUMMARY.md` into the current directory (`--out` changes it). If the batch stops part-way, run the same command again: it skips the cases already finished. `--retry-incomplete` reruns only the cases that ended incomplete, and `--fresh` reruns everything. On 11 cases (8 public, 3 loose-file) it took 55 s.
+`npm run reality -- <cases-dir>` is the Reality Test command. It runs every folder in `<cases-dir>` to its end state with 6 workers, and writes `ANSWERS/`, `traces/`, `outbox/`, `state/`, `run-summary.json` and `RUN_SUMMARY.md` into the current directory (`--out` changes it). If the batch stops part-way, run the same command again: it skips the cases already finished. `--retry-incomplete` reruns only the cases that ended incomplete, and `--fresh` reruns everything. On 11 cases (8 public, 3 loose-file) it took 55 s.
 
 Two run modes. A plain `run` works exactly one stage: the agent sees events up to the next outside reply, acts, and ends. `--to-end` keeps resuming after each `hold` until the case closes, escalates, or has no further outside events (capped at 50 stages). Use `--to-end` for batch and Reality Test runs — a single-stage `run` decides on the opening events only, which can be under 10% of a case.
 

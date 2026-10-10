@@ -35,7 +35,7 @@ export async function classifyLandlordReply(
   model: string,
   request: string,
   replies: string[],
-  opts: { onError?: (message: string) => void; onUsage?: (usage: Anthropic.Usage, model: string) => void; signal?: AbortSignal } = {},
+  opts: { onError?: (message: string) => void; onUsage?: (usage: Anthropic.Usage, model: string) => void } = {},
 ): Promise<LandlordAnswer> {
   const onError = opts.onError ?? (() => {});
   try {
@@ -46,7 +46,7 @@ export async function classifyLandlordReply(
       tools: [RECORD],
       tool_choice: { type: "tool", name: RECORD.name },
       messages: [{ role: "user", content: `## Approval request\n${caseData(request)}\n\n## Landlord replies since the request\n${caseData(replies.join("\n\n"))}` }],
-    }, { signal: opts.signal });
+    });
     opts.onUsage?.(resp.usage, resp.model);
     const call = resp.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === RECORD.name);
     const answer = (call?.input as { answer?: unknown } | undefined)?.answer;
