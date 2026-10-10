@@ -182,7 +182,8 @@ export async function runCase(opts: {
           references: [...referenceHistory].join("\n"),
           currentEvidence: [
             { id: "request", text: c.request }, { id: "details", text: c.details },
-            ...visible.map((e) => ({ id: `event:${e.n}`, text: e.body })),
+            { id: "visible_prompt_evidence", text: prompt.evidence },
+            ...visible.map((e) => ({ id: `event:${e.n}`, text: `${e.at} | ${e.channel} | from ${e.from} | to ${e.to}\n${e.body}` })),
           ],
           actions: state.actions.filter((a) => a.run === state.runs),
           ending: { tool: u.name, input: u.input }, trace,
