@@ -12,7 +12,7 @@ export const MAX_TURNS = 15;
 // The agency's own records of a landlord approval that came before the agent's first run.
 // Positive grants only: "landlord approval pending" or "approve the quote with the landlord" must not match.
 const APPROVAL_ON_FILE =
-  /landlord(?:'s)? approval (?:confirmed|granted|received|given|on file|obtained)|landlord (?:who |has )?approv(?:ed|es)\b|approved by (?:the )?landlord\b/i;
+  /landlord(?:'s)? approval (?:confirmed|granted|received|given|on file|obtained)|landlord (?:who |has )?approv(?:ed|es)\b|approved by (?:the )?landlord\b|landlord instruction (?:is )?on file|approval to proceed (?:indicated|confirmed|given)/i;
 const CACHE = { type: "ephemeral" } as const;
 const NUDGE = "End the run now with exactly one of hold, escalate or close_case.";
 
@@ -154,9 +154,9 @@ export async function runCase(opts: {
         results.push({ type: "tool_result", tool_use_id: u.id, content: result, is_error: true });
         continue;
       }
-      // Review only optional selected workflows, at most twice per invocation.
+      // Review only optional selected workflows, at most once per invocation.
       // A refusal becomes a tool result so the actor must recover before claiming completion.
-      if (!opts.singleStep && opts.playbooks && referenceHistory.size && completionChecks < 2 && (u.name === "hold" || u.name === "close_case")) {
+      if (!opts.singleStep && opts.playbooks && referenceHistory.size && completionChecks < 1 && (u.name === "hold" || u.name === "close_case")) {
         completionChecks++;
         const audit = await auditStageCompletion({
           client, model: opts.playbooks.model ?? model,

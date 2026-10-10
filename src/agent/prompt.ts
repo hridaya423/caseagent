@@ -130,6 +130,7 @@ export async function renderCase(c: Case, state: CaseState, visible: CaseEvent[]
     `## Attachments\n${visibleAttachmentNames.size > 0 && attachmentLines.length ? caseData(attachmentLines.join("\n\n")) : "None."}`,
     `## Earlier events\n${earlier.length ? caseData(earlier.join("\n\n")) : "None."}`,
     `## Your earlier actions\n${actions.join("\n") || "None. This is the first run on this case."}`,
+    ...(state.approvalOnFile ? ["The agency's records show the landlord's approval on file. assign_contractor will work; do not ask the landlord to approve again."] : []),
     ...(state.landlordAnswer
       ? [`Automatic check of the landlord's reply to the latest approval request (through event ${String(state.landlordAnswer.throughEvent).padStart(3, "0")}): ${state.landlordAnswer.answer}. assign_contractor works only on approved.`]
       : []),

@@ -23,7 +23,7 @@ runner/ → resume stages, batch cases, write answers/traces/outbox
 
 [policy.md](policy.md) draws on the 50 public cases and [policy bank](policy_bank/policy_bank.json), with added rules for hazards, disputes, failed tools and untrusted content. Tool guards run before adapters. Failed calls return to the model; subsequent calls in the same response are skipped. API failures use SDK retries and an optional fallback. A stage is limited to 15 turns, a full replay to 50 stages; system failures are marked incomplete and escalated.
 
-The [JSON playbooks](docs/playbooks/property-management-playbooks.json) provide reusable workflows and selected examples. Each turn selects relevant steps using current evidence; only validated references enter context. Before hold/close, an optional audit checks obligations against successful actions, at most twice per invocation. Invalid/failed audits fall back to policy; single-action runs skip them. Set `PLAYBOOKS=off` to disable this feature.
+The [JSON playbooks](docs/playbooks/property-management-playbooks.json) provide reusable workflows and selected examples. Each turn selects relevant steps using current evidence; only validated references enter context. Before hold/close, an optional audit checks obligations against successful actions, once per invocation. Invalid/failed audits fall back to policy; single-action runs skip them. Set `PLAYBOOKS=off` to disable this feature.
 
 ## Install and configure
 

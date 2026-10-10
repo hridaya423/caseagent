@@ -213,6 +213,24 @@ test("the approval classifier fails closed on an API error, a missing call or an
   assert.deepEqual(errors, ["529", "the model did not call record_answer", 'unexpected answer "yes!!"']);
 });
 
+test("in a first run, a landlord's yes to the agency's request in the history allows assignment", async () => {
+  const ask = { ...ev(2, "Agency / system", "Please see the quote. Do you wish to proceed?"), to: "Landlord" };
+  const c = mkCase([ev(1, "Tenant", "the oven is broken"), ask, ev(3, "Landlord", "Yes please go ahead.")]);
+  const s = newState("x", 3);
+  const asked: string[] = [];
+  const client: ModelClient = { messages: { create: async (p) => {
+    if (p.tools?.some((t) => "name" in t && t.name === "record_answer")) {
+      asked.push(JSON.stringify(p.messages));
+      return { content: [use("c", "record_answer", { answer: "approved" })], stop_reason: "tool_use", usage: {} } as unknown as Anthropic.Message;
+    }
+    return { content: [use("a", "assign_contractor", { trade: "appliance", notes: "", reason: "r" })], stop_reason: "tool_use", usage: {} } as unknown as Anthropic.Message;
+  } } };
+  await runCase({ c, state: s, newFrom: 1, model: "f", policy: "p", trace: () => {}, singleStep: true, client });
+  assert.match(asked[0], /Do you wish to proceed/);
+  assert.equal(s.landlordAnswer?.requestAfter, 2);
+  assert.equal(actionLog(s).at(-1)!.ok, true);
+});
+
 test("an unclear landlord answer blocks assignment and names the next step", async () => {
   const c = mkCase([ev(1, "Tenant"), ev(2, "Landlord", "How much will it cost?")]);
   const s = newState("x", 1);
