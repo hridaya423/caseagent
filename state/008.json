@@ -1,0 +1,44 @@
+{
+  "caseId": "008",
+  "initialSeen": 1,
+  "seen": 1,
+  "status": {
+    "kind": "escalated",
+    "by": "agent",
+    "summary": "Checked: Reviewed the tenant's report [event 001]: water is reported coming through the ceiling of Flat 2, directly below the bathroom of Flat 3, 8 Tallowmere Row. The tenant sees no leak in her own flat. She asked to be contacted before anyone comes to Flat 3. No landlord approval, contractor or cost exists yet.\nMissing or in conflict: The source of the leak is unknown, and the report is second-hand (\"I have been told\") with no direct confirmation from Flat 2. It is not known whether the water is still flowing, whether it is near electrics or light fittings, or who owns/manages Flat 2 and its occupant. The landlord has not been contacted and nothing is approved.\nDecision needed: Decide the urgent response now: contact Yara first to agree access, make contact with the Flat 2 occupant/landlord to establish whether the leak is active and whether electrics are at risk, and decide whether to arrange emergency attendance (stopcock/isolation, plumber) with landlord approval.",
+    "checked": "Reviewed the tenant's report [event 001]: water is reported coming through the ceiling of Flat 2, directly below the bathroom of Flat 3, 8 Tallowmere Row. The tenant sees no leak in her own flat. She asked to be contacted before anyone comes to Flat 3. No landlord approval, contractor or cost exists yet.",
+    "missing_or_conflict": "The source of the leak is unknown, and the report is second-hand (\"I have been told\") with no direct confirmation from Flat 2. It is not known whether the water is still flowing, whether it is near electrics or light fittings, or who owns/manages Flat 2 and its occupant. The landlord has not been contacted and nothing is approved.",
+    "decision_needed": "Decide the urgent response now: contact Yara first to agree access, make contact with the Flat 2 occupant/landlord to establish whether the leak is active and whether electrics are at risk, and decide whether to arrange emergency attendance (stopcock/isolation, plumber) with landlord approval."
+  },
+  "runs": [
+    {
+      "seen": 1,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Yara,\n\nThank you for letting us know about the water coming through the ceiling of Flat 2, below your bathroom at Flat 3, 8 Tallowmere Row. Because water is entering another home and the source is not yet known, a member of our team is dealing with this now.\n\nWe have noted your request, and no one will come to Flat 3 until we have contacted you first. We will be in touch shortly to agree next steps and access.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "Tenant reported water coming through the Flat 2 ceiling below her bathroom and asked to be contacted before anyone attends Flat 3 [event 001]. Rule 18 requires telling the tenant that a person is dealing with an urgent water escape; the message also respects her request for prior contact."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "escalate",
+          "input": {
+            "checked": "Reviewed the tenant's report [event 001]: water is reported coming through the ceiling of Flat 2, directly below the bathroom of Flat 3, 8 Tallowmere Row. The tenant sees no leak in her own flat. She asked to be contacted before anyone comes to Flat 3. No landlord approval, contractor or cost exists yet.",
+            "missing_or_conflict": "The source of the leak is unknown, and the report is second-hand (\"I have been told\") with no direct confirmation from Flat 2. It is not known whether the water is still flowing, whether it is near electrics or light fittings, or who owns/manages Flat 2 and its occupant. The landlord has not been contacted and nothing is approved.",
+            "decision_needed": "Decide the urgent response now: contact Yara first to agree access, make contact with the Flat 2 occupant/landlord to establish whether the leak is active and whether electrics are at risk, and decide whether to arrange emergency attendance (stopcock/isolation, plumber) with landlord approval.",
+            "reason": "Active water ingress into a neighbouring flat from an unknown source is a possible flood and possible water near electrics, which rule 18 says needs immediate human handling before a normal repair could arrive [event 001]. I have told the tenant that a person is dealing with it and that no one will attend without contacting her first."
+          },
+          "ok": true,
+          "result": "case escalated to a person"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

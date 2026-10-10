@@ -1,0 +1,8 @@
+Message-ID: <023.6.10@northbridge-lettings.case-agent>
+Date: Thu, 06 Feb 2025 07:56:00 GMT
+X-Case-Id: 023
+X-Run: 6
+X-Recipient-Role: tenant
+To: tenant
+
+Northbridge Lettings: thanks for your message. A member of our team is dealing with your heating now. Please read our email.

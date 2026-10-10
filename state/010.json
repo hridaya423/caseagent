@@ -1,0 +1,307 @@
+{
+  "caseId": "010",
+  "initialSeen": 1,
+  "seen": 22,
+  "status": {
+    "kind": "escalated",
+    "by": "agent",
+    "summary": "Checked: Reviewed the full case history. The landlord asked only for up-to-date estimates for a full new kitchen and for replacement cupboards and doors, and has approved no visit, work or cost [event 004][event 016]. The contractor said earlier prices may have changed [event 014] and acknowledged the request, promising a quote [event 019]. His latest call raised a 15% commission, which basis applies, a cap on larger jobs and VAT [event 022].\nMissing or in conflict: The contractor disputes or is unsure of the commission terms: old or revised basis, whether a cap applies, and VAT treatment. He says this could change his quote [event 022]. No written estimate, total or VAT basis has been received. Nothing in the case settles the commission terms. No landlord approval exists for a visit or work [event 016]. The tenant has been waiting since 4 September and reports cuts from sharp edges [event 001].\nDecision needed: Confirm the commission basis, any cap and the VAT treatment that apply to Alderline Joinery for this job, and reply to the contractor so he can send complete written estimates for both options for the landlord's decision.",
+    "checked": "Reviewed the full case history. The landlord asked only for up-to-date estimates for a full new kitchen and for replacement cupboards and doors, and has approved no visit, work or cost [event 004][event 016]. The contractor said earlier prices may have changed [event 014] and acknowledged the request, promising a quote [event 019]. His latest call raised a 15% commission, which basis applies, a cap on larger jobs and VAT [event 022].",
+    "missing_or_conflict": "The contractor disputes or is unsure of the commission terms: old or revised basis, whether a cap applies, and VAT treatment. He says this could change his quote [event 022]. No written estimate, total or VAT basis has been received. Nothing in the case settles the commission terms. No landlord approval exists for a visit or work [event 016]. The tenant has been waiting since 4 September and reports cuts from sharp edges [event 001].",
+    "decision_needed": "Confirm the commission basis, any cap and the VAT treatment that apply to Alderline Joinery for this job, and reply to the contractor so he can send complete written estimates for both options for the landlord's decision."
+  },
+  "runs": [
+    {
+      "seen": 1,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "42 Brackenveil Row, Oakhollow: kitchen cabinets have peeling laminate with sharp edges, which have caused the tenant several cuts. Several cabinet doors also do not close properly. We ask approval for a contractor (joiner/kitchen repair) to inspect and quote. The tenant has two dogs, so access will be arranged in advance.",
+            "cost": "unknown - no quote yet; the contractor would quote after inspection",
+            "reason": "The tenant reported a repair fault (peeling laminate, sharp edges, doors not closing) [event 001]. Repairs go to the landlord first, and approval is needed before any contractor visit or cost. The cuts make this a hazard, so I am asking for a prompt reply. No cost is known yet."
+          },
+          "ok": true,
+          "result": "approval request for \"42 Brackenveil Row, Oakhollow: kitchen cabinets have peeling laminate with sharp edges, which have caused the tenant several cuts. Several cabinet doors also do not close properly. We ask approval for a contractor (joiner/kitchen repair) to inspect and quote. The tenant has two dogs, so access will be arranged in advance.\" (cost: unknown - no quote yet; the contractor would quote after inspection) sent to the landlord"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elowen,\n\nThank you for reporting the peeling laminate, sharp edges and cabinet doors that won't close at 42 Brackenveil Row. I'm sorry to hear you have been cut.\n\nI have asked the landlord to approve a contractor visit and will update you as soon as I have a reply. I have noted the two dogs. Any visit will be arranged with you in advance so they can be secured.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The tenant needs an acknowledgement and to know the landlord has been contacted. The dogs and advance access are noted [event 001]. I promise only what the agency controls."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "Approval has been requested from the landlord for a contractor inspection and quote [event 001]. No contractor can be assigned until the landlord replies."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 4,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "42 Brackenveil Row, Oakhollow: kitchen cabinets have peeling laminate with sharp edges that have cut the tenant several times, and several doors do not close properly. Following your request for a quote to replace the laminate, we propose to send a joiner/kitchen contractor to inspect and give a written quote for the laminate replacement (and the door fault). This approval would cover the inspection and quote only. No repair work would start until you have approved the quote. Access will be arranged in advance with the tenant, who has two dogs.",
+            "cost": "Unknown - no quote yet. Any inspection/call-out charge is not yet known; the repair cost will be sent to you for approval once quoted.",
+            "reason": "The landlord asked us to obtain a quote for replacing the laminate but did not say we may send a contractor or incur any cost [event 004]. The automatic check rated the reply as unclear, so it is not approval. Rule 5 requires approval on record before any contractor visit or cost, so I am asking for the exact scope (inspection and quote only) with the cost stated as unknown. The tenant's report of cuts and doors not closing is the basis for the visit [event 001], and the earlier request had no clear answer."
+          },
+          "ok": true,
+          "result": "approval request for \"42 Brackenveil Row, Oakhollow: kitchen cabinets have peeling laminate with sharp edges that have cut the tenant several times, and several doors do not close properly. Following your request for a quote to replace the laminate, we propose to send a joiner/kitchen contractor to inspect and give a written quote for the laminate replacement (and the door fault). This approval would cover the inspection and quote only. No repair work would start until you have approved the quote. Access will be arranged in advance with the tenant, who has two dogs.\" (cost: Unknown - no quote yet. Any inspection/call-out charge is not yet known; the repair cost will be sent to you for approval once quoted.) sent to the landlord"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord's reply asks for a quote but gives no clear approval for a contractor visit or cost [event 004]. I have sent a new request limited to inspection and quote. No contractor can be assigned until the landlord approves."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 10,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "Reminder: 42 Brackenveil Row, Oakhollow. Kitchen cabinets have peeling laminate with sharp edges that have cut the tenant several times, and several doors do not close properly. You asked us for a quote to replace the laminate. We ask your approval to send a joiner/kitchen contractor to inspect and give a written quote for the laminate replacement and the door fault. This approval covers the inspection and quote only. No repair work would start until you have approved the quote. The tenant has offered access on 16, 17 or 18 September, between 11:00 and 14:00. She has two dogs, so access is arranged in advance.",
+            "cost": "Unknown - no quote yet. Any inspection/call-out charge is not yet known; the repair cost will be sent to you for approval once quoted.",
+            "reason": "Your 6 September reply asked for a quote but did not clearly approve a visit or cost [event 004]. Our second request has had no answer for 3 days, so I am sending it again under the chasing rule. The tenant has now offered access dates [event 010], so a quick reply lets us book. Approval must be on record before a contractor is assigned."
+          },
+          "ok": true,
+          "result": "approval request for \"Reminder: 42 Brackenveil Row, Oakhollow. Kitchen cabinets have peeling laminate with sharp edges that have cut the tenant several times, and several doors do not close properly. You asked us for a quote to replace the laminate. We ask your approval to send a joiner/kitchen contractor to inspect and give a written quote for the laminate replacement and the door fault. This approval covers the inspection and quote only. No repair work would start until you have approved the quote. The tenant has offered access on 16, 17 or 18 September, between 11:00 and 14:00. She has two dogs, so access is arranged in advance.\" (cost: Unknown - no quote yet. Any inspection/call-out charge is not yet known; the repair cost will be sent to you for approval once quoted.) sent to the landlord"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elowen,\n\nThank you for your availability: 16, 17 or 18 September, between 11:00 and 14:00. I have noted it.\n\nI can't confirm an appointment yet because we are still waiting for the landlord's approval for the contractor to visit and quote. I have reminded the landlord today and passed on your dates. Once approved, a contractor will contact you to arrange the visit, and the dogs can be secured beforehand.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The tenant offered access dates [event 010]. No landlord approval is on record [event 004], so I cannot confirm a visit. I tell her honestly where things stand and that we have chased the landlord, without promising a date."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord has not approved a contractor visit or any cost [event 004]. I have chased with the tenant's access dates [event 010] and updated the tenant. No contractor can be assigned until approval arrives."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 12,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Kellan,\n\nThank you for your message about 42 Brackenveil Row, Oakhollow (peeling kitchen-cabinet laminate with sharp edges, and several doors that do not close properly).\n\nWe have not received the earlier quote you mention for a full new kitchen. Please send it in writing, with the total price, exactly what it includes, and whether the figure includes VAT. If it covers more than the laminate and the doors, please also give a separate price for replacing the laminate and fixing the doors only.\n\nPlease note that the landlord has not yet approved any visit or work at this address. Please do not attend or start anything until we confirm approval. Once we have your complete quote, we will send it to the landlord for a decision.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The contractor says they previously quoted for a full new kitchen but gave no quote or amount [event 012]. The landlord only asked for a quote for replacing the laminate and never approved a visit or cost [event 004], and chases remain unanswered. Per the quote-boundary guidance, the total and scope are unknown, so I ask the contractor for a complete quote including tax basis and a separate laminate/door price, rather than asking the landlord to approve an unknown figure. I also tell them not to attend or start, since no approval is on record. The tenant's contact details are not passed on and no visit slot is chosen."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "I have asked the contractor for the full written quote, total, inclusions and VAT basis [event 012]. The landlord approval requests remain open and unanswered [event 004]. No contractor can be assigned or booked into the tenant's offered dates [event 010] until a complete quote exists and the landlord approves."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 14,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Kellan,\n\nThank you for your call about 42 Brackenveil Row, Oakhollow (peeling kitchen-cabinet laminate and doors that do not close).\n\nWe still need a written quote before we can go to the landlord. Please send:\n1. A price to replace the laminate and fix the doors, as the landlord asked, with what it includes.\n2. A separate price for a new kitchen, with what it includes.\n3. For both, the total and whether it includes VAT.\n\nEarlier prices may have changed, so please quote the current figures. If you need to see the kitchen to quote, please tell us and we will ask the landlord. No visit or work is approved yet, so please do not attend or start anything until we confirm in writing.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The contractor's call said the laminate needs the kitchen stripping and a new kitchen is the practical option, but gave no current written estimate and no site visit was recorded [event 014]. The total, scope and VAT basis are unknown, so per the quote-boundary guidance the next step is to get a complete comparable quote from the contractor, not to ask the landlord to approve an unknown figure. The landlord only asked for a laminate quote and never approved a visit or cost [event 004], so I repeat that nothing is to start. My earlier request for the quote [event 012] is still not met."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Soren,\n\nAn update on the kitchen cabinets at 42 Brackenveil Row, Oakhollow. You asked us to obtain a quote for replacing the laminate.\n\nThe joiner, Alderline Joinery, told us by phone today that the laminate is peeling from several panels. In their view, replacing it properly would mean stripping the kitchen, so they think a new kitchen is the practical option. They have given no figures and no written estimate yet. They also say earlier prices may have changed.\n\nI have asked them for a written quote with two separate prices, laminate and door repair only, and a new kitchen, each stating what is included and whether VAT is included. I will send you both as soon as I have them. Nothing has been approved or started, and no cost is committed. Our earlier requests for your approval of an inspection visit are still open, so please reply if you would like to approve it.\n\nThe tenant has reported cuts from the sharp laminate edges, so a prompt decision will help.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The contractor's call widened the scope from laminate replacement to a possible new kitchen [event 014]. The landlord only asked for a laminate quote [event 004], so they should know about this change. No figures exist yet, so I do not ask for approval of an unknown total. I explain that nothing is approved and I will send both options with prices. I mention the cuts, reported by the tenant [event 001]. The last chase was sent recently [event 010], so this is an update, not a new chase."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The contractor has given only a verbal opinion with no figures [event 014]. I have asked for a written quote with both options and the VAT basis, and told the landlord about the change in scope. No approval is on record [event 004], so nothing can be assigned or booked until the quote arrives and the landlord decides."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 15,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Landlord Soren Pike left a voicemail on 10 Sept saying he is away until 14 Sept and asked that enquiries go to his office. No office contact is on file and the voicemail gives no approval. No approval is on record for a visit or work. Quote from Alderline Joinery still outstanding. Tenant availability: 16, 17 or 18 Sept, 11:00-14:00, two dogs. Review on or after 14 Sept; if the landlord's office contact is found, use it.",
+            "reason": "The landlord's voicemail [event 015] says he is away until 14 September and refers enquiries to his office. It is not an approval and it gives no office contact. The next person needs to know this. Earlier requests are still unanswered [event 004], and the contractor quote is still outstanding [event 014]."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Soren,\n\nThank you for your voicemail. We understand you are away until 14 September.\n\nWe do not have contact details for your office. If you would like someone there to deal with 42 Brackenveil Row, Oakhollow while you are away, please send us their name and contact details, and tell us whether they may approve a contractor visit.\n\nWhere things stand on the kitchen cabinets (peeling laminate with sharp edges that have cut the tenant, and several doors that do not close):\n- Nothing has been approved or started, and no cost is committed.\n- We have asked Alderline Joinery for a written quote for two options: laminate and door repair only, and a new kitchen. Each will say what is included and whether VAT is included. We will send you both before any decision is needed.\n- Our earlier request to approve a contractor visit to inspect and quote is still open.\n- The tenant is available on 16, 17 or 18 September between 11:00 and 14:00.\n\nWe will take no action without your approval and will write to you again on your return.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The landlord is away until 14 September and directs enquiries to his office, but no office contact is on file [event 015]. He has not clearly approved a visit or cost [event 004]. I acknowledge the voicemail, ask for office contact details and whether the office may approve, and restate the open approval request and the tenant's dates [event 010]. I promise nothing the agency does not control."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elowen,\n\nAn update on the kitchen cabinets at 42 Brackenveil Row. The landlord is away until 14 September, so we still have no approval for a contractor visit. I have asked him how we can reach his office in the meantime.\n\nI have also asked the joiner for a written quote. I can't confirm an appointment for 16, 17 or 18 September yet. I have kept your times (11:00 to 14:00) on file. Any visit will be arranged with you in advance so the dogs can be secured.\n\nUntil the cabinets are repaired, please take care around the sharp edges.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The tenant is waiting for news of a visit [event 010]. The landlord's voicemail shows he is away until 14 September and gives no approval [event 015]. I explain the delay honestly and promise only what the agency controls. The tenant reported cuts [event 001], so the care reminder is brief."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord is away until 14 September and his voicemail gives no approval [event 015]. His earlier reply did not approve a visit or cost [event 004]. I have asked for his office contact details and updated the tenant. The contractor's written quote is still outstanding [event 014]. No contractor can be assigned until approval is on record."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 16,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Kellan,\n\nFurther to my earlier emails about 42 Brackenveil Row, Oakhollow (peeling kitchen-cabinet laminate with sharp edges, and doors that do not close).\n\nThe landlord has asked for up-to-date written estimates for two alternatives:\n1. A full new kitchen.\n2. Replacement cupboards and doors only.\n\nThe landlord says the appliances, worktops and flooring are in good condition. Please give each estimate as a total, say what it includes, and say whether VAT is included.\n\nThis is a request for estimates only. No visit, repair or other work is approved, so please do not attend or start anything. If you cannot estimate without seeing the kitchen, please tell us, and say whether you would charge for the visit. We will then ask the landlord before anything is booked.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The landlord has agreed to obtain up-to-date estimates for a full new kitchen and for replacement cupboards and doors only, and says appliances, worktops and flooring are in good condition [event 016]. That is authority to get the quotes, not approval of either option or of any work [event 016]. The contractor has given only a verbal opinion and no figures [event 014], so I ask for both comparable estimates with inclusions and VAT basis. I keep the no-visit, no-work instruction in place because no visit or cost is approved [event 004], and I ask them to flag any visit fee before anything is booked."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Soren,\n\nThank you for your reply about the kitchen at 42 Brackenveil Row, Oakhollow.\n\nI have asked Alderline Joinery for up-to-date written estimates for the two alternatives you named: a full new kitchen, and replacement cupboards and doors only. I have passed on that the appliances, worktops and flooring are in good condition. Each estimate will give the total, what it includes and whether VAT is included.\n\nI understand your reply as a request for estimates only. Nothing has been approved or started. We will send you both estimates and wait for your decision on which option, if any, to go ahead with. If the contractor says he needs to see the kitchen first, or would charge for a visit, we will ask you before anything is booked.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The landlord asked for estimates for two alternatives and did not approve either option [event 016]. I confirm what has been requested and that nothing is approved, so no one assumes consent to work. I promise to send both options and prices for his choice, and to ask before any visit or fee [event 004]."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The landlord has requested estimates for a full new kitchen and for replacement cupboards and doors only, but has approved neither option nor any visit or cost [event 016]. I have asked the contractor for both written estimates with inclusions and VAT basis [event 014]. Once I have them I will send both to the landlord for a decision."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 19,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "Alderline Joinery has acknowledged our request and said the updated quote will be sent. No figures, scope or visit time were given [event 019]. The landlord asked for estimates for a full new kitchen and for replacement cupboards and doors only, and approved neither option nor any visit or cost [event 016]. Approval for a visit or work has never been given [event 004]. The contractor has asked nothing that needs a reply. I will send both estimates to the landlord once they arrive. The landlord is due back on 14 September [event 015]. No contractor can be assigned or booked into the tenant's dates [event 010] until approval is on record."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 22,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Kellan,\n\nThank you for your call about the kitchen quote for 42 Brackenveil Row, Oakhollow.\n\nI cannot confirm from this case which commission basis applies, whether a cap applies to a larger job, or how VAT affects the amount. I have passed your questions to a colleague who will come back to you on them.\n\nIn the meantime, please send the written estimates the landlord asked for: a full new kitchen, and replacement cupboards and doors only. For each, please give the total, what it includes, and whether VAT is included. Please also say which figures are affected by the commission points you raised.\n\nThese are estimates only. No visit, repair or other work is approved, so please do not attend or start anything until we confirm in writing.\n\nKind regards,\nNia Calder\nNorthbridge Lettings",
+            "reason": "The contractor raised questions about commission basis, a cap and VAT that could change the quote [event 022]. I cannot settle them from the case, so I say so, tell him a colleague will respond, and keep asking for the complete written estimates with total and VAT basis the landlord requested [event 016]. I repeat that no visit or work is approved [event 004]."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "escalate",
+          "input": {
+            "checked": "Reviewed the full case history. The landlord asked only for up-to-date estimates for a full new kitchen and for replacement cupboards and doors, and has approved no visit, work or cost [event 004][event 016]. The contractor said earlier prices may have changed [event 014] and acknowledged the request, promising a quote [event 019]. His latest call raised a 15% commission, which basis applies, a cap on larger jobs and VAT [event 022].",
+            "missing_or_conflict": "The contractor disputes or is unsure of the commission terms: old or revised basis, whether a cap applies, and VAT treatment. He says this could change his quote [event 022]. No written estimate, total or VAT basis has been received. Nothing in the case settles the commission terms. No landlord approval exists for a visit or work [event 016]. The tenant has been waiting since 4 September and reports cuts from sharp edges [event 001].",
+            "decision_needed": "Confirm the commission basis, any cap and the VAT treatment that apply to Alderline Joinery for this job, and reply to the contractor so he can send complete written estimates for both options for the landlord's decision.",
+            "reason": "The contractor's commission and VAT questions are a money dispute over the agency's terms with him, and they could change the quote [event 022]. No message from me can settle it, so a person must decide. I have told the contractor that a colleague will respond and have asked again for the complete estimates, with no work approved [event 016]."
+          },
+          "ok": true,
+          "result": "case escalated to a person"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false,
+  "landlordAnswer": {
+    "answer": "unclear",
+    "requestAfter": 10,
+    "throughEvent": 16
+  }
+}

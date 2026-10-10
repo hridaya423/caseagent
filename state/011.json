@@ -1,0 +1,372 @@
+{
+  "caseId": "011",
+  "initialSeen": 4,
+  "seen": 23,
+  "status": {
+    "kind": "escalated",
+    "by": "agent",
+    "summary": "Checked: Landlord authorised only the quoted plumbing scope up to the estimate amount, with contact required before any scope or cost change [event 013], and later confirmed it excludes specialist material assessment and asked for cost and timing first [event 022]. The contractor saw a pale fibrous lining he cannot identify and paused [event 017]. His estimate excludes investigation, testing, removal and disposal of suspect material and gives no total or VAT basis [event 011]. The building manager has no flat-specific records and the landlord has none [event 006] [event 013] [event 022]. The contractor has left, cannot price the lining work or specify the assessment [event 023]. The tenant reports a small drip when the tap is used and has stopped using that tap; no sagging, hatch untouched [event 020].\nMissing or in conflict: No one in the case can supply a cost or timing for identifying the lining, or say what type of specialist is needed. The contractor has declined to price it [event 023]. The plumbing total, VAT basis and making-good scope are still unconfirmed [event 011], so the landlord's cap cannot be checked [event 013]. The joint is still inaccessible and the leak is still active [event 020]. No further work is approved beyond the quoted plumbing scope.\nDecision needed: Decide how to obtain a cost and timing for identifying the lining (for example by sourcing a specialist assessment quote), so it can be sent to the landlord for her approval. Do not instruct any work that disturbs the lining before she approves.",
+    "checked": "Landlord authorised only the quoted plumbing scope up to the estimate amount, with contact required before any scope or cost change [event 013], and later confirmed it excludes specialist material assessment and asked for cost and timing first [event 022]. The contractor saw a pale fibrous lining he cannot identify and paused [event 017]. His estimate excludes investigation, testing, removal and disposal of suspect material and gives no total or VAT basis [event 011]. The building manager has no flat-specific records and the landlord has none [event 006] [event 013] [event 022]. The contractor has left, cannot price the lining work or specify the assessment [event 023]. The tenant reports a small drip when the tap is used and has stopped using that tap; no sagging, hatch untouched [event 020].",
+    "missing_or_conflict": "No one in the case can supply a cost or timing for identifying the lining, or say what type of specialist is needed. The contractor has declined to price it [event 023]. The plumbing total, VAT basis and making-good scope are still unconfirmed [event 011], so the landlord's cap cannot be checked [event 013]. The joint is still inaccessible and the leak is still active [event 020]. No further work is approved beyond the quoted plumbing scope.",
+    "decision_needed": "Decide how to obtain a cost and timing for identifying the lining (for example by sourcing a specialist assessment quote), so it can be sent to the landlord for her approval. Do not instruct any work that disturbs the lining before she approves."
+  },
+  "runs": [
+    {
+      "seen": 4,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "Contractor inspection of a recurring damp patch and occasional dripping from the kitchen ceiling above the sink at 16 Brindlewick Mews, to find the source of the moisture. Approval is for the inspection visit only; any repair would be quoted and sent to you for separate approval. The tenant is available on weekdays after 10:00.",
+            "cost": "unknown",
+            "reason": "The tenant reports a brown damp patch, about the size of a small plate, above the kitchen sink, with a few drops overnight, and says it returns after rain [event 001]. The tenant says no water is dripping now, no light is directly below the patch, the kitchen sockets appear dry, and there is a narrow crack but no sagging [event 003]. This is a repair fault, so the landlord must approve before any contractor visit or cost. The cost is unknown, so I say so. Nothing indicates an immediate safety risk that would need escalation."
+          },
+          "ok": true,
+          "result": "approval request for \"Contractor inspection of a recurring damp patch and occasional dripping from the kitchen ceiling above the sink at 16 Brindlewick Mews, to find the source of the moisture. Approval is for the inspection visit only; any repair would be quoted and sent to you for separate approval. The tenant is available on weekdays after 10:00.\" (cost: unknown) sent to the landlord"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Iven,\n\nThank you for the details about the damp patch and the occasional dripping from the kitchen ceiling above the sink at 16 Brindlewick Mews. I have asked the landlord to approve an inspection. Once I have their answer I will arrange the contractor, who will contact you to agree a time. I have noted that weekday access is possible after 10:00.\n\nIf the dripping starts again, or you see water near any electrical fitting, or the ceiling begins to sag, please tell us straight away.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant reported the fault and gave access times [event 001], and described the current state [event 003]. I'm telling them that the landlord approval has been requested, that the contractor will contact them after approval, and what to report if things change. I promise nothing beyond what the agency controls."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "Approval for the inspection visit has been requested from the landlord and no contractor can be assigned until it is given [event 001] [event 003]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 6,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Building manager (Bren Talwick, Alderwake Court) replied: no current building-wide leak notification; communal roof inspection planned for next week; has not inspected the flat ceiling and holds no flat-specific ceiling survey or alteration record. Landlord approval for the inspection visit is still pending. Roof inspection timing may be relevant to the contractor's findings; no unrelated household information shared.",
+            "reason": "Bren Talwick's reply [event 006] is useful background for the inspection but does not give approval or change the stage. I'm recording it on the case so it is available when the landlord answers the approval request [event 005]."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord has not yet answered the request for approval of the inspection visit sent earlier today, and no contractor can be assigned without it. The building manager's message [event 006] gives no approval and raises no safety concern. The tenant reports no current dripping and no electrical involvement [event 003]. Under the 3-day rule I will chase the landlord if there is no answer."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 9,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Kellan,\n\nThank you for your report on the visit to 16 Brindlewick Mews today. Please do not open up the ceiling lining, drill or carry out any repair for now. Only the inspection visit has been requested, and any opening-up or repair needs the landlord's separate approval.\n\nPlease send us a quote covering:\n- the limited opening in the ceiling lining needed to reach the compression joint, and any making good afterwards;\n- the repair to the joint;\n- the complete all-inclusive total, stating whether VAT is included;\n- the earliest date you could do the work.\n\nOnce we have the quote we will ask the landlord for approval and let you know the answer.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The contractor found moisture at a compression joint above the hatch and says a limited opening in the ceiling lining may be needed; no opening-up was done [event 009]. This changes scope and cost beyond the inspection-only approval requested [event 005]. I must not allow additional work until a complete quote is known and approved, so I am asking for a full all-inclusive quote and telling the contractor not to start."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Landlord,\n\nAn update on the kitchen ceiling leak at 16 Brindlewick Mews. The contractor, Kellan Orve of Mossbarrow Pipe Services, attended today. He saw moisture at a compression joint above the kitchen ceiling access hatch while the tap was running. The hatch opening is too small to reach the joint safely, so a limited opening in the ceiling lining may be needed. No opening-up, drilling or repair has been done.\n\nI have asked the contractor not to start any work and to send a full quote, including the opening, the repair and the total with VAT stated. I will send it to you as soon as it arrives and will wait for your approval before any work goes ahead. Our earlier request covered the inspection visit only.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The landlord should know the inspection result and that further work, with a cost not yet known, will need separate approval [event 009]. The earlier approval request covered the inspection only [event 005]. I make no claim of approval or cost."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The contractor found the likely source but access needs a ceiling opening, which is beyond the inspection visit [event 009]. I have asked for a complete quote and told the contractor not to start. I will request landlord approval once the total is known."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 10,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Iven,\n\nThank you for your message, and for letting the contractor in today at 16 Brindlewick Mews. The contractor saw moisture at a pipe joint above the kitchen ceiling hatch. The hatch opening is too small to reach it safely, so a limited opening in the ceiling lining may be needed before the joint can be repaired.\n\nNo repair has been arranged yet. We have asked the contractor for a full quote and the earliest date he could do the work. Once we have it, we will send it to the landlord for approval. I cannot give you a repair date until the landlord has approved, but I will tell you as soon as there is an answer. Thank you for leaving the hatch closed. Please do not open up the ceiling yourself.\n\nIf the dripping returns, you see water near any electrical fitting, or the ceiling begins to sag, please tell us straight away.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant asked when the pipe repair might be arranged and said the hatch was left closed [event 010]. The contractor found moisture at a compression joint, could not reach it through the hatch, and may need a limited opening in the ceiling lining; nothing was opened or repaired [event 009]. I have asked the contractor for a full quote and told him not to start, and the landlord has been told that separate approval will be needed. I therefore give the tenant an honest status without promising a date, without saying who pays, and with the safety advice repeated."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The tenant's question is answered [event 010]. The contractor has been asked for a complete all-inclusive quote and a date and told not to start [event 009]. I will request landlord approval once the total is known, and no repair can be assigned before then."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 11,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Kellan,\n\nThank you for your estimate for 16 Brindlewick Mews (isolating the pipe, opening about 30 cm of ceiling lining, replacing the joint and making the opening safe).\n\nThe estimate we received does not show a figure we can pass to the landlord. Please confirm:\n- the complete total for the work described, and whether VAT is included;\n- whether making good the ceiling finish (filling and decorating) is included or excluded;\n- the earliest date you could do the work;\n- what the exclusion for investigation, testing, removal and disposal of suspect material refers to. Did you see anything that you suspect, and if so, what, and could it add cost or change the scope?\n\nPlease do not start any work, open the ceiling or drill. Only the inspection visit has been requested so far. The repair needs the landlord's separate approval, and we will tell you as soon as we have their answer.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The contractor's estimate gives the scope and exclusions but no total or VAT basis, and no date [event 011]. Landlord approval so far covered only the inspection and none has been recorded [event 005] [event 009]. Per the quote-scope guidance, an incomplete total must be clarified with the contractor before asking the landlord to approve. The exclusion for suspect material may change scope or cost, so I ask what it refers to. I am repeating that no work may start."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The estimate lacks a complete total, tax basis and date, and has an exclusion for suspect material that could change cost [event 011]. I have asked the contractor to clarify and told him not to start. I will request landlord approval of the full proposal once the total is known."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 13,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ms Fenlow,\n\nThank you for your reply about the kitchen ceiling leak at 16 Brindlewick Mews. I have noted that you authorise the quoted plumbing work (isolating the pipe, opening about 30 cm of ceiling lining, replacing the joint and making the opening safe) up to the estimate amount, provided it is carried out safely, and that you want to be contacted before any increase in scope or cost.\n\nThe contractor's estimate did not state a total or whether VAT is included, and it excludes investigation, testing, removal and disposal of any suspect material. I have asked him to confirm the complete total, VAT, whether making good is included, his earliest date, and what that exclusion refers to. I will not instruct him to start until I have those answers, and I will come back to you straight away if the figure or scope differs from what you have authorised.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The landlord's conditional authorisation [event 013] caps the work at \"the estimate amount\", but the contractor's estimate gave no total, VAT basis or date [event 011], and my clarification request to him is unanswered [event 011]. The automatic check marks the reply as unclear. I confirm what she authorised, explain what I am clarifying, and promise to contact her before any increase, as she asked. I do not assign yet because the cap cannot be checked."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The landlord authorised the quoted scope up to the estimate amount, safely carried out [event 013], but the estimate has no stated total, VAT basis or date, and its exclusion for suspect material is unexplained [event 011]. I have asked the contractor for these and told him not to start. I will assign once the complete total is confirmed and within the authorised amount, and will go back to the landlord if it is not."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 15,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Kellan,\n\nThank you for your message about returning to 16 Brindlewick Mews on 13 June between 10:30 and 12:30. Please do not attend to open the ceiling or carry out the repair tomorrow. We have not yet confirmed that date and the work is not yet cleared to start.\n\nWe still need answers to the questions in our last email:\n- the complete total for the work described, and whether VAT is included;\n- whether making good the ceiling finish (filling and decorating) is included or excluded;\n- what your exclusion for investigation, testing, removal and disposal of suspect material refers to. Did you see anything you suspect, and if so, what, and could it add cost or change the scope?\n\nThe landlord has authorised the quoted plumbing scope only up to the estimate amount and wants to be contacted before any increase in scope or cost. We cannot check that limit until we have your total. Once we have these answers we will confirm in writing whether the visit can go ahead on 13 June or another date.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The contractor proposes to return on 13 June with tools for the ceiling opening and repair [event 015], but he has not answered my request for a complete total, VAT basis, making-good scope and an explanation of the suspect-material exclusion [event 011]. The landlord authorised the scope only up to the estimate amount and asked to be contacted before any increase [event 013], and the automatic check marks that reply as unclear, so the cap cannot be verified. I therefore will not assign or confirm the visit. I tell him not to attend for the work yet and repeat the missing questions, per the guidance to resolve quote facts with the contractor first. Nothing here is urgent: the tenant reports no current dripping and no electrical involvement [event 003]. A written reply can arrive in time."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The contractor's proposed date [event 015] does not answer the open questions on total, VAT, making good and suspect material [event 011]. The landlord's authorisation is capped at an estimate amount that has no stated total [event 013]. I have told him not to attend for the work until I confirm, and I will assign only once the complete total is known and within the authorised amount, or go back to the landlord if it is not."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 17,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Kellan,\n\nThank you for your call from 16 Brindlewick Mews. Please do not drill, cut, open the ceiling or touch or disturb the fibrous-looking lining, and please do not start the repair today. Please close up the hatch as it was and stand down on site until we write to you again.\n\nThe landlord's authority covers only the quoted plumbing scope, up to the estimate amount, carried out safely. It does not cover investigation, testing or removal of suspect material, which your estimate excludes. We are putting what you saw to the landlord and will tell you her decision.\n\nWe still need your complete all-inclusive total (stating whether VAT is included), whether making good is included, and your earliest date once the position is settled.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The contractor is on site and has paused because the planned opening needs drilling or cutting near a pale, fibrous lining he cannot identify [event 017]. His estimate excludes investigation, testing, removal and disposal of suspect material [event 011]. The landlord authorised only the quoted plumbing scope up to the estimate amount, safely carried out, and wants contact before any scope or cost change [event 013]. Nobody has approved work on or near this material, so I confirm he must not start or disturb it, and I repeat the outstanding quote questions [event 015]. A written reply can reach the landlord in time since he has paused and nothing has been disturbed."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ms Fenlow,\n\nAn update on the kitchen ceiling leak at 16 Brindlewick Mews. The contractor, Kellan Orve of Mossbarrow Pipe Services, attended today as arranged. From the access hatch he saw a pale, fibrous-looking lining behind the painted ceiling board. He cannot identify it by sight and has not touched or disturbed it. The planned opening would need drilling or cutting nearby, so he has stopped and is waiting for instructions. I have told him not to start, drill, cut or disturb anything.\n\nThis differs from the quoted scope. The estimate excludes investigation, testing, removal and disposal of any suspect material, and you asked to be contacted before any change in scope or cost. We do not yet know whether the material needs testing or specialist handling, or what that would cost. The contractor has also still not confirmed a total, whether VAT is included, or whether making good is included.\n\nPlease tell me how you would like to proceed, for example whether you want us to obtain a quote for identifying the material before any ceiling opening. I will not instruct any further work until I have your answer.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The contractor found an unidentified fibrous lining and paused before drilling or cutting [event 017]. His estimate excludes suspect material [event 011], and the landlord's authority was limited to the quoted plumbing scope up to the estimate amount, safely carried out, with contact required before any scope or cost increase [event 013]. This is a changed scope and risk with no known cost, so I must inform her and ask for her decision rather than choose for her. Nothing is disturbed and the contractor has stopped, so a written reply is sufficient and no urgent escalation is needed."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Iven,\n\nThank you for letting the contractor in today at 16 Brindlewick Mews. When he looked through the hatch he saw a lining behind the ceiling board that he could not identify. He has not touched it and has paused, so the ceiling will not be opened and the pipe repair will not go ahead today. We have told the landlord and are waiting for her instructions. I will update you as soon as I have an answer. I cannot give a new date yet.\n\nPlease do not open up or disturb the ceiling yourself. If the dripping returns, you see water near any electrical fitting, or the ceiling begins to sag, please tell us straight away.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant admitted the contractor, who has paused work because of an unidentified fibrous lining [event 017]. The tenant had been told the repair was awaiting approval and a date [event 010], so they need to know that today's work is not proceeding. I promise no date, say nothing about cost, and repeat the earlier safety instruction about leaks and electrics."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The contractor has paused because of an unidentified fibrous lining and nobody has approved work that disturbs it or investigates it [event 017] [event 011]. The landlord's authority covers only the quoted plumbing scope up to the estimate amount [event 013]. I have asked her how to proceed and told the contractor and tenant that nothing goes ahead meanwhile."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 20,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Iven,\n\nThank you for letting us know about the drip from the kitchen ceiling at 16 Brindlewick Mews this morning, and for not using that tap and leaving the hatch alone. I am passing this on to the landlord today, as it shows the leak is still active.\n\nWe are still waiting for the landlord's instructions, so I cannot give you a repair date yet. Please do not open up or disturb the ceiling or hatch. If the drip gets worse, you see water near any electrical fitting, or the ceiling begins to sag or come down, please tell us straight away.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant reports a small drip when the kitchen tap was used, has stopped using that tap, sees no sagging and has not touched the hatch [event 020]. I acknowledge this, say the landlord is being told, promise no date because the landlord has not yet decided how to proceed after the unidentified lining was found [event 017], and repeat the safety reporting instruction. Nothing in the report shows water near electrics or a sagging ceiling, and earlier reports found no fittings affected [event 003], so it does not need immediate escalation."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ms Fenlow,\n\nA further update on the kitchen ceiling leak at 16 Brindlewick Mews. The tenant reports a small drip this morning when the kitchen tap was used. They have stopped using that tap. The ceiling is not visibly sagging and the hatch has not been touched.\n\nThis shows the leak is still active while the contractor is stood down. As explained in my last email, he found an unidentified fibrous-looking lining behind the ceiling board and has not touched it, and the opening would need drilling or cutting nearby. Your authority covers only the quoted plumbing scope, so nothing further will be done until I have your instructions. Please tell me how you would like to proceed, for example whether you want us to obtain a quote to identify the material before any ceiling opening.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant reports a continuing small drip when the tap is used [event 020]. The landlord's decision on the unidentified lining is still outstanding [event 017], and her authority is limited to the quoted plumbing scope with contact required before scope change [event 013]. She should know the leak is ongoing when she decides. I repeat the question without choosing for her."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The tenant reports a small drip with the tap in use, no sagging, hatch untouched, and has stopped using the tap [event 020]. This is not an immediate safety escalation. The landlord has been told and asked how to proceed on the unidentified lining [event 017]; no work that disturbs it is approved [event 013]. Contractor stays stood down."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 22,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Kellan,\n\nThank you for your call from 16 Brindlewick Mews. The landlord has confirmed that her authority covers only the quoted plumbing work, not a specialist assessment of the lining. She has asked for the likely cost and timing before she considers anything further.\n\nPlease send us:\n- the likely cost and earliest timing for identifying the pale, fibrous-looking lining behind the kitchen ceiling board, or, if you do not do this, the type of specialist you would recommend and any indication of their cost and lead time;\n- whether the plumbing work could be done without disturbing the lining, and if not, what would change in your scope and price;\n- your complete all-inclusive total for the quoted plumbing work, stating whether VAT is included, and whether making good is included.\n\nPlease do not drill, cut, open the ceiling, touch the lining or start any work. Nothing is approved beyond the quoted plumbing scope. We will pass your answer to the landlord and tell you her decision.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The landlord says her authorisation covered the quoted plumbing work only, not a specialist material assessment, and asks for likely cost and timing before considering more spend [event 022]. The contractor paused because of an unidentified fibrous lining [event 017], his estimate excludes investigation and testing of suspect material, and it still has no stated total, VAT basis or making-good scope [event 011]. Per the changed-scope guidance, I must get the complete facts from the contractor before asking the landlord to approve, and no extra work can be instructed meanwhile. The work is paused and nothing is disturbed, so a written request is enough."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ms Fenlow,\n\nThank you for your reply about the kitchen ceiling leak at 16 Brindlewick Mews. I understand your authority covers the quoted plumbing work only, not a specialist material assessment or other work outside that scope.\n\nWe do not yet have a cost or timing for identifying the lining. I have asked the contractor for the likely cost and earliest timing, or the type of specialist he would recommend with an indication of cost and lead time. I have also asked whether the plumbing work can be done without disturbing the lining, and for his complete total with VAT stated. The contractor has been told not to start or disturb anything.\n\nI will send you the figures as soon as I have them and will not commit to any additional expenditure without your approval.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The landlord asked for the likely cost and timing before considering extra expenditure [event 022]. We do not have them: the estimate excludes investigation and testing of suspect material [event 011], and the contractor has paused over the unidentified lining [event 017]. I answer her by saying what we are obtaining and that nothing proceeds without her approval, consistent with her limit on scope [event 013]."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The landlord declined to widen her authority until she has the likely cost and timing of assessing the lining [event 022]. I have asked the contractor for those figures and a complete total [event 011] [event 017]. I will send them to the landlord for approval once known. The contractor remains stood down."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 23,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ms Fenlow,\n\nThank you for your earlier reply about the kitchen ceiling leak at 16 Brindlewick Mews. You asked for the likely cost and timing before considering any extra spend. I do not have these yet.\n\nThe contractor, Kellan Orve, has now left site without opening the ceiling or touching the lining. He tells us he cannot price work involving the unidentified lining and cannot say what assessment would be needed. The pipe joint is still out of reach through the hatch. The tenant has reported a small drip when the kitchen tap is used, and has stopped using that tap.\n\nNothing beyond your authorisation for the quoted plumbing work has been instructed, and nothing will be without your approval. A colleague is now looking at how to get a cost and timing for identifying the lining, and will come back to you with figures so that you can decide.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The landlord asked for likely cost and timing before considering additional expenditure [event 022]. The contractor has now said he cannot price work involving the unidentified lining or specify the assessment needed, and has left without disturbing anything [event 023]. I tell her honestly that we have no figures, that the leak is still active [event 020], and that nothing further is instructed beyond her authorisation [event 013]. I name no cost and make no promise beyond a colleague following up."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "escalate",
+          "input": {
+            "checked": "Landlord authorised only the quoted plumbing scope up to the estimate amount, with contact required before any scope or cost change [event 013], and later confirmed it excludes specialist material assessment and asked for cost and timing first [event 022]. The contractor saw a pale fibrous lining he cannot identify and paused [event 017]. His estimate excludes investigation, testing, removal and disposal of suspect material and gives no total or VAT basis [event 011]. The building manager has no flat-specific records and the landlord has none [event 006] [event 013] [event 022]. The contractor has left, cannot price the lining work or specify the assessment [event 023]. The tenant reports a small drip when the tap is used and has stopped using that tap; no sagging, hatch untouched [event 020].",
+            "missing_or_conflict": "No one in the case can supply a cost or timing for identifying the lining, or say what type of specialist is needed. The contractor has declined to price it [event 023]. The plumbing total, VAT basis and making-good scope are still unconfirmed [event 011], so the landlord's cap cannot be checked [event 013]. The joint is still inaccessible and the leak is still active [event 020]. No further work is approved beyond the quoted plumbing scope.",
+            "decision_needed": "Decide how to obtain a cost and timing for identifying the lining (for example by sourcing a specialist assessment quote), so it can be sent to the landlord for her approval. Do not instruct any work that disturbs the lining before she approves.",
+            "reason": "The case is blocked. The landlord wants figures before approving anything [event 022], but the only contractor involved cannot price or specify the assessment [event 023]. Asking him again would not help, and I must not choose for the landlord. A person needs to decide how to source the specialist quote. I have told the landlord what we know and do not know in this run. The leak is still active but the tenant has stopped using the tap and reports no sagging or electrical involvement [event 020], so a person can handle this without an emergency response."
+          },
+          "ok": true,
+          "result": "case escalated to a person"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false,
+  "landlordAnswer": {
+    "answer": "unclear",
+    "requestAfter": 4,
+    "throughEvent": 22
+  }
+}

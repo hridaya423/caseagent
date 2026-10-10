@@ -1,0 +1,99 @@
+{
+  "caseId": "027",
+  "initialSeen": 4,
+  "seen": 13,
+  "status": {
+    "kind": "hold",
+    "reason": "Waiting for Quote"
+  },
+  "runs": [
+    {
+      "seen": 4,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello, thank you for the quotation for 46 Fernwick Lane, Aldermead, ZZ1 1ZZ (your ref NBL-027-Q1).\n\nFirst, a correction to our earlier email: we have not yet received the landlord's approval for these move-out works. Please treat this as a quote only. Do not start any work or order materials until we confirm approval in writing.\n\nTo make the quote complete and comparable, please send us:\n1. Your total price including VAT, and say clearly whether the £3,865.68 shown includes VAT.\n2. A price for each line item, not one lump sum.\n3. Prices, or a note that you are excluding them, for the items on the checkout report that your quote does not mention: kitchen flooring damage; chipped living-room laminate; warped kitchen worktop with reported water ingress; missing curtain pole, curtains and bulbs; other rusting radiators; the bedroom door frame and second newel post; and a quote to replace the stained and faded carpets.\n4. Your view on the boiler casing, which the report says appears to be held with tape and needs inspection. Please give a price for an inspection.\n5. The date on the quotation reads 15 September 2025. Please confirm the correct date and that the quote is current.\n\nThe property is vacant and we can arrange access for an inspection if you need one. Please include your earliest availability.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The provider's quotation [event 004] shows a single lump sum of £3,865.68 with no stated VAT basis, covers only part of the checkout report [event 001], and carries a date (15 September 2025) that is after today. The earlier job email told the provider the works were agreed with the landlord [event 004], but nothing shows landlord approval [event 002 only says it is normally in place and must be checked]. I am correcting that and telling the contractor not to start. Under PB09 the missing quote facts go to the contractor first; the landlord approval request follows once a complete total is known."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Landlord approval for move-out works at 46 Fernwick Lane is NOT confirmed on file; the workflow note only says it is normally in place [event 002]. The provider was wrongly told the works were agreed with the landlord [event 004]; corrected by email. Quote NBL-027-Q1 (£3,865.68) has an unclear VAT basis, a future date (15 Sep 2025), no line prices, and omits several checkout items (flooring, laminate, worktop, curtains/bulbs, carpets, boiler inspection). Clarification requested. Next step: once a complete total is received, request landlord approval for the full scope and price. Property vacant; keys held at agency office [event 003].",
+            "reason": "Records that approval is outstanding, that the provider was misinformed [event 004], and what is needed next, so the next run does not assume approval exists [event 002, event 003]."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The quote is incomplete and not comparable (VAT basis unknown, no line prices, items missing, date inconsistent) [event 004]. I have asked the contractor for a complete quote and told them not to start without approval. I will request landlord approval once a full total is available."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 6,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello Iris,\n\nThank you for your email. Here is the check-out report (ref NBL-027-CHECKOUT) for 46 Fernwick Lane, Aldermead, ZZ1 1ZZ. The recorded items are:\n\n1. Damage to the staircase newel posts and a bedroom door frame.\n2. Screw damage to an upstairs uPVC window frame.\n3. Wall holes, plugs, nail holes and sticker residue.\n4. Kitchen flooring damage; chipped living-room laminate and missing threshold.\n5. Missing toilet-roll holder (downstairs), bedroom curtain pole, curtains and some bulbs.\n6. Non-working top-floor smoke detector.\n7. Kitchen radiator pulled away from the wall.\n8. Warped kitchen worktop with reported water ingress.\n9. Boiler casing apparently held with tape and requiring inspection.\n10. Two reported non-working extractor fans.\n11. Rusting radiators, including the en-suite radiator.\n12. Ceiling or water-damage defects in the kitchen, lounge, Bedroom 3, bathroom and en-suite.\n13. Altered decoration.\n14. Stained and faded carpets; a replacement quotation is requested.\n\nPlease quote against this full list. This is a quotation only. Landlord approval has not been confirmed, so please do not start any work or order materials until we confirm approval in writing.\n\nThe points in our earlier email still apply: please give your total price including VAT, a price for each line item, prices (or a note of any exclusions) for items not in your first quote, a price for the boiler casing inspection, and the correct date for your quotation. The property is vacant, and we can arrange access for an inspection if you need one. Please also include your earliest availability.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "Iris Bell asked for the check-out report [event 006]. The report is available in full [event 001, attachment checkout-report.pdf], so I am answering her request by listing its items rather than leaving it unanswered. The property is vacant and keys are at the office [event 003]. Landlord approval is still unconfirmed [event 002, run 1 note], so I repeat that this is a quote only and nothing may start. I also remind her of the open clarifications on the earlier quote [event 004]: VAT basis, line prices, omitted items, boiler inspection and the date."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The check-out report has been sent to the contractor [event 006]. A complete, comparable quote with a VAT-inclusive total is still needed [event 004]. Landlord approval is requested only once a full total is known, so the case waits for the contractor's quote."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    },
+    {
+      "seen": 13,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello Iris,\n\nThank you for your quotation NBL-027-Q1 for 46 Fernwick Lane, Aldermead, ZZ1 1ZZ, and for confirming you will check scheduling once approval is given. Please do not start any work or order materials until we confirm approval in writing.\n\nBefore we can put the quote to the landlord, we still need the following. The quote shows one figure of £3,865.68 under \"Labour & Materials\", so we cannot yet compare it with the check-out report.\n\n1. Please confirm whether £3,865.68 includes VAT, and give your total price including VAT.\n2. Please give a price for each task listed in the quote, not a single lump sum.\n3. The check-out report items below are not in your quote. Please give a price for each, or say clearly that you are excluding it:\n   - kitchen flooring damage and chipped living-room laminate\n   - warped kitchen worktop with reported water ingress\n   - missing curtain pole, curtains and bulbs\n   - rusting radiators other than the en-suite radiator\n   - the bedroom door frame and the second newel post (your quote mentions one newel post and \"a door frame\")\n   - replacement of the stained and faded carpets (the report asks for a replacement quotation)\n4. Please give a price for inspecting the boiler casing, which the report says appears to be held with tape.\n5. Please confirm that the quote date of 15 September 2025 is correct and that the quote is current.\n\nOnce we have a complete, itemised total, we will ask the landlord for approval.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "Iris Bell's new quotation still shows a single \"Labour & Materials\" figure of £3,865.68 with no VAT basis, no line prices and no stated exclusions [event 013]. It omits several check-out items [event 001] that we asked her to price or exclude [event 004, run 1 and run 2 emails]. Under PB09 the quote total, included work and tax basis must be complete before a landlord approval request, so the next action is a contractor clarification rather than asking the landlord for approval on an unknown total. Landlord approval is also still unconfirmed [event 002], so I repeat that nothing may start. Her point that she will only check scheduling after approval needs no answer beyond that."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The latest quotation is still a lump sum with unknown VAT basis and omitted check-out items [event 013, event 001]. I have asked the contractor again for an itemised, VAT-inclusive, complete quote. Landlord approval will be requested once the total is known, as approval on file is not confirmed [event 002]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

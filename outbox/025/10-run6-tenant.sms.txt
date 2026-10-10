@@ -1,0 +1,8 @@
+Message-ID: <025.6.10@northbridge-lettings.case-agent>
+Date: Tue, 09 Sep 2025 08:02:07 GMT
+X-Case-Id: 025
+X-Run: 6
+X-Recipient-Role: tenant
+To: tenant
+
+Northbridge Lettings: the plumber can visit tomorrow afternoon about your tap. Please read my email and reply to say if you will be home.

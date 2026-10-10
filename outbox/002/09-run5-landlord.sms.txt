@@ -1,0 +1,8 @@
+Message-ID: <002.5.9@northbridge-lettings.case-agent>
+Date: Thu, 09 Oct 2025 08:48:00 GMT
+X-Case-Id: 002
+X-Run: 5
+X-Recipient-Role: landlord
+To: landlord
+
+Northbridge Lettings: the gas engineer is attending 8 Brindlewick Row today. Please read our email and tell us if he should also look at the boiler lockouts.

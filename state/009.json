@@ -1,0 +1,94 @@
+{
+  "caseId": "009",
+  "initialSeen": 1,
+  "seen": 4,
+  "status": {
+    "kind": "escalated",
+    "by": "agent",
+    "summary": "Checked: Reviewed the tenant's report of a bedroom window that will not close or seal fully [event 001]. I asked the landlord to approve an inspection and quote, with no cost known. The landlord's reply [event 004] is not an approval, and the automatic check marks it unclear. I noted that the tenant's attachment is a gas safety record for another property, 8 Thistledown Mews, and did not use it.\nMissing or in conflict: The landlord has not approved the inspection or any cost. He says he is waiting to obtain the insurance excess and wants a phone call about when work can proceed. It is unclear whether an insurance claim is involved, whether he approves an inspection and quote now, and who pays the excess. I cannot phone him. No contractor has been assigned.\nDecision needed: Phone Dorian Pike to find out whether he approves a contractor inspection and quote for the bedroom window at 24 Bramblewick Lane, and whether his insurance excess affects the timing or scope. Then record his answer on the case.",
+    "checked": "Reviewed the tenant's report of a bedroom window that will not close or seal fully [event 001]. I asked the landlord to approve an inspection and quote, with no cost known. The landlord's reply [event 004] is not an approval, and the automatic check marks it unclear. I noted that the tenant's attachment is a gas safety record for another property, 8 Thistledown Mews, and did not use it.",
+    "missing_or_conflict": "The landlord has not approved the inspection or any cost. He says he is waiting to obtain the insurance excess and wants a phone call about when work can proceed. It is unclear whether an insurance claim is involved, whether he approves an inspection and quote now, and who pays the excess. I cannot phone him. No contractor has been assigned.",
+    "decision_needed": "Phone Dorian Pike to find out whether he approves a contractor inspection and quote for the bedroom window at 24 Bramblewick Lane, and whether his insurance excess affects the timing or scope. Then record his answer on the case."
+  },
+  "runs": [
+    {
+      "seen": 1,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "The tenant's attachment (forwarded-document.pdf) is a Landlord Gas Safety Record for a different property (8 Thistledown Mews, Vellumby), dated 8 September 2025, and does not relate to the bedroom window fault at 24 Bramblewick Lane. It was not used for this case. Someone should check whether it was attached by mistake and whether it belongs on another file.",
+            "reason": "The attachment [event 001] names another property and is unrelated to the window fault. I am recording the mismatch so it is not mistaken for evidence on this case."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "24 Bramblewick Lane, Alderfen: the tenant reports the bedroom window will not close or seal fully. The handle seems to work and the tenant thinks the hinges may be at fault. Approval requested for a contractor to inspect the window and quote for the repair. No repair work to start without further approval.",
+            "cost": "unknown",
+            "reason": "This is a repair fault, so the landlord is asked first [event 001]. The tenant has given the item (bedroom window), the symptom and the likely cause, and reports no special access needs. No cost is known yet, so I am asking for approval of the inspection and quote only."
+          },
+          "ok": true,
+          "result": "approval request for \"24 Bramblewick Lane, Alderfen: the tenant reports the bedroom window will not close or seal fully. The handle seems to work and the tenant thinks the hinges may be at fault. Approval requested for a contractor to inspect the window and quote for the repair. No repair work to start without further approval.\" (cost: unknown) sent to the landlord"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elena,\n\nThank you for letting us know that the bedroom window at 24 Bramblewick Lane will not close or seal fully. We have passed this to the landlord for approval and will update you as soon as we hear back.\n\nPlease note that the document attached to your report was a gas safety record for a different property (8 Thistledown Mews). If you meant to send something else, please send it again.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant reported the fault [event 001]. This acknowledges the report, says the landlord has been asked, and points out that the attachment relates to another property."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "Landlord approval for the inspection and quote has been requested [event 001]. No contractor can be assigned until the landlord replies."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 4,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Mr Pike,\n\nThank you for your email about the bedroom window at 24 Bramblewick Lane, Alderfen, which will not close or seal fully. I have passed your request for a call to a colleague, who will phone you to discuss when work can proceed.\n\nWe have not booked any contractor and will not do so until you have approved the work. When you are ready, please confirm whether you approve a contractor visit to inspect the window and quote for the repair. The cost is not yet known.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The landlord asked for a call and said he is waiting for the insurance excess [event 004]. That is not approval of the inspection requested earlier, so no contractor is assigned. I cannot phone, so I tell him a colleague will call and restate the approval needed."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "escalate",
+          "input": {
+            "checked": "Reviewed the tenant's report of a bedroom window that will not close or seal fully [event 001]. I asked the landlord to approve an inspection and quote, with no cost known. The landlord's reply [event 004] is not an approval, and the automatic check marks it unclear. I noted that the tenant's attachment is a gas safety record for another property, 8 Thistledown Mews, and did not use it.",
+            "missing_or_conflict": "The landlord has not approved the inspection or any cost. He says he is waiting to obtain the insurance excess and wants a phone call about when work can proceed. It is unclear whether an insurance claim is involved, whether he approves an inspection and quote now, and who pays the excess. I cannot phone him. No contractor has been assigned.",
+            "decision_needed": "Phone Dorian Pike to find out whether he approves a contractor inspection and quote for the bedroom window at 24 Bramblewick Lane, and whether his insurance excess affects the timing or scope. Then record his answer on the case.",
+            "reason": "The landlord asked the agency to call him [event 004]. A person must make that call because I cannot phone. His message is not approval, so I cannot assign a contractor. I have sent him an email saying a colleague will call."
+          },
+          "ok": true,
+          "result": "case escalated to a person"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false,
+  "landlordAnswer": {
+    "answer": "unclear",
+    "requestAfter": 1,
+    "throughEvent": 4
+  }
+}

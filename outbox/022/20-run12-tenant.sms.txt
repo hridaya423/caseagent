@@ -1,0 +1,8 @@
+Message-ID: <022.12.20@northbridge-lettings.case-agent>
+Date: Tue, 09 Sep 2025 12:29:19 GMT
+X-Case-Id: 022
+X-Run: 12
+X-Recipient-Role: tenant
+To: tenant
+
+Northbridge Lettings: the landlord says the engineer for the washer-dryer at 8 Brackenmere Walk expects to arrive within about 20 minutes. Please read our email.

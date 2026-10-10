@@ -1,0 +1,8 @@
+Message-ID: <029.1.2@northbridge-lettings.case-agent>
+Date: Mon, 12 May 2025 09:02:00 GMT
+X-Case-Id: 029
+X-Run: 1
+X-Recipient-Role: tenant
+To: tenant
+
+Northbridge Lettings: we have no heating visit booked for 62 Brindlewick Row. Please do not leave your key in the meter cabinet. We are looking into it now; please read our email.

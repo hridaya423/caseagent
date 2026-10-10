@@ -1,0 +1,443 @@
+{
+  "model": "claude-sonnet-5-5",
+  "started": "2026-10-10T15:32:09.758Z",
+  "cases": {
+    "006": {
+      "id": "006",
+      "status": "hold (Waiting for Tenant)",
+      "incomplete": false,
+      "next": "Wait for the tenant's reply.",
+      "messages": 3,
+      "runs": 2,
+      "seconds": 24.369,
+      "input_tokens": 11795,
+      "output_tokens": 1971,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "001": {
+      "id": "001",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide whether the landlord's reply [event 005] counts as approval for an inspection-and-quote visit only (no repair). If it does, assign the plumber (Ewan Rook, Hearthline Plumbing & Bath) on that limit. If it does not, phone the landlord to get a clear yes.",
+      "messages": 3,
+      "runs": 4,
+      "seconds": 93.699,
+      "input_tokens": 79066,
+      "output_tokens": 7009,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "008": {
+      "id": "008",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide the urgent response now: contact Yara first to agree access, make contact with the Flat 2 occupant/landlord to establish whether the leak is active and whether electrics are at risk, and decide whether to arrange emergency attendance (stopcock/isolation, plumber) with landlord approval.",
+      "messages": 1,
+      "runs": 1,
+      "seconds": 15.375,
+      "input_tokens": 5469,
+      "output_tokens": 1228,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "007": {
+      "id": "007",
+      "status": "hold (Waiting for Landlord)",
+      "incomplete": false,
+      "next": "Wait for the landlord's reply.",
+      "messages": 5,
+      "runs": 5,
+      "seconds": 105.253,
+      "input_tokens": 63546,
+      "output_tokens": 7799,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "009": {
+      "id": "009",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Phone Dorian Pike to find out whether he approves a contractor inspection and quote for the bedroom window at 24 Bramblewick Lane, and whether his insurance excess affects the timing or scope. Then record his answer on the case.",
+      "messages": 2,
+      "runs": 2,
+      "seconds": 37.165,
+      "input_tokens": 16725,
+      "output_tokens": 2654,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "004": {
+      "id": "004",
+      "status": "hold (Waiting for Tenant)",
+      "incomplete": false,
+      "next": "Wait for the tenant's reply.",
+      "messages": 8,
+      "runs": 6,
+      "seconds": 153.742,
+      "input_tokens": 114283,
+      "output_tokens": 12606,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "012": {
+      "id": "012",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide whether the unsecured bedroom window needs an urgent same-day security fix, and phone the landlord to get approval for a contractor visit and cost, covering the bedroom window, the bathroom window and the missing keys.",
+      "messages": 1,
+      "runs": 1,
+      "seconds": 12.033,
+      "input_tokens": 4979,
+      "output_tokens": 1239,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "014": {
+      "id": "014",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Treat as urgent no-heat for a vulnerable tenant: decide how to obtain landlord approval now (phone if needed) and dispatch a heating engineer promptly, passing on the tenant's call-from-outside access request.",
+      "messages": 1,
+      "runs": 1,
+      "seconds": 13.682,
+      "input_tokens": 5690,
+      "output_tokens": 1226,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "003": {
+      "id": "003",
+      "status": "hold (Waiting for Provider)",
+      "incomplete": false,
+      "next": "Wait for the provider's reply.",
+      "messages": 17,
+      "runs": 9,
+      "seconds": 213.47,
+      "input_tokens": 150124,
+      "output_tokens": 16825,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "005": {
+      "id": "005",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Verify the bank details by phoning Hearthline Heating on a number already on file, not one from the email. Then decide which details, if any, can be given to the landlord for payment of the £114 invoice.",
+      "messages": 14,
+      "runs": 12,
+      "seconds": 254.699,
+      "input_tokens": 186598,
+      "output_tokens": 17869,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "015": {
+      "id": "015",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide whether the agency can and will pursue the cost from the tenant's bond, based on the check-in inventory and the move-out evidence. Then tell the landlord whether the bond condition is met, so that unconditional approval can be requested for the final scope and total once the contractor's complete quote arrives.",
+      "messages": 3,
+      "runs": 4,
+      "seconds": 80.69,
+      "input_tokens": 48883,
+      "output_tokens": 6283,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "018": {
+      "id": "018",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Phone Gareth Vale on 07700 900184 now and record whether he approves an agency-arranged pest control visit (and the cost limit) or will arrange his own contractor.",
+      "messages": 3,
+      "runs": 2,
+      "seconds": 29.027,
+      "input_tokens": 12793,
+      "output_tokens": 2815,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "020": {
+      "id": "020",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide how to make the kitchen socket safe now: arrange an urgent electrician (with landlord approval and cost by phone) and decide whether the tenant should isolate the circuit or leave the property until it is checked.",
+      "messages": 2,
+      "runs": 1,
+      "seconds": 11.731,
+      "input_tokens": 5411,
+      "output_tokens": 1260,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "010": {
+      "id": "010",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Confirm the commission basis, any cap and the VAT treatment that apply to Alderline Joinery for this job, and reply to the contractor so he can send complete written estimates for both options for the landlord's decision.",
+      "messages": 10,
+      "runs": 9,
+      "seconds": 167.234,
+      "input_tokens": 95063,
+      "output_tokens": 12440,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "019": {
+      "id": "019",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Confirm whether Alder & Finch were instructed and whether the work was actually done. If it was, tell me to inform the landlord of the result and the £174.00 invoice, stating that the cost was not approved beforehand and leaving the payment decision to the landlord. If it was not, tell me to request landlord approval for the six items before any contractor is assigned.",
+      "messages": 0,
+      "runs": 1,
+      "seconds": 18.004,
+      "input_tokens": 7866,
+      "output_tokens": 1507,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "016": {
+      "id": "016",
+      "status": "hold (Waiting for Landlord)",
+      "incomplete": false,
+      "next": "Wait for the landlord's reply.",
+      "messages": 12,
+      "runs": 6,
+      "seconds": 106.302,
+      "input_tokens": 45169,
+      "output_tokens": 8572,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "021": {
+      "id": "021",
+      "status": "hold (Waiting for Landlord)",
+      "incomplete": false,
+      "next": "Wait for the landlord's reply.",
+      "messages": 2,
+      "runs": 2,
+      "seconds": 33.539,
+      "input_tokens": 11961,
+      "output_tokens": 2496,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "024": {
+      "id": "024",
+      "status": "hold (Waiting for Quote)",
+      "incomplete": false,
+      "next": "Wait for the quote's reply.",
+      "messages": 4,
+      "runs": 4,
+      "seconds": 72.261,
+      "input_tokens": 46338,
+      "output_tokens": 5317,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "002": {
+      "id": "002",
+      "status": "hold (Waiting for Provider)",
+      "incomplete": false,
+      "next": "Wait for the provider's reply.",
+      "messages": 27,
+      "runs": 17,
+      "seconds": 670.433,
+      "input_tokens": 323806,
+      "output_tokens": 30804,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "026": {
+      "id": "026",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide whether to treat this as an electrical safety issue now. If yes, phone the landlord to approve urgent attendance, covering any electrician check of the socket and the 6 March inspection, and decide whether the tenant should be given safety advice.",
+      "messages": 4,
+      "runs": 4,
+      "seconds": 286.922,
+      "input_tokens": 28936,
+      "output_tokens": 4663,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "029": {
+      "id": "029",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide how to treat this as a possible attempted unauthorised entry: whether to check with the landlord and known contractors that nobody called, and whether to report the caller (Bram Alder, 07700 900683) to the police.",
+      "messages": 2,
+      "runs": 1,
+      "seconds": 14.619,
+      "input_tokens": 5721,
+      "output_tokens": 1364,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "017": {
+      "id": "017",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide how to answer the landlord's repair budget question (whether the agency can fund or approve the £186.00 painting from a repair budget, or the landlord must approve it). Also contact the building manager about painting and the door, so that the landlord's conditions can be met.",
+      "messages": 13,
+      "runs": 11,
+      "seconds": 471.272,
+      "input_tokens": 185871,
+      "output_tokens": 20121,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "030": {
+      "id": "030",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide how to restore smoke detection at 8 Brindlefern Walk urgently, and contact the landlord now to approve an emergency replacement and refit of the landing alarm and make good the ceiling.",
+      "messages": 1,
+      "runs": 1,
+      "seconds": 14.868,
+      "input_tokens": 5625,
+      "output_tokens": 1275,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "027": {
+      "id": "027",
+      "status": "hold (Waiting for Quote)",
+      "incomplete": false,
+      "next": "Wait for the quote's reply.",
+      "messages": 3,
+      "runs": 3,
+      "seconds": 54.976,
+      "input_tokens": 36078,
+      "output_tokens": 4482,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    "028": {
+      "id": "028",
+      "status": "closed (work_completed)",
+      "incomplete": false,
+      "next": "None. The case is closed.",
+      "messages": 3,
+      "runs": 3,
+      "seconds": 66.21,
+      "input_tokens": 46921,
+      "output_tokens": 4623,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "025": {
+      "id": "025",
+      "status": "hold (Waiting for Provider)",
+      "incomplete": false,
+      "next": "Wait for the provider's reply.",
+      "messages": 18,
+      "runs": 10,
+      "seconds": 449.446,
+      "input_tokens": 145800,
+      "output_tokens": 16976,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "022": {
+      "id": "022",
+      "status": "hold (Waiting for Landlord)",
+      "incomplete": false,
+      "next": "Wait for the landlord's reply.",
+      "messages": 32,
+      "runs": 18,
+      "seconds": 573.051,
+      "input_tokens": 257068,
+      "output_tokens": 23871,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "013": {
+      "id": "013",
+      "status": "hold (Waiting for Quote)",
+      "incomplete": false,
+      "next": "Wait for the quote's reply.",
+      "messages": 5,
+      "runs": 4,
+      "seconds": 70.045,
+      "input_tokens": 37807,
+      "output_tokens": 5952,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "023": {
+      "id": "023",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide how to get heating restored urgently for the household with a child: whether to phone the landlord and the contractor now to get a decision on the actuator replacement (and the cost basis), and whether temporary heating is needed in the meantime.",
+      "messages": 10,
+      "runs": 6,
+      "seconds": 136.225,
+      "input_tokens": 118585,
+      "output_tokens": 11122,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    },
+    "011": {
+      "id": "011",
+      "status": "escalated",
+      "incomplete": false,
+      "next": "A person decides: Decide how to obtain a cost and timing for identifying the lining (for example by sourcing a specialist assessment quote), so it can be sent to the landlord for her approval. Do not instruct any work that disturbs the lining before she approves.",
+      "messages": 15,
+      "runs": 11,
+      "seconds": 207.55,
+      "input_tokens": 127240,
+      "output_tokens": 15937,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5"
+      ]
+    }
+  }
+}

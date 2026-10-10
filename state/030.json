@@ -1,0 +1,44 @@
+{
+  "caseId": "030",
+  "initialSeen": 2,
+  "seen": 2,
+  "status": {
+    "kind": "escalated",
+    "by": "agent",
+    "summary": "Checked: Tenant report: upstairs landing smoke alarm kept beeping, tenant removed it, small opening left in ceiling, tenant says no immediate risk [event 001]. Triage: no access issue, two cats usually out in daytime, marked urgent [event 002]. Property and item are clear.\nMissing or in conflict: Tenant says she knows of no immediate risk [event 001], but the home currently has no smoke alarm on the landing, which is a fire-safety gap. Unclear why it was beeping (battery, end of life, or fault) and whether any other alarm is working. Landlord not yet contacted. Responsibility for the removal and any charges is not established.\nDecision needed: Decide how to restore smoke detection at 8 Brindlefern Walk urgently, and contact the landlord now to approve an emergency replacement and refit of the landing alarm and make good the ceiling.",
+    "checked": "Tenant report: upstairs landing smoke alarm kept beeping, tenant removed it, small opening left in ceiling, tenant says no immediate risk [event 001]. Triage: no access issue, two cats usually out in daytime, marked urgent [event 002]. Property and item are clear.",
+    "missing_or_conflict": "Tenant says she knows of no immediate risk [event 001], but the home currently has no smoke alarm on the landing, which is a fire-safety gap. Unclear why it was beeping (battery, end of life, or fault) and whether any other alarm is working. Landlord not yet contacted. Responsibility for the removal and any charges is not established.",
+    "decision_needed": "Decide how to restore smoke detection at 8 Brindlefern Walk urgently, and contact the landlord now to approve an emergency replacement and refit of the landing alarm and make good the ceiling."
+  },
+  "runs": [
+    {
+      "seen": 2,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Nessa, thank you for reporting the smoke alarm on the upstairs landing at 8 Brindlefern Walk. As the alarm has been removed and there is now an opening in the ceiling, we are treating this as urgent. A member of our team is dealing with it now and will be in touch about the next step. Kind regards, Northbridge Lettings",
+            "reason": "Tenant reported the landing smoke alarm removed with an opening left in the ceiling [event 001]; triage marked it urgent [event 002]. Telling her a person is dealing with it, per safety rule 18."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "escalate",
+          "input": {
+            "checked": "Tenant report: upstairs landing smoke alarm kept beeping, tenant removed it, small opening left in ceiling, tenant says no immediate risk [event 001]. Triage: no access issue, two cats usually out in daytime, marked urgent [event 002]. Property and item are clear.",
+            "missing_or_conflict": "Tenant says she knows of no immediate risk [event 001], but the home currently has no smoke alarm on the landing, which is a fire-safety gap. Unclear why it was beeping (battery, end of life, or fault) and whether any other alarm is working. Landlord not yet contacted. Responsibility for the removal and any charges is not established.",
+            "decision_needed": "Decide how to restore smoke detection at 8 Brindlefern Walk urgently, and contact the landlord now to approve an emergency replacement and refit of the landing alarm and make good the ceiling.",
+            "reason": "With the landing smoke alarm removed, the home lacks fire detection until a repair is done. Rule 18 says to escalate at once when the home could become unsafe before a normal repair arrives. Triage also marked it urgent [event 002]. A person needs to decide the fastest safe route and speak to the landlord, even though the tenant sees no immediate risk [event 001]. The tenant has been told a person is dealing with it."
+          },
+          "ok": true,
+          "result": "case escalated to a person"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

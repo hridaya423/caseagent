@@ -1,0 +1,75 @@
+{
+  "caseId": "006",
+  "initialSeen": 3,
+  "seen": 17,
+  "status": {
+    "kind": "hold",
+    "reason": "Waiting for Tenant"
+  },
+  "runs": [
+    {
+      "seen": 3,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Hello, the landlord of 14 Brindlefern Walk, Larkmere, ZZ1 1ZZ has asked for the current solar generation readings for the property. Could you please send us a clear photo of the solar generation meter or inverter display showing the current reading? If you can also tell us the date and time you took it, that would help. If you are not sure where the meter or display is, please let us know and we will help. There is no fault to report and no visit is needed. Thank you.",
+            "reason": "The landlord only asked for current solar generation readings and no fault or visit was described [event 001]. No reading or meter details are on record [event 002], so per the reading-request guidance we must ask for readable evidence rather than invent a value. Reading a display is a simple check the tenant can do, and no contractor or cost is involved, so no landlord approval is needed [event 003]."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Edwin, thank you for your call about the current solar generation readings for 14 Brindlefern Walk, Larkmere, ZZ1 1ZZ. We do not hold a reading at the moment, so we have asked the tenant for a clear photo of the generation meter or inverter display. We will pass it on once we receive it. No contractor visit or cost is involved. If you would rather use a reading from your own monitoring portal, or want something different, please let us know.",
+            "reason": "The landlord's request [event 001] has not been answered yet. We have no reading on file [event 002], so I am telling him we have asked the tenant for readable evidence, without inventing a value, and that no visit or cost is involved [event 003]."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Tenant",
+            "reason": "The readable solar generation reading has not been delivered; a promise or mention does not count. We asked the tenant for a photo of the meter or inverter display [event 001, event 002], and we wait for it before replying to the landlord with the value."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Tenant"
+        }
+      ]
+    },
+    {
+      "seen": 17,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Hello Ivo, thank you for your reply about 14 Brindlefern Walk, Larkmere, ZZ1 1ZZ. I am sorry for the repetition. We cannot see a solar generation reading or photo on the case yet, so we cannot pass anything on to the landlord. Could you please reply to this email with a clear photo of the generation meter or inverter display, or type out the figure shown with the date and time it was taken? If your wife's earlier email is easy to find, forwarding it would also be fine. There is no fault and no visit is needed. Thank you for your help.",
+            "reason": "The tenant says the readings were supplied about two weeks ago by phone and email, but his reply has no figures or image [event 017]. The case record shows no reading received, only the original landlord request and no meter details [event 001, event 002]. A mention of earlier delivery is not a readable reading, so I will not invent a value and will ask again for the actual photo or figure, politely acknowledging his point. No contractor, cost or landlord approval is involved [event 003]."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Tenant",
+            "reason": "No readable solar reading is on the case; the tenant's statement that it was sent earlier is not evidence of delivery and he included no figures or image [event 017]. We have asked him to resend it, and will pass it to the landlord once received [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Tenant"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

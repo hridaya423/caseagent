@@ -1,0 +1,8 @@
+Message-ID: <016.6.11@northbridge-lettings.case-agent>
+Date: Sat, 20 Sep 2025 10:15:00 GMT
+X-Case-Id: 016
+X-Run: 6
+X-Recipient-Role: landlord
+To: landlord
+
+Northbridge Lettings: please read our email about 26 Tallowmere Close. An unverified visitor called there on Saturday. Was it your electrician? Please reply today.

@@ -1,0 +1,44 @@
+{
+  "caseId": "012",
+  "initialSeen": 1,
+  "seen": 1,
+  "status": {
+    "kind": "escalated",
+    "by": "agent",
+    "summary": "Checked: Read the tenant's report: bathroom window will not open, bedroom window opens but will not secure, keys missing [event 001]. No landlord contact or contractor action has taken place yet.\nMissing or in conflict: Unknown: which keys are missing (window, door or other), the floor and accessibility of the bedroom window, and whether the property can be secured tonight. The bathroom window fault (stuck) is not urgent by itself. The tenant has been asked for these details.\nDecision needed: Decide whether the unsecured bedroom window needs an urgent same-day security fix, and phone the landlord to get approval for a contractor visit and cost, covering the bedroom window, the bathroom window and the missing keys.",
+    "checked": "Read the tenant's report: bathroom window will not open, bedroom window opens but will not secure, keys missing [event 001]. No landlord contact or contractor action has taken place yet.",
+    "missing_or_conflict": "Unknown: which keys are missing (window, door or other), the floor and accessibility of the bedroom window, and whether the property can be secured tonight. The bathroom window fault (stuck) is not urgent by itself. The tenant has been asked for these details.",
+    "decision_needed": "Decide whether the unsecured bedroom window needs an urgent same-day security fix, and phone the landlord to get approval for a contractor visit and cost, covering the bedroom window, the bathroom window and the missing keys."
+  },
+  "runs": [
+    {
+      "seen": 1,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Perrin,\n\nThank you for your report about Unit 2, 18 Brindlewick Mews. Because the bedroom window will not secure, a member of our team is dealing with this now and will be in touch.\n\nTo help them, please reply with:\n1. Which keys are missing (for example window keys, front door keys or another set), and when you last saw them.\n2. Whether the bedroom window can be closed fully, and which floor the bedroom is on.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The bedroom window will not secure, which is a security failure under rule 18, so a person is handling it now and the tenant is told so [event 001]. I also ask which keys are missing, since the report does not say [event 001]."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "escalate",
+          "input": {
+            "checked": "Read the tenant's report: bathroom window will not open, bedroom window opens but will not secure, keys missing [event 001]. No landlord contact or contractor action has taken place yet.",
+            "missing_or_conflict": "Unknown: which keys are missing (window, door or other), the floor and accessibility of the bedroom window, and whether the property can be secured tonight. The bathroom window fault (stuck) is not urgent by itself. The tenant has been asked for these details.",
+            "decision_needed": "Decide whether the unsecured bedroom window needs an urgent same-day security fix, and phone the landlord to get approval for a contractor visit and cost, covering the bedroom window, the bathroom window and the missing keys.",
+            "reason": "An unsecured bedroom window is a security failure, which rule 18 says to escalate at once, before a normal repair could arrive [event 001]. A person must contact the landlord and decide on urgency; I have told the tenant that a person is dealing with it."
+          },
+          "ok": true,
+          "result": "case escalated to a person"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

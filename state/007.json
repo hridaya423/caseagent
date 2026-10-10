@@ -1,0 +1,192 @@
+{
+  "caseId": "007",
+  "initialSeen": 1,
+  "seen": 19,
+  "status": {
+    "kind": "hold",
+    "reason": "Waiting for Landlord"
+  },
+  "runs": [
+    {
+      "seen": 1,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "8 Vellum Court, Brindlewick: electrician to inspect and repair the downstairs bedroom light, which flickers and makes a popping noise when switched on. The tenant has also reported a Samsung TV in the upstairs bedroom that trips a fuse when plugged in. We are checking whether the TV belongs to the tenant or the property. Access will be arranged in advance with the tenant because a dog is at the property.",
+            "cost": "unknown - no quote yet. Please approve the inspection visit, or tell us your cost limit.",
+            "reason": "The tenant reported a flickering, popping bedroom light, which is an electrical fault in the property's fixed wiring or fitting [event 001]. Rule 1 says to go to the landlord first for a repair. Rule 5 requires approval before any contractor visit or cost. No cost is known yet. The TV is handled separately until ownership is clear."
+          },
+          "ok": true,
+          "result": "approval request for \"8 Vellum Court, Brindlewick: electrician to inspect and repair the downstairs bedroom light, which flickers and makes a popping noise when switched on. The tenant has also reported a Samsung TV in the upstairs bedroom that trips a fuse when plugged in. We are checking whether the TV belongs to the tenant or the property. Access will be arranged in advance with the tenant because a dog is at the property.\" (cost: unknown - no quote yet. Please approve the inspection visit, or tell us your cost limit.) sent to the landlord"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Ada,\n\nThank you for your report about 8 Vellum Court. We have asked the landlord to approve an electrician to look at the downstairs bedroom light that flickers and pops. We will arrange access in advance, and we have noted the dog.\n\nTo help us, could you please tell us:\n1. Does the Samsung TV in the upstairs bedroom belong to you, or was it supplied with the property?\n2. Your report mentions a door handle in the case title but not in the details. If there is a door handle problem, which door is it and what is wrong?\n3. Which days and times suit you for a visit, and how should the dog be managed during it?\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The case title mentions a door handle that the tenant's report does not describe, so I need to know which door [event 001]. Who owns the TV decides whether it is the landlord's responsibility. The tenant asked for access to be arranged in advance because of the dog, so I need their availability [event 001]. I also confirm that the landlord has been asked about the light."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "Landlord approval for the electrician visit is requested and no contractor can be assigned until it arrives. The tenant has been asked about TV ownership, the door handle and access [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 3,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "8 Vellum Court, Brindlewick: electrician to inspect and repair the downstairs bedroom light, which flickers and makes a popping noise when switched on. This covers the light only. The Samsung TV in the upstairs bedroom is not part of this request. Access will be arranged in advance with the tenant because a dog is at the property.",
+            "cost": "unknown - no quote yet. Please confirm the inspection visit and repair of the light, or tell us your cost limit.",
+            "reason": "The landlord replied \"Please sort it. I don't remember leaving a TV\" [event 003]. The reply reads as a response to the TV and does not mention the downstairs light. The automatic check marked it unclear. I will not assign an electrician on an unclear reply. The flickering, popping light is a fault in the property's fixed electrics [event 001], so approval for it must be on record before any visit (rule 5). I have restated the light as the only scope and have separated the TV. The landlord does not recall supplying the TV, and the tenant has not yet said who owns it."
+          },
+          "ok": true,
+          "result": "approval request for \"8 Vellum Court, Brindlewick: electrician to inspect and repair the downstairs bedroom light, which flickers and makes a popping noise when switched on. This covers the light only. The Samsung TV in the upstairs bedroom is not part of this request. Access will be arranged in advance with the tenant because a dog is at the property.\" (cost: unknown - no quote yet. Please confirm the inspection visit and repair of the light, or tell us your cost limit.) sent to the landlord"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Corin,\n\nThank you for your reply about 8 Vellum Court. We have noted that you do not recall leaving a TV. We are checking with the tenant who owns the Samsung TV in the upstairs bedroom, and we will not arrange anything for the TV on your behalf.\n\nYour reply did not mention the second item, so we want to be sure. The tenant also reports that the downstairs bedroom light flickers and pops when switched on. We would like to send an electrician to inspect it and repair it. We have no quote yet. Please reply \"yes\" to approve the visit, or tell us your cost limit. We will arrange access with the tenant in advance because there is a dog at the property.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The landlord's reply was TV-focused and did not address the light [event 003]. I need a clear approval for the light on record before assigning an electrician. I also confirm that I have noted their comment on the TV and will not commit them to anything for it [event 001]."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord's approval for the light is unclear [event 003]. A clear approval has been requested again. No contractor can be assigned until it arrives. The tenant has also not yet answered our questions about TV ownership, the door handle and access [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 7,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Ada,\n\nI wrote on 4 September about 8 Vellum Court and have not yet heard back. Could you please let us know:\n\n1. Does the Samsung TV in the upstairs bedroom belong to you, or was it supplied with the property?\n2. Is there a problem with a door handle? If so, which door and what is wrong?\n3. Which days and times suit you for an electrician to look at the downstairs bedroom light, and how should the dog be managed during the visit?\n\nWe are still waiting for the landlord's approval for the electrician. We will arrange access with you in advance once it is confirmed. Please reply by Thursday 11 September if you can.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant has not answered our questions of 4 September for 3 days, so rule 9 requires sending the request again, with a date. We still need TV ownership, the door handle detail and access availability [event 001]. The landlord has not approved the visit, so I promise only that access will be arranged once approved."
+          },
+          "ok": false,
+          "result": "refused: the message states 11 Sep, which no event, record or document in the case shows. State only amounts and dates from the case; write \"plus VAT\" rather than a total you worked out, and ask for a date rather than proposing one."
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord's only new message is an automatic away reply with no instruction or approval [event 007]. Their earlier reply was unclear on the light [event 003], and the approval request sent in run 2 is only two days old, so a chase is not yet due. No contractor can be assigned without clear approval (rule 5). The tenant has been chased once for TV ownership, door handle and access."
+          },
+          "ok": false,
+          "result": "not executed: an earlier action in this response failed. Read its error, then decide again; the action was not executed"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Ada,\n\nI wrote on 4 September about 8 Vellum Court and have not yet heard back. Could you please let us know:\n\n1. Does the Samsung TV in the upstairs bedroom belong to you, or was it supplied with the property?\n2. Is there a problem with a door handle? If so, which door and what is wrong?\n3. Which days and times suit you for an electrician to look at the downstairs bedroom light, and how should the dog be managed during the visit?\n\nWe are still waiting for the landlord's approval for the electrician. We will arrange access with you in advance once it is confirmed. Please reply as soon as you can.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant has not answered our questions of 4 September for 3 days, so rule 9 requires sending the request again. We still need TV ownership, the door handle detail and access availability [event 001]. The landlord has not approved the visit, so I promise only that access will be arranged once approved."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord's only new message is an automatic away reply with no instruction or approval [event 007]. Their earlier reply was unclear on the light [event 003], and the approval request from run 2 is only two days old, so a chase is not yet due. No contractor can be assigned without clear approval (rule 5). The tenant has now been chased once for TV ownership, the door handle and access [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 16,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "8 Vellum Court, Brindlewick: electrician to inspect and repair the downstairs bedroom light, which flickers and makes a popping noise when switched on. This covers the light only. The Samsung TV in the upstairs bedroom is not part of this request. The tenant has offered access on several dates from 23 September, the dog will be taken out during the visit, and the electrician will be asked to call on arrival.",
+            "cost": "unknown - no quote yet. Please reply \"yes\" to approve the inspection visit and repair, or tell us your cost limit.",
+            "reason": "Our earlier approval requests have had no clear answer. The landlord's first reply was about the TV and did not mention the light [event 003]. The only later message was an automatic away reply with no instruction [event 007]. More than 3 days have passed, so rule 9 requires sending the request again. The tenant has now given access availability [event 016], so a clear approval is the only thing stopping the electrician being booked. The flickering, popping light is a fault in the property's fixed electrics [event 001]. I will not assign a contractor without approval on record (rule 5)."
+          },
+          "ok": true,
+          "result": "approval request for \"8 Vellum Court, Brindlewick: electrician to inspect and repair the downstairs bedroom light, which flickers and makes a popping noise when switched on. This covers the light only. The Samsung TV in the upstairs bedroom is not part of this request. The tenant has offered access on several dates from 23 September, the dog will be taken out during the visit, and the electrician will be asked to call on arrival.\" (cost: unknown - no quote yet. Please reply \"yes\" to approve the inspection visit and repair, or tell us your cost limit.) sent to the landlord"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Ada,\n\nThank you for your availability for the electrician at 8 Vellum Court. We have noted that the dog will be taken out during the visit and that the electrician should call on arrival rather than knock.\n\nWe are still waiting for the landlord to approve the visit to the downstairs bedroom light, so we cannot book a date yet. We have sent the landlord a reminder, and we will contact you as soon as we have an answer.\n\nTwo things are still open. Please could you tell us:\n1. Does the Samsung TV in the upstairs bedroom belong to you, or was it supplied with the property?\n2. Is there a problem with a door handle? If so, which door and what is wrong?\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant sent access availability, the dog arrangement and a request that the contractor call on arrival [event 016]. I acknowledge these and say honestly that landlord approval is still outstanding, since the landlord has not given a clear approval [event 003][event 007]. The tenant did not answer the questions about TV ownership and the door handle that we asked in earlier messages [event 001], so I ask them again. I promise only that we will get back to them."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "No clear landlord approval exists for the electrician visit. The reply was TV-focused and unclear [event 003], and the later message was an automatic away reply [event 007]. I have sent the approval request again. The tenant's availability is on record [event 016], so a contractor can be assigned once the landlord approves."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 19,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Rian,\n\nThank you for proposing 29 September after 15:00 for 8 Vellum Court, Brindlewick (downstairs bedroom light that flickers and pops when switched on).\n\nWe do not yet have the landlord's approval for this visit, so please do not attend or start any work for now. We have asked the landlord and will confirm as soon as we have an answer. If approved, we will confirm the date with you, and we will ask you for an arrival time then.\n\nPlease note the tenant has a dog at the property and asks that the contractor calls on arrival rather than knocking. We will pass on the tenant's contact arrangements once the visit is confirmed.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "Rian proposed 29 September after 15:00 with no exact time [event 019]. The tenant offered that date, after 15:00 [event 016]. But the landlord has given no clear approval for the light: the only reply concerned the TV [event 003], followed by an automatic away reply [event 007]. Rule 5 requires approval before any contractor visit, so I must not confirm the booking. I have told the contractor not to attend yet, so nothing starts without approval. The latest approval request went out yesterday, so another chase is not yet due."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The electrician has offered 29 September after 15:00 [event 019], which fits the tenant's availability [event 016]. There is still no clear landlord approval [event 003][event 007]. The approval request was re-sent on 16 September, so the next chase is due after 3 days without an answer (rule 9). The contractor has been told not to attend until we confirm. Once approved, I will assign the electrician, confirm the date and tell the tenant."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

@@ -1,0 +1,150 @@
+{
+  "caseId": "026",
+  "initialSeen": 2,
+  "seen": 9,
+  "status": {
+    "kind": "escalated",
+    "by": "agent",
+    "summary": "Checked: Tenant reports damp staining and lifting paint below the kitchen window, cool but not wet, no dripping, faint musty smell [event 001, event 004]. New: the mark is nearest the socket under the window; no heat, sparks or tripped breaker noticed [event 009]. Landlord inspection approval was requested in run 1 and no reply is on file. Contractor Brindle Survey & Drying offered 6 March after 13:00 with no trim removal or wall cutting [event 007]. I told him not to attend yet. The tenant is available after 13:00 on 6 March [event 009].\nMissing or in conflict: Damp next to an electrical socket is possible water near electrics, and it could become unsafe before a normal repair arrives. The offered inspection excludes opening up the wall and is a damp survey, so it may not be the right trade or urgency. The landlord has not replied to the approval request. The cause of the damp and the state of the socket are unknown. No electrician has been considered.\nDecision needed: Decide whether to treat this as an electrical safety issue now. If yes, phone the landlord to approve urgent attendance, covering any electrician check of the socket and the 6 March inspection, and decide whether the tenant should be given safety advice.",
+    "checked": "Tenant reports damp staining and lifting paint below the kitchen window, cool but not wet, no dripping, faint musty smell [event 001, event 004]. New: the mark is nearest the socket under the window; no heat, sparks or tripped breaker noticed [event 009]. Landlord inspection approval was requested in run 1 and no reply is on file. Contractor Brindle Survey & Drying offered 6 March after 13:00 with no trim removal or wall cutting [event 007]. I told him not to attend yet. The tenant is available after 13:00 on 6 March [event 009].",
+    "missing_or_conflict": "Damp next to an electrical socket is possible water near electrics, and it could become unsafe before a normal repair arrives. The offered inspection excludes opening up the wall and is a damp survey, so it may not be the right trade or urgency. The landlord has not replied to the approval request. The cause of the damp and the state of the socket are unknown. No electrician has been considered.",
+    "decision_needed": "Decide whether to treat this as an electrical safety issue now. If yes, phone the landlord to approve urgent attendance, covering any electrician check of the socket and the 6 March inspection, and decide whether the tenant should be given safety advice."
+  },
+  "runs": [
+    {
+      "seen": 2,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "Inspection by a suitable contractor of damp staining and lifting paint below the kitchen window at 18 Juniper Fold, Velden Quay, ZZ1 1ZZ, to find the cause. This approval covers the inspection visit only. Any repair would be quoted and sent to you for separate approval.",
+            "cost": "unknown",
+            "reason": "The tenant reported damp staining and lifting paint below the kitchen window. She said the patch has grown since last week and asked for an inspection [event 001]. This is a repair-type fault, so the landlord must approve before any contractor visit or cost (rule 5). The item and room are clear, and no safety emergency is reported. No quote exists yet, so the cost is unknown [event 002]."
+          },
+          "ok": true,
+          "result": "approval request for \"Inspection by a suitable contractor of damp staining and lifting paint below the kitchen window at 18 Juniper Fold, Velden Quay, ZZ1 1ZZ, to find the cause. This approval covers the inspection visit only. Any repair would be quoted and sent to you for separate approval.\" (cost: unknown) sent to the landlord"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Iris,\n\nThank you for reporting the damp staining and lifting paint below the kitchen window at 18 Juniper Fold. Your request reference is NBL-4821.\n\nI have asked the landlord to approve an inspection. I can't give you an attendance date until they reply. Once they approve, a contractor will contact you by email to arrange a suitable time. I will keep you updated.\n\nIf you would like a particular access arrangement, such as preferred days or times, please let me know.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The tenant asked to be told when someone can attend [event 001]. No access preference is recorded beyond email contact [event 002]. I have told her that landlord approval is pending, that the contractor will contact her once it is given, and that she can share access preferences. I have promised no date."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "Approval for the inspection has been requested from the landlord, with the cost stated as unknown. No contractor can be assigned until the landlord approves [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 4,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Iris,\n\nThank you for the extra detail about the damp below the kitchen window at 18 Juniper Fold (ref NBL-4821). I have noted that the paint feels cool but not wet, that nothing is dripping, that there is a faint musty smell, and that you can give access after 13:00 on weekdays.\n\nI am still waiting for the landlord to approve the inspection, so I can't offer a date yet. Once they approve, a contractor will contact you by email to arrange a visit, and I will pass on your access times. If anything changes, for example water starts to drip or the patch spreads quickly, please tell me straight away.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The tenant gave a fuller description and access times (weekdays after 13:00) [event 004]. I acknowledged them and said the landlord's approval is still pending from my earlier request [event 001, event 002], so no date can be promised. No water or safety emergency is described, so no escalation is needed. Contractor assignment must wait for the landlord's approval (rule 5)."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Tenant access: weekdays after 13:00, contact by email. Tenant reports paint cool but not wet, no dripping, faint musty smell. Landlord approval for inspection still pending; pass access times to contractor once assigned.",
+            "reason": "Records the tenant's access window and condition details from [event 004] for the later contractor assignment, as no access preference was recorded before [event 002]."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord has not yet replied to the inspection approval request sent in run 1 [event 001]. No contractor can be assigned until approval is given. The tenant's access details are recorded [event 004]. Chase after 3 days without an answer (rule 9)."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 7,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Owen,\n\nThank you for offering an inspection slot on 6 March after 13:00 for the damp staining and lifting paint below the kitchen window at 18 Juniper Fold, Velden Quay, ZZ1 1ZZ (ref NBL-4821). I have noted that the inspection would not include removing trim or cutting into the wall.\n\nWe are still waiting for the landlord to approve the visit, so please do not attend or book anything with the tenant yet. I will confirm as soon as approval is in place. The tenant has said she can give access after 13:00 on weekdays.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The contractor offered a slot for 6 March after 13:00 [event 007], but the landlord has not yet approved the inspection requested in run 1 [event 001, event 002]. Rule 5 requires approval before any contractor visit, so I have told him not to attend or book yet. The slot fits the tenant's access window of weekdays after 13:00 [event 004]. I have not confirmed a date to anyone. The request is under 3 days old, so no chase is due."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Brindle Survey & Drying (Owen Pike) offered an inspection slot on 2025-03-06 after 13:00; the inspection excludes removing trim or cutting into the wall. Not confirmed. Landlord approval is still pending. Once approved, assign the contractor and tell the tenant the contractor will contact her.",
+            "reason": "This records the offered slot and its limits [event 007] for the next run, as approval is still pending from the request in run 1."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The inspection approval requested in run 1 has had no landlord reply yet. The contractor's slot offer [event 007] cannot be accepted without it. Chase the landlord after 3 days without an answer (rule 9)."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 9,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Iris,\n\nThank you for confirming you will be home after 13:00 on 6 March, and for telling me the mark is nearest the socket under the kitchen window at 18 Juniper Fold (ref NBL-4821).\n\nBecause the damp is close to an electrical socket, a member of our team is now looking at this case as a priority. I can't yet confirm the 6 March visit, as the landlord has not approved the inspection. We will update you as soon as that is settled.\n\nPlease tell me straight away if anything changes, for example heat, sparks, a tripped breaker, dripping water or the patch spreading.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The tenant gave a date she is home [event 009] and asked earlier to be told when someone can attend [event 001]. I have answered that the visit is not yet confirmed because landlord approval is outstanding. I told her a person is dealing with the case now, as damp beside a socket is possible water near electrics (rule 18). I added no repair advice of my own (messages rule)."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "escalate",
+          "input": {
+            "checked": "Tenant reports damp staining and lifting paint below the kitchen window, cool but not wet, no dripping, faint musty smell [event 001, event 004]. New: the mark is nearest the socket under the window; no heat, sparks or tripped breaker noticed [event 009]. Landlord inspection approval was requested in run 1 and no reply is on file. Contractor Brindle Survey & Drying offered 6 March after 13:00 with no trim removal or wall cutting [event 007]. I told him not to attend yet. The tenant is available after 13:00 on 6 March [event 009].",
+            "missing_or_conflict": "Damp next to an electrical socket is possible water near electrics, and it could become unsafe before a normal repair arrives. The offered inspection excludes opening up the wall and is a damp survey, so it may not be the right trade or urgency. The landlord has not replied to the approval request. The cause of the damp and the state of the socket are unknown. No electrician has been considered.",
+            "decision_needed": "Decide whether to treat this as an electrical safety issue now. If yes, phone the landlord to approve urgent attendance, covering any electrician check of the socket and the 6 March inspection, and decide whether the tenant should be given safety advice.",
+            "reason": "The new tenant report puts damp staining next to a socket [event 009]. Rule 18 requires immediate escalation where water near electrics could make the home unsafe before a normal repair arrives. The landlord has not approved anything [event 001], so I cannot assign the contractor. A person must phone the landlord and judge the risk. I have told the tenant that a person is dealing with it."
+          },
+          "ok": true,
+          "result": "case escalated to a person"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

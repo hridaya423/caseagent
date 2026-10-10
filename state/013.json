@@ -1,0 +1,165 @@
+{
+  "caseId": "013",
+  "initialSeen": 1,
+  "seen": 18,
+  "status": {
+    "kind": "hold",
+    "reason": "Waiting for Quote"
+  },
+  "runs": [
+    {
+      "seen": 1,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "Glazier to inspect and quote for the misted double-glazed kitchen window at 8 Brackenmere Walk, Vellumbrook, ZZ1 1ZZ (moisture between the panes, water gathering around the frame, kitchen very cold, tenant concerned about damp). The sash opens, closes and locks. Approval requested for the visit and a quote only; no repair until you approve a quote.",
+            "cost": "unknown - quote to follow after inspection",
+            "reason": "The tenant reports a failed seal or misting between the panes of the kitchen glazing, with water around the frame and a cold kitchen [event 001]. This is a fault that needs a repair, so the landlord comes first (rule 1). The item and room are clear, and it is not a setting or tenant-caused issue. No cost is known. The attached invoice has no amount and is dated 10 September 2025, which is after today, so it does not give a cost or show any work is done."
+          },
+          "ok": true,
+          "result": "approval request for \"Glazier to inspect and quote for the misted double-glazed kitchen window at 8 Brackenmere Walk, Vellumbrook, ZZ1 1ZZ (moisture between the panes, water gathering around the frame, kitchen very cold, tenant concerned about damp). The sash opens, closes and locks. Approval requested for the visit and a quote only; no repair until you approve a quote.\" (cost: unknown - quote to follow after inspection) sent to the landlord"
+        },
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Tenant attached glazing-invoice.pdf (Clearfirth Glazing, ref NBL-013-INV-09, dated 10 September 2025, \"supply and fit 1 pane of glass to the kitchen glazing\"). The amount is blank and the date is later than the report date (31 July 2025). No approved work has been recorded. It is not treated as a quote or as proof of work. Check where this document came from.",
+            "reason": "The attachment to the request conflicts with the case timeline: it is a future-dated invoice with no amount, and no work has been approved or done [event 001]. Recording this so nobody treats it as a quote or completion evidence."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elowen,\n\nThank you for your report about the misted kitchen glazing at 8 Brackenmere Walk, and for confirming that the sash opens, closes and locks. I have passed the details to the landlord and asked for approval to have a glazier look at it. I will update you as soon as I hear back. If a visit is approved, the contractor will contact you to arrange a time.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "Acknowledge the tenant's report and tell them the next step, which is that the landlord has been asked for approval [event 001]. I promise no outcome or date."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "Landlord approval for the inspection and quote has been requested. No contractor can be assigned until the landlord replies [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 10,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "Please confirm the following for the misted double-glazed kitchen window at 8 Brackenmere Walk, Vellumbrook, ZZ1 1ZZ (moisture between the panes, water around the frame, cold kitchen). (1) Do you approve a glazier attending to inspect and quote? We have no quote yet, so we cannot say whether the total will be £180. (2) Once we have the quote, we will send it to you. We will only book the repair if you approve it in writing, and we will not go ahead with any repair on the visit itself. Please also say whether the £180 is meant to include VAT.",
+            "cost": "Unknown - no quote yet. Landlord said he is happy to use the contractor if the total quote is £180.",
+            "reason": "The landlord's reply is conditional: he is happy to use the contractor if £180 is the total value of the quote [event 010]. No quote exists yet, so the condition is not met and this is not a clear approval (rule 5). It also does not say whether he approves the inspection visit alone. The invoice attached to the request has no amount and a future date, so it is not a quote [event 001]. I am keeping to the boundary he set and not inventing permission for a repair (rule 7, PB09). I am asking him to confirm the inspection and quote visit and whether £180 includes VAT. Then I can assign the glazier within what he has approved."
+          },
+          "ok": true,
+          "result": "approval request for \"Please confirm the following for the misted double-glazed kitchen window at 8 Brackenmere Walk, Vellumbrook, ZZ1 1ZZ (moisture between the panes, water around the frame, cold kitchen). (1) Do you approve a glazier attending to inspect and quote? We have no quote yet, so we cannot say whether the total will be £180. (2) Once we have the quote, we will send it to you. We will only book the repair if you approve it in writing, and we will not go ahead with any repair on the visit itself. Please also say whether the £180 is meant to include VAT.\" (cost: Unknown - no quote yet. Landlord said he is happy to use the contractor if the total quote is £180.) sent to the landlord"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord's reply is conditional on a £180 total quote that does not exist yet [event 010]. I have asked him to confirm approval for an inspection and quote visit. No contractor is assigned until he replies."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 14,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elowen,\n\nThank you for letting us know, and for offering 24, 25 or 26 August for a visit to the kitchen glazing at 8 Brackenmere Walk. I have noted those dates so you can be present.\n\nWe are still waiting for the landlord's approval, so no visit is booked yet. Once it is approved, the contractor will contact you to arrange a time, and I will pass on your availability. I will update you when I hear back.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The tenant gave availability of 24, 25 or 26 August and wants to be present [event 014]. The landlord's reply was conditional on a £180 quote and has not yet given clear approval; I asked him to confirm the inspection and quote visit [event 010]. No contractor can be assigned until he approves, so I acknowledge the dates, say nothing is booked, and promise only that the contractor will contact her after approval (rules 5, 6)."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Tenant is away for two weeks and is available for a visit on 24, 25 or 26 August 2025 (she wants to be present). Pass this to the glazier once the landlord approves. Landlord approval for inspection/quote is still outstanding; his earlier reply was conditional on a £180 total quote.",
+            "reason": "Record the tenant's availability for scheduling later [event 014] while the landlord's clear approval is still awaited after his conditional reply [event 010]."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "My request to the landlord to confirm approval for an inspection and quote visit is unanswered; his earlier reply was conditional and not an approval [event 010]. The tenant's dates are recorded [event 014]. No contractor is assigned until he approves."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 18,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Dear Sella,\n\nThank you for your update on the kitchen glazing at 8 Brackenmere Walk, Vellumbrook, ZZ1 1ZZ. We have not yet had the landlord's approval for a repair, so please do not fit anything until we confirm approval in writing.\n\nPlease send us:\n1. Your written quote for the work, with the total price and whether it includes VAT.\n2. The expected delivery date for the glass and when you could attend.\n\nThe tenant wants to be present for the visit, so please wait for us to confirm before contacting her to book. We will send the quote to the landlord and come back to you once we have his answer.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The contractor says glass is already ordered but gave no date, quote or attendance time [event 018]. The landlord's only reply was conditional on a £180 total quote and no repair has been approved [event 010]. Under rule 7, a contractor waiting for parts means I ask for the quote and date, tell them not to fit without approval, and hold. I am not assigning or authorising any work."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Mr Vale,\n\nI am following up on the misted kitchen window at 8 Brackenmere Walk, Vellumbrook, ZZ1 1ZZ (moisture between the panes, water around the frame, cold kitchen). You said you were happy to use the contractor if £180 was the total value of the quote. We have not yet had a reply to our question on whether you approve a glazier to inspect and quote, or whether the £180 includes VAT.\n\nClearfirth Glazing has now told us the glass has been ordered and is awaiting delivery. They have not given a price or a date. I have asked for a written quote and told them not to fit anything until you approve in writing. I will send you the quote as soon as I have it. Please let me know whether the £180 includes VAT and whether you approve the visit.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The landlord has not answered my earlier request for 13 days [event 010]. His reply was conditional on a £180 quote, so there is no clear approval. The contractor reports ordering glass with no quote [event 018]. I am chasing him (rule 9), giving the update, and promising only to send the quote and wait for his written approval (rules 5, 7)."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elowen,\n\nAn update on the kitchen glazing at 8 Brackenmere Walk. The glazier has told us the glass has been ordered and is awaiting delivery, but we have no delivery date or visit time yet. We are also still waiting for the landlord's approval, so no visit is booked for 24, 25 or 26 August. I will let you know as soon as there is a date. Please tell me your availability for the following weeks so I can pass it on.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "The contractor has no delivery date or attendance time [event 018], and the tenant's offered dates of 24-26 August cannot be used [event 014]. I keep her informed, promise nothing the agency does not control, and ask for later availability."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Quote",
+            "reason": "The contractor has ordered glass but given no quote or date [event 018]. I have asked for both and told them not to fit anything. The landlord has not given clear approval [event 010], and I have chased him. Once the quote arrives I will send it to him for approval."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Quote"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

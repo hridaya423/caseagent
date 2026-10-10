@@ -1,0 +1,44 @@
+{
+  "caseId": "014",
+  "initialSeen": 3,
+  "seen": 3,
+  "status": {
+    "kind": "escalated",
+    "by": "agent",
+    "summary": "Checked: Tenant report: radiators cold, controller unresponsive, hot water still working [event 001]. Tenant confirmed no gas smell, no visible leak, boiler display blank [event 003]. Property manager already asked safety and access questions [event 002]. No landlord contact or approval yet; no contractor assigned.\nMissing or in conflict: No conflict. Not yet known: boiler make/age, whether a simple power/fuse check could restore it, landlord approval and cost. Tenant disclosed a mobility impairment and cannot use stairs quickly; she asks that any attendee phone from outside rather than arrive unannounced [event 003]. Hot water is still available, but heating is off in January.\nDecision needed: Treat as urgent no-heat for a vulnerable tenant: decide how to obtain landlord approval now (phone if needed) and dispatch a heating engineer promptly, passing on the tenant's call-from-outside access request.",
+    "checked": "Tenant report: radiators cold, controller unresponsive, hot water still working [event 001]. Tenant confirmed no gas smell, no visible leak, boiler display blank [event 003]. Property manager already asked safety and access questions [event 002]. No landlord contact or approval yet; no contractor assigned.",
+    "missing_or_conflict": "No conflict. Not yet known: boiler make/age, whether a simple power/fuse check could restore it, landlord approval and cost. Tenant disclosed a mobility impairment and cannot use stairs quickly; she asks that any attendee phone from outside rather than arrive unannounced [event 003]. Hot water is still available, but heating is off in January.",
+    "decision_needed": "Treat as urgent no-heat for a vulnerable tenant: decide how to obtain landlord approval now (phone if needed) and dispatch a heating engineer promptly, passing on the tenant's call-from-outside access request."
+  },
+  "runs": [
+    {
+      "seen": 3,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Leah,\n\nThank you for the details about the heating at 7 Mallowmere Walk. As the heating is off, the boiler display is blank and the weather is cold, a member of our team is dealing with your case now as a priority.\n\nWe have noted that you cannot use the stairs quickly, and that anyone attending should call you from outside rather than arrive unannounced. We will pass this on.\n\nPlease tell us at once if you smell gas or see a leak, or if your hot water stops.\n\nKind regards,\nNorthbridge Lettings",
+            "reason": "Tenant reported no heating, blank boiler display, in January, and has a mobility impairment [event 001][event 003]. This is a no-heat case for a vulnerable tenant, so a person is dealing with it now (rule 18). Her access request (call from outside) is acknowledged. No promise on timing or cost is made."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "escalate",
+          "input": {
+            "checked": "Tenant report: radiators cold, controller unresponsive, hot water still working [event 001]. Tenant confirmed no gas smell, no visible leak, boiler display blank [event 003]. Property manager already asked safety and access questions [event 002]. No landlord contact or approval yet; no contractor assigned.",
+            "missing_or_conflict": "No conflict. Not yet known: boiler make/age, whether a simple power/fuse check could restore it, landlord approval and cost. Tenant disclosed a mobility impairment and cannot use stairs quickly; she asks that any attendee phone from outside rather than arrive unannounced [event 003]. Hot water is still available, but heating is off in January.",
+            "decision_needed": "Treat as urgent no-heat for a vulnerable tenant: decide how to obtain landlord approval now (phone if needed) and dispatch a heating engineer promptly, passing on the tenant's call-from-outside access request.",
+            "reason": "Rule 18 requires immediate escalation when there is no heat for a vulnerable tenant before a normal repair could arrive. The tenant has a mobility impairment, the heating has failed, the boiler display is blank, and it is mid-January [event 001][event 003]. A person must prioritise the landlord approval and attendance. The tenant has been told a person is dealing with it."
+          },
+          "ok": true,
+          "result": "case escalated to a person"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

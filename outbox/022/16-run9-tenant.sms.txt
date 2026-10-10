@@ -1,0 +1,8 @@
+Message-ID: <022.9.16@northbridge-lettings.case-agent>
+Date: Thu, 04 Sep 2025 13:41:17 GMT
+X-Case-Id: 022
+X-Run: 9
+X-Recipient-Role: tenant
+To: tenant
+
+Northbridge Lettings: please read our email today about the washer-dryer at 8 Brackenmere Walk. The repair cannot be booked until we have the E-number and serial number from the rating label. A photo of the label is fine. Thank you.

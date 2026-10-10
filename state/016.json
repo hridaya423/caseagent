@@ -1,0 +1,234 @@
+{
+  "caseId": "016",
+  "initialSeen": 1,
+  "seen": 15,
+  "status": {
+    "kind": "hold",
+    "reason": "Waiting for Landlord"
+  },
+  "runs": [
+    {
+      "seen": 1,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elise,\n\nThank you for letting us know about the smoke alarm at 26 Tallowmere Close, Fenbarrow.\n\nSo that we can take this to the landlord, could you please tell us:\n1. Which room and which smoke alarm has come away from the ceiling (for example, hallway or landing)?\n2. Whether the alarm is still attached to its wiring or battery, or is completely loose.\n3. If you are able to, a photograph of the alarm and the ceiling around it.\n\nOnce we have this, we will move the matter forward.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The report [event 001] does not say which room or which smoke alarm has come away, and no photo was supplied. Under rule 2 I must ask the tenant for the item and room before contacting the landlord. I have asked for the room, the alarm's condition and a photo, and have not added any repair advice."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Tenant",
+            "reason": "Waiting for the tenant to say which room and alarm is affected, and to send a photo, before approaching the landlord [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Tenant"
+        }
+      ]
+    },
+    {
+      "seen": 4,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ronan,\n\nThank you for your reply about the smoke alarm that has come away from the ceiling at 26 Tallowmere Close, Fenbarrow.\n\nWe understand you will arrange your own electrician to have a look, so we will not send anyone from our side. We have not passed the tenant's contact details to your electrician. If you would like them to be shared, we will first check with the tenant.\n\nPlease let us know when the work has been done, and send the invoice if one is due. We have asked the tenant which room the alarm is in and will pass that on once we have it.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The landlord said they will use their own electrician [event 004]. Under rule 8 I let them, ask them to tell us when the work is done, and do not share the tenant's contact details without the tenant's agreement. No contractor is assigned and no cost is requested. The room is still unconfirmed from the tenant [event 001]."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elise,\n\nAn update on the smoke alarm at 26 Tallowmere Close: the landlord has said they will arrange their own electrician to have a look. We do not yet have a visit date. We will not share your contact details with the electrician unless you agree.\n\nWe are still waiting to hear which room the alarm is in, so please reply with that, and a photo if you can.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The landlord is using their own electrician [event 004]. The tenant is owed an update. The room is still unknown from the earlier request [event 001], so I ask again. I have not shared her details, in line with rule 8."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord is arranging their own electrician [event 004]. We wait for the landlord to confirm when the work is done. We also still hope for the tenant's room details [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 7,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elise,\n\nAn update on the smoke alarm at 26 Tallowmere Close, Fenbarrow. The landlord has told us their electrician will contact you and complete the work by the end of next weekend at the latest. We do not yet have the electrician's name or a confirmed appointment.\n\nWe have not passed your contact details to the electrician. Please reply to confirm whether you are happy for them to contact you directly, and if so, which phone number or email you would like them to use.\n\nWe also still need to know which room the smoke alarm is in, and a photo if you can. Please reply with this when you can.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The landlord says their electrician will contact the tenant and finish by the following weekend, with no details or appointment [event 007]. Rule 8 bars sharing the tenant's contact details without her agreement, so I ask for her consent. She has not replied about the room since my earlier requests [event 001], so I chase once more, and I add no repair advice."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ronan,\n\nThank you for your update on the smoke alarm at 26 Tallowmere Close, Fenbarrow. We note your electrician will contact the tenant and complete the work by the end of next weekend at the latest.\n\nWe have not given the tenant's contact details to your electrician. We have asked the tenant whether she agrees to be contacted directly, and we will pass on her details only if she does. If you can send us the electrician's name and contact number, we can make sure she expects the call. We have also asked her which room the alarm is in and will tell you when we hear.\n\nPlease let us know once the work has been done, and send the invoice if one is due.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The landlord is using their own electrician and says they will contact the tenant [event 007]. Under rule 8 I let them proceed, keep the tenant's details private until she agrees, and ask to be told when the work is done. The electrician's identity and appointment are still missing, so I ask for them. Nothing has been approved or assigned by us."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Tenant",
+            "reason": "We need the tenant's consent to share her contact details and the room of the alarm [event 007, event 001]. The landlord will tell us when the work is done [event 004]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Tenant"
+        }
+      ]
+    },
+    {
+      "seen": 12,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ronan,\n\nWe are following up on the smoke alarm that has come away from the ceiling at 26 Tallowmere Close, Fenbarrow. You told us on 12 August that your electrician would complete the work by the following weekend at the latest. We have not heard since, and the tenant has now told us the work is not finished.\n\nThe tenant is currently unavailable and expects to arrange access once she is home. Please could you tell us:\n1. Whether your electrician has attended, and if not, when you expect the work to be done.\n2. The electrician's name and contact details, so that we can pass on to the tenant who will be in touch.\n\nPlease let us know once the work has been done, and send the invoice if one is due.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The landlord elected to manage the work with their own electrician and promised completion by the following weekend [event 004, event 007]. The tenant now says the work is not done and the visit did not happen [event 012]. The landlord has been silent for 26 days, so under rules 8 and 9 I chase for a progress update without opening a competing contractor instruction. I disclose only that the tenant is unavailable, not her health details. No approval or cost is involved."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elise,\n\nThank you for letting us know, and we are sorry to hear you have been unwell. Please focus on recovering; there is nothing you need to do about the smoke alarm at 26 Tallowmere Close, Fenbarrow, for now.\n\nWe are asking the landlord for an update on when their electrician can attend. We have not shared your contact details with anyone. When you are home and ready, please email us to say so, and also let us know which room the alarm is in. We will update you once we hear from the landlord.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The tenant told us the electrician's visit did not happen and that she will arrange it when home [event 012]. She is owed a reply. I reassure her, say I am chasing the landlord, and promise only our own update. Her contact details stay private as she has not consented [event 007]. I do not promise the electrician will contact her."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord manages the repair with their own electrician [event 004, event 007]. The work is not done [event 012]. I have chased the landlord for the plan and completion update, and I wait for the answer."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 13,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elise,\n\nThank you for your message, and we are glad you are home. We will leave you in peace and will not contact you about the smoke alarm at 26 Tallowmere Close, Fenbarrow, unless we have to. Please email us when the alarm has been fixed, or sooner if you need anything from us.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The tenant has been discharged, says the alarm is still not fixed, and asks us to stop repeated contact [event 013]. A short acknowledgement respects that, and says we will wait for her to report completion. No chase to the tenant is sent. Her contact details remain unshared [event 007]."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ronan,\n\nWe are following up again on the smoke alarm that has come away from the ceiling at 26 Tallowmere Close, Fenbarrow. You told us on 12 August that your electrician would finish by the following weekend. The tenant has now told us the alarm is still not fixed.\n\nPlease could you tell us:\n1. Whether your electrician has attended, and if not, when the work will be done.\n2. The electrician's name and contact details.\n\nThe tenant has asked for contact to be kept to a minimum for now, so it would help if your electrician could arrange access through us or with the tenant directly once you have confirmed a date with us. Please tell us when the work is done, and send the invoice if one is due.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The landlord owns the repair through their own electrician [event 004, event 007]. The tenant says the work is still not done [event 013]. I last chased the landlord on 7 September and have had no reply, so a further chase is due under rule 9. It asks about the pending milestone only, assigns no competing contractor and requests no cost. It shares no health details and no tenant contact details."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord's own electrician has not completed the work [event 013]. I have chased the landlord again for progress. The tenant has asked for no further contact and will report when it is fixed [event 013]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 15,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Ronan,\n\nWe need a quick answer on the smoke alarm at 26 Tallowmere Close, Fenbarrow.\n\nThe tenant has told us that on Saturday morning an unannounced person came to the door saying they were there to check something. The tenant did not let them in because they could not verify who it was. We do not know whether this was connected to the alarm work.\n\nPlease could you tell us:\n1. Whether the visitor was your electrician or anyone else you arranged.\n2. The electrician's name and contact details, and the date you have agreed for the visit, so that we can confirm it with the tenant.\n3. Whether the alarm work has been done, and if not, when it will be.\n\nWe have not given your electrician the tenant's contact details. Please ask your electrician to arrange any visit through us first.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The tenant reported an unannounced visitor who could not be verified and did not know if it was linked to the alarm work [event 015]. The landlord alone can confirm whether his own electrician attended, which is a fact one party can confirm, so I ask him rather than guess or escalate (rule 19). He took ownership of the work with his own electrician [event 004, event 007] and has not replied to earlier chases about progress, names or dates since 12 August. This is a further chase under rule 9. I raise no new contractor, request no cost, and keep the tenant's contact details and health information private (rule 8)."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "sms",
+            "text": "Northbridge Lettings: please read our email about 26 Tallowmere Close. An unverified visitor called there on Saturday. Was it your electrician? Please reply today.",
+            "reason": "The visitor query needs a fast answer from the landlord, who has been silent for weeks [event 015, event 007]. The SMS only points to the email."
+          },
+          "ok": true,
+          "result": "sms to landlord queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elise,\n\nThank you for telling us about the person who called at 26 Tallowmere Close on Saturday morning. You were right to check before letting anyone in.\n\nWe have no name or appointment for any visitor, so we cannot say whether this was linked to the smoke alarm. We are asking the landlord today whether it was their electrician and will tell you what we hear. We have not shared your contact details with anyone.\n\nYou do not need to reply to this email.\n\nKind regards,\nMaya Chen\nNorthbridge Lettings",
+            "reason": "The tenant phoned about an unannounced visitor and does not know if it relates to the alarm work [event 015]. She is owed a reply. I tell her we are checking with the landlord, without deciding who the visitor was, and promise only our own update. She asked for minimal contact [event 013], so I say no reply is needed. Her details remain unshared [event 007]."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "The landlord is managing the repair with his own electrician [event 004, event 007]. I have asked him to confirm whether the unverified visitor reported by the tenant was his electrician, and for the electrician's details and the work status [event 015]. I wait for his answer. If the answers still conflict or he stays silent, a person will need to take over."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false
+}

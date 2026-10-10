@@ -1,0 +1,395 @@
+{
+  "caseId": "003",
+  "initialSeen": 1,
+  "seen": 22,
+  "status": {
+    "kind": "hold",
+    "reason": "Waiting for Provider"
+  },
+  "runs": [
+    {
+      "seen": 1,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Attachment tap-works-invoice.pdf (Copper Finch Plumbing, ref NBL-003-INV-14) does not match this case. It is for Flat 4, 28 Larkspur Quay, Brindlewick, not Flat 4, 8-12 Juniper Mews, Vellumford. It is dated 14 Sep 2025, after today (3 Sep 2025). It is not evidence of any work or invoice for this case. Not filed as the invoice. Ask the tenant how it came to be attached. Photos mentioned in the report were not visible in the case record.",
+            "reason": "The attachment names a different property and carries a future date [event 001]. It cannot count as completion evidence or an invoice for Juniper Mews, so I am recording the mismatch to stop it being relied on later."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "request_landlord_approval",
+          "input": {
+            "scope": "Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ: plumber to attend and assess (1) dripping kitchen tap, (2) bathroom basin hot tap that drips and is hard to shut off, (3) rainwater coming through the bathroom vent during heavy rain, with damp patches on the ceiling and wall of the smaller bedroom. The visit covers assessment only. Any repair or cost will be sent to you as a quote for separate approval.",
+            "cost": "unknown",
+            "reason": "The tenant reports faults that need repair, so the landlord must approve before any contractor visit or spend [event 001]. The report names the items and rooms, so no tenant question is needed first. The cost is not known yet. The damp from the vent leak could worsen with further rain, so a prompt reply is useful."
+          },
+          "ok": true,
+          "result": "approval request for \"Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ: plumber to attend and assess (1) dripping kitchen tap, (2) bathroom basin hot tap that drips and is hard to shut off, (3) rainwater coming through the bathroom vent during heavy rain, with damp patches on the ceiling and wall of the smaller bedroom. The visit covers assessment only. Any repair or cost will be sent to you as a quote for separate approval.\" (cost: unknown) sent to the landlord"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elian,\n\nThank you for your report about Flat 4, 8-12 Juniper Mews: the dripping kitchen tap, the bathroom hot tap that is hard to shut off, rain coming through the bathroom vent, and the damp patches in the smaller bedroom.\n\nI have asked the landlord to approve a plumber visit to assess these. I will update you as soon as I have their answer.\n\nThe invoice attached to your report is for a different address (28 Larkspur Quay, Brindlewick) and is dated 14 September. Could you check whether it was attached by mistake? If you meant to send something else, please resend it. If you have photos of the damp patches or the vent, please send them again, as I could not see them on the report.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The tenant should know the report is received and with the landlord, per the landlord-first rule [event 001]. The attached invoice is for a different address and has a future date, and the photos did not come through, so I ask the tenant to clarify. I promise no cost, date or outcome."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Landlord",
+            "reason": "Approval for the assessment visit has been requested and nothing may be assigned until the landlord replies [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Landlord"
+        }
+      ]
+    },
+    {
+      "seen": 4,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "assign_contractor",
+          "input": {
+            "trade": "Plumber",
+            "notes": "Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ. Landlord has approved an assessment visit only. Please assess: (1) dripping kitchen tap, (2) bathroom basin hot tap that drips and is hard to shut off, (3) rainwater coming through the bathroom vent in heavy rain, with damp patches on the ceiling and wall of the smaller bedroom. Do not start any repair or incur any cost. Send a written quote with a description of the findings, and give options with prices if there are any, for landlord approval first. Please record the damp and vent findings with photos, as the landlord is considering an insurance claim. Contact the tenant, Elian Voss, through Northbridge Lettings to arrange access.",
+            "reason": "The landlord replied \"Yes, please proceed\" to the assessment visit request, and the automatic check shows approved [event 004]. The approval covers the visit only. The scope was stated as assessment with any repair to be quoted separately, so the notes limit the contractor to assessing and quoting [event 001]."
+          },
+          "ok": true,
+          "result": "Plumber contractor assigned"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elian,\n\nThe landlord has approved a plumber visit to assess the dripping kitchen tap, the bathroom hot tap, the rain coming through the bathroom vent and the damp patches in the smaller bedroom at Flat 4, 8-12 Juniper Mews.\n\nThe plumber will contact you to arrange a convenient time. The visit is to assess the problems. Any repair will be quoted to the landlord for approval first.\n\nIf you have photos of the damp patches or the vent, please send them to us, as they did not come through with your report. Please also let me know whether the invoice attached to your report was sent by mistake.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "Rule 6: after approval, the tenant is told that the contractor will contact them to arrange the visit [event 004]. I repeat the open request about the photos and the mismatched invoice from the earlier run [event 001], and promise no cost or date."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Mr Vale,\n\nThank you for your reply. I have instructed a plumber to attend Flat 4, 8-12 Juniper Mews to assess the dripping kitchen tap, the bathroom hot tap and the rain coming through the bathroom vent, with the damp patches in the smaller bedroom. The plumber will arrange access with the tenant. This visit is for assessment only. Any repair will be sent to you as a quote for your approval before work starts.\n\nOn your other two points:\n- Insurance: I cannot confirm what the building insurance covers, as I have no policy details on this case. The plumber has been asked to record the findings with photos, which I will pass on to you after the visit. Please check the policy or contact your insurer about notifying the roof and vent leak.\n- Flat history: the record for this case holds no earlier reports of roof leaks at the flat. If you have dates or earlier reports, please send them so I can add them to the case.\n\nI will update you when the plumber has reported.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The landlord approved the visit and also asked for an insurance check and a review of the flat's history, so those questions must be answered now [event 004]. The case holds no policy or history details, so I say so plainly, promise only the photos and findings, and invite the landlord to supply the history. I do not claim cover or fault."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Landlord asked for a check of building insurance cover and a review of the flat's history, saying roof leaks had recurred and some damage looks severe. No policy details or earlier leak records are on this case. Landlord told this and asked for dates and earlier reports. Plumber's findings and photos to be passed to the landlord after the visit. Approval covers assessment only; repairs need a quote and fresh approval.",
+            "reason": "The landlord's insurance and history request needs a record for the next handler [event 004]. The approval boundary is noted so no repair is authorised by mistake."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Provider",
+            "reason": "The landlord approved the assessment visit and I assigned the plumber, limited to assessment and a quote [event 004]. The tenant has been told the plumber will make contact. The landlord has an answer on insurance and flat history. The case now waits for the plumber to book access and report findings or a quote. Any repair needs fresh landlord approval."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Provider"
+        }
+      ]
+    },
+    {
+      "seen": 7,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello,\n\nAccess details for the assessment visit at Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ (dripping kitchen tap, bathroom hot tap that drips and is hard to shut off, rain coming through the bathroom vent, damp patches in the smaller bedroom).\n\nThe tenant, Elian Voss, has offered several all-day options, including Friday 12 September, with no preferred time. The tenant is happy for you to attend while they are out, and suggests keys could be collected from our office. Please reply with the date you propose and tell us whether you will need keys, so we can confirm the arrangements with the tenant before the visit. Please do not collect or use keys until we have confirmed.\n\nAs before, the landlord has approved the assessment visit only. Please do not start any repair or incur any cost. Send a written quote with your findings, with options and prices if there are any, and photos of the damp and the vent.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The tenant gave availability including Friday 12 September and consent to attend while they are out [event 007]. The plumber was assigned but no appointment is confirmed, so I pass the access information on and ask for a proposed date and key need. I cannot confirm key holding from the case, so I do not promise it. I repeat the visit limit: approval covers assessment only [event 004]."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elian,\n\nThank you for your availability, including Friday 12 September, and for agreeing that the plumber can attend while you are out. I have passed this to the plumber and asked them to propose a date and tell us whether they need keys. I will confirm the booked date and the key arrangements with you before the visit. Please do not leave keys with anyone until you hear from me.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The tenant offered dates and unaccompanied access [event 007]. They should know it has gone to the plumber and that a confirmed date will follow. I promise nothing about keys or dates, which the plumber has not yet confirmed."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "add_note",
+          "input": {
+            "text": "Tenant allows unaccompanied access and offered several all-day slots incl. Fri 12 Sep; suggested keys from Northbridge. Not yet confirmed that we hold keys or that the plumber needs them. If keys are issued, record it and check return before closing. Appointment not yet confirmed.",
+            "reason": "Key issue affects the final checks if keys are issued [event 007]."
+          },
+          "ok": true,
+          "result": "note added"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Provider",
+            "reason": "Access options passed to the plumber; waiting for a proposed date and key need so the appointment can be confirmed [event 007]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Provider"
+        }
+      ]
+    },
+    {
+      "seen": 9,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello Gareth,\n\nThank you. Friday 12 September at around 09:00 suits the tenant, so please treat the assessment visit at Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ as booked. The tenant has said you may attend while they are out.\n\nOne point is still open: please tell us whether you need keys. If you do, we will confirm the key arrangements with you before the visit. Please do not collect or use any keys until we have confirmed.\n\nAs before, the landlord has approved the assessment visit only. Please do not start any repair or incur any cost. Send a written quote with your findings, with options and prices if there are any, and photos of the damp and the vent.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The plumber proposed Friday 12 September at about 09:00 [event 009], which falls within the tenant's all-day availability that included 12 September and the consent to attend while they are out [event 007]. The slot is viable, so I confirm it. The plumber has not said whether keys are needed, so I ask and do not promise key entry. I repeat that the approval covers assessment only [event 004]."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elian,\n\nThe plumber, Gareth Lune of Copper Finch Plumbing, will attend Flat 4, 8-12 Juniper Mews on Friday 12 September at around 09:00 to assess the dripping kitchen tap, the bathroom hot tap, the rain coming through the bathroom vent and the damp patches in the smaller bedroom. This fits the availability you gave us.\n\nWe have asked the plumber whether they need keys and will confirm the arrangements with you before the visit. Please do not leave keys with anyone until you hear from me. If this date no longer suits you, please let me know.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The tenant needs to know the proposed date and time [event 009], which matches their offered availability for 12 September and their consent to attend while they are out [event 007]. The key arrangement is not yet settled, so I promise nothing on keys and invite the tenant to tell us if the date stops suiting them."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Provider",
+            "reason": "The appointment is set for Friday 12 September at about 09:00 [event 009], within the tenant's availability [event 007]. We are waiting for the plumber to say whether keys are needed so access can be confirmed. Approval covers assessment only [event 004]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Provider"
+        }
+      ]
+    },
+    {
+      "seen": 14,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello Gareth,\n\nThank you for your message about Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ. Before we cancel the appointment on Friday 12 September, I need some details, as your message does not say what was done:\n\n1. Which of the reported issues did you attend to: the kitchen tap, the bathroom hot tap, the rain coming through the bathroom vent, the damp patches in the smaller bedroom?\n2. Was this assessment only, or did you carry out any repair or fit any parts? The landlord approved the assessment visit only, and no repair or cost has been approved.\n3. How did you get access today, and were any keys used?\n4. Please send your written findings, photos of the damp and the vent, and your invoice or quote with the amount.\n\nPlease also note that the invoice we hold under reference NBL-003-INV-14 names a different address (28 Larkspur Quay, Brindlewick) and carries a date of 14 September. Please confirm the correct address and date for any invoice for this job.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The plumber says the job was done today and asks to cancel, but gives no detail on which issues, no report and no invoice [event 014]. The booked visit was for 12 September [event 009], and approval covered assessment only [event 004]. The invoice on file names another address and a future date [event 001]. Completion is not proven, so I ask for specifics and evidence and flag the invoice mismatch."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elian,\n\nThe plumber, Gareth Lune, has told us he has asked to cancel the visit booked for Friday 12 September at Flat 4, 8-12 Juniper Mews, and says work was done today. He has not yet told us what was done, so I am checking with him and have not cancelled anything yet.\n\nCould you let me know:\n- whether the plumber or anyone else attended the flat today, and if so what was done;\n- whether the kitchen tap, the bathroom hot tap and the bathroom vent leak are now fixed, and whether the damp patches in the smaller bedroom are unchanged.\n\nI will update you once I have the plumber's answer.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The plumber's claim that the job was done today [event 014] conflicts with the booked 12 September visit [event 009] and has no detail. The tenant can confirm whether anyone attended and what the state of the items is, so I ask them and say I am checking, without deciding who is right."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Provider",
+            "reason": "The plumber's message does not prove which issues were done or whether unapproved repairs were carried out [event 014]. I have asked him for the work description, access, photos and invoice, and asked the tenant to confirm attendance and the current state. The landlord will be told the result once the evidence is in."
+          },
+          "ok": false,
+          "result": "Workflow completion check: this end action was not executed. Review these applicable omissions against current evidence and policy, execute any required actions, or escalate if human judgement is needed: [\"Send the landlord an interim update, as the PB03 result step requires. It should say what is confirmed and what is still being checked: the plumber says the job was done on 11 Sep, but the issues covered, any repair and any invoice are unverified. It should not invent a cause, a completion date or photo contents. The contractor and tenant messages do not meet this obligation, and the hold only promises to tell the landlord once the evidence is in. The landlord approved an assessment visit only, and Northbridge told him he would be updated when the plumber reported.\"]"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Mr Vale,\n\nAn update on Flat 4, 8-12 Juniper Mews (dripping kitchen tap, bathroom hot tap, rain through the bathroom vent, damp patches in the smaller bedroom).\n\nToday the plumber, Gareth Lune of Copper Finch Plumbing, wrote asking us to cancel the visit booked for Friday 12 September and saying the job was done today. That is all we have so far. He has not said which of the reported issues he dealt with, whether he carried out any repair, or sent a report, photos or an invoice.\n\nYou approved an assessment visit only. No repair or cost has been approved. I have asked the plumber for a description of the work, his findings, photos of the damp and the vent, and his invoice or quote. I have also asked the tenant to confirm whether anyone attended and what the current state is.\n\nUntil I have that, I cannot confirm that any work was completed. I will write again as soon as I have the answers, including any amount you are asked to consider. You do not need to take any action now.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The workflow requires an interim update to the landlord on what is confirmed and what is still being checked. The plumber claims the job was done today but gives no detail [event 014]. The landlord approved assessment only [event 004] and was promised an update when the plumber reported. I do not state completion, a cause, photo contents or any payer."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Provider",
+            "reason": "The plumber's message does not prove which issues were done or whether unapproved repairs were carried out [event 014]. I have asked him for the work description, access, photos and invoice, asked the tenant to confirm attendance and the current state, and sent the landlord an interim update. The case waits for the plumber's evidence before any completion checks."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Provider"
+        }
+      ]
+    },
+    {
+      "seen": 15,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello Gareth,\n\nThank you for your correction. Your two messages today do not agree, so please confirm both points for Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ:\n\n1. Is the assessment visit still going ahead tomorrow, Friday 12 September, at around 09:00? Until you confirm otherwise, I am treating it as booked and have not cancelled it.\n2. Did you carry out any work at the flat today, 11 September? If so, please say what was done, and whether you used keys or had access.\n\nMy earlier questions still stand: please send your findings, photos of the damp and the vent, and your quote or invoice with the amount. The landlord has approved the assessment visit only. Please do not start any repair or incur any cost without his approval.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "Event 015 (\"Booked for tomorrow\") conflicts with event 014 (\"Please cancel appointment. Job was done today.\"), and neither gives detail. The plumber can confirm the appointment date and whether work happened, so I ask him to confirm rather than choose one reading or escalate [event 009]. I keep the 12 September booking in place and repeat that approval covers assessment only [event 004]. The tenant and landlord have already been told we are checking [event 014]."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Provider",
+            "reason": "The plumber's two messages conflict on whether the visit is cancelled or booked for tomorrow, and on whether work was done today [event 014][event 015]. I have asked him to confirm. The tenant has also been asked what happened [event 014]. Completion is not proven, and no invoice is on file that matches this property [event 001]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Provider"
+        }
+      ]
+    },
+    {
+      "seen": 16,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elian,\n\nThank you for taking the plumber's call. I understand Gareth Lune of Copper Finch Plumbing will attend Flat 4, 8-12 Juniper Mews tomorrow, Friday 12 September, likely late morning, and that this suits you. The visit is to assess the dripping kitchen tap, the bathroom hot tap, the rain coming through the bathroom vent and the damp patches in the smaller bedroom. Any repair will be quoted to the landlord for approval first.\n\nMy earlier question is still open. Please could you tell me whether the plumber or anyone else attended the flat today, 11 September, and whether anything was done to the taps or the vent? I am checking this with the plumber too.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The plumber phoned the tenant and agreed attendance on 12 September, likely late morning, which the tenant accepted [event 016]. This settles the booking conflict between the cancel and \"booked for tomorrow\" messages in favour of tomorrow [event 014][event 015], and moves the time from 09:00 [event 009]. The call reported no completed work, so the tenant's answer on whether anyone attended today is still needed [event 014]. Approval covers assessment only [event 004]."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello Gareth,\n\nThank you for calling the tenant. I have noted that you will attend Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ tomorrow, Friday 12 September, likely late morning, and that the tenant has agreed to this. The appointment stands and is not cancelled.\n\nYour message earlier today said the job was done today. Please still tell me: did you do any work at the flat on 11 September, and if so what, and how did you get access? Please also send the invoice or quote for this job with the amount. The invoice we hold (NBL-003-INV-14) names 28 Larkspur Quay, Brindlewick and is dated 14 September, so it cannot be used for this property. Please send a corrected one if it relates to this job.\n\nThe landlord has approved the assessment visit only. Please do not start any repair or incur any cost without his approval. Please send your findings, photos of the damp and the vent, and a quote with options and prices if any.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The plumber's call with the tenant confirms attendance on 12 September, late morning [event 016], resolving the date conflict [event 015]. His claim that work was done today is still unexplained and unverified, and the invoice on file names another address and a future date [event 014][event 001]. I restate the open evidence requests and the assessment-only limit [event 004]."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Provider",
+            "reason": "The visit is now consistently set for tomorrow, 12 September, late morning, agreed by plumber and tenant [event 016]. Completion is not proven: the plumber has not explained his \"job was done today\" message and no matching invoice is on file [event 014][event 001]. The case waits for the plumber's answers and the visit report, and for the tenant's reply on whether anyone attended today."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Provider"
+        }
+      ]
+    },
+    {
+      "seen": 20,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello Gareth,\n\nI understand you are at Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ today, Friday 12 September. Please note the correct address is 8-12 Juniper Mews.\n\nThe landlord has approved the assessment visit only. Please do not start any repair, fit any parts or incur any cost. If repair is needed, send me a written quote with your findings, with options and prices if there are any, and the landlord will be asked to approve before any work starts.\n\nPlease also send photos of the damp and the vent. I still need to know whether you did any work at the flat on 11 September, and if so what and how you got access. The invoice we hold (NBL-003-INV-14) names 28 Larkspur Quay, Brindlewick and is dated 14 September, so it cannot be used for this property. If you have an invoice for this job, please send a corrected copy.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The call shows the plumber attending the flat on 12 September and being let in by the tenant [event 020]. Approval covers assessment only [event 004], so I repeat that no repair or cost may start without the landlord's approval. His earlier claim that the job was done on 11 September remains unexplained, and the invoice on file names a different address and a future date [event 014][event 001]. Those evidence requests stay open. He gave the address as 8-10, so I restate the correct address [event 020]."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Provider",
+            "reason": "The plumber is attending for the approved assessment on 12 September [event 020]. Completion is not proven: there is no visit report, no matching invoice and no explanation of his 11 September message [event 014][event 001]. The case waits for his findings, quote and photos. Any repair needs fresh landlord approval [event 004]."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Provider"
+        }
+      ]
+    },
+    {
+      "seen": 22,
+      "notes": [],
+      "actions": [
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "contractor",
+            "channel": "email",
+            "text": "Hello Gareth,\n\nThank you for your invoice. I cannot accept it as it stands for Flat 4, 8-12 Juniper Mews, Vellumford, ZZ1 1ZZ:\n\n1. It names Flat 4, 28 Larkspur Quay, Brindlewick, not Juniper Mews. Please confirm that the work was done at Flat 4, 8-12 Juniper Mews and send a corrected invoice.\n2. It shows no amount. Please send the total, with a breakdown of parts and labour and whether VAT is included.\n3. Please confirm the date or dates the work was done. Your earlier message said the job was done on 11 September, and your visit was on 12 September.\n4. Please send photos of the work, and your findings on the rain coming through the bathroom vent and the damp patches in the smaller bedroom. The invoice does not mention them.\n\nThe landlord approved an assessment visit only. No repair or cost was approved before the new kitchen tap and the basin tap parts were fitted. Please do not carry out any further work, including any work on the vent or the damp, without written approval from the landlord. I will pass your corrected invoice to him.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The plumber's invoice reports a new kitchen mixer tap and a new insert and head on the basin hot tap [event 022]. The attached invoice names 28 Larkspur Quay, Brindlewick, and shows no amount [event 001]. The records do not agree, so the work cannot be matched to this property and I need a corrected invoice with the total. The landlord approved assessment only, so no repair or cost was approved beforehand [event 004]. The invoice is silent on the vent and the damp, which were in the report [event 001]. His earlier \"done today\" message conflicts with the 12 September visit [event 014][event 020]."
+          },
+          "ok": true,
+          "result": "email to contractor queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "landlord",
+            "channel": "email",
+            "text": "Dear Mr Vale,\n\nAn update on Flat 4, 8-12 Juniper Mews. The plumber, Gareth Lune of Copper Finch Plumbing, attended on 12 September. He has now sent an invoice saying he installed a new kitchen mixer tap and fitted a new brass insert and chrome head to the bathroom basin hot tap.\n\nPlease note:\n- You approved an assessment visit only. Neither the repairs nor any cost were approved before this work was done. I told him not to start repairs.\n- The invoice shows no amount, and it names a different address (28 Larkspur Quay, Brindlewick). I have asked him for a corrected invoice with the total and for confirmation that the work was done at Juniper Mews. I will send you the amount as soon as I have it, and you can then decide about payment.\n- The invoice does not mention the rain through the bathroom vent or the damp patches in the smaller bedroom. I have asked him for his findings and photos. As far as I know, those two issues have not been dealt with. I have asked the tenant to confirm the state of the taps.\n\nYou do not need to take any action now. I will write again when I have the corrected invoice.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The contractor's invoice reports repairs [event 022]. The landlord approved assessment only [event 004], so I must say in this message that the repairs and cost were not approved beforehand, and leave the payment decision to him. The amount is missing and the address on the invoice is wrong [event 001], so I say a corrected invoice will follow. The landlord was promised updates [event 004] and has had interim updates [event 014], so he is told what is confirmed and what is outstanding, including the vent and the damp. I name no payer."
+          },
+          "ok": true,
+          "result": "email to landlord queued in the outbox"
+        },
+        {
+          "tool": "send_message",
+          "input": {
+            "to": "tenant",
+            "channel": "email",
+            "text": "Dear Elian,\n\nThank you for letting the plumber in on Friday 12 September. He has told us he installed a new kitchen mixer tap and fitted new parts to the bathroom basin hot tap at Flat 4, 8-12 Juniper Mews.\n\nCould you please tell me:\n- whether the kitchen tap and the bathroom hot tap now stop dripping and shut off properly;\n- whether the rain through the bathroom vent and the damp patches in the smaller bedroom are unchanged. The plumber's invoice does not mention them.\n\nIf you have photos of the damp or the vent, please send them. I am checking the paperwork with the plumber and will update you.\n\nKind regards,\nPriya Nair\nNorthbridge Lettings",
+            "reason": "The plumber reports tap work [event 022] after attending on 12 September [event 020]. The tenant has not yet answered my earlier questions on whether work was done and on the state of the items [event 014]. The tenant can confirm the current state of the taps, the vent and the damp. The photos requested in earlier messages are still missing [event 001]."
+          },
+          "ok": true,
+          "result": "email to tenant queued in the outbox"
+        },
+        {
+          "tool": "hold",
+          "input": {
+            "waiting_for": "Waiting for Provider",
+            "reason": "The invoice describes tap work but names a different property and has no amount [event 022][event 001]. The work was not approved beforehand, as approval covered assessment only [event 004]. I cannot close the case until a corrected invoice matching Juniper Mews is on file, and until the vent and damp findings are known. The landlord and the tenant have been written to, and I have asked the plumber for a corrected invoice, the amount, the date, photos and the vent and damp findings."
+          },
+          "ok": true,
+          "result": "case on hold: Waiting for Provider"
+        }
+      ]
+    }
+  ],
+  "approvalOnFile": false,
+  "landlordAnswer": {
+    "answer": "approved",
+    "requestAfter": 1,
+    "throughEvent": 4
+  }
+}

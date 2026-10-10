@@ -1,0 +1,8 @@
+Message-ID: <020.1.2@northbridge-lettings.case-agent>
+Date: Sat, 12 Apr 2025 08:51:00 GMT
+X-Case-Id: 020
+X-Run: 1
+X-Recipient-Role: tenant
+To: tenant
+
+Northbridge Lettings: please read our email about the kitchen socket. A person is dealing with it now. Do not use the socket. If smoke or sparks, leave and call 999.
