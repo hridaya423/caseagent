@@ -15,8 +15,6 @@
     "typecheck": "tsc -p .",
     "eval": "node --env-file-if-exists=.env --import tsx evals/reality-sim/run.ts",
     "eval:score": "node --env-file-if-exists=.env --import tsx evals/reality-sim/score.ts",
-    "eval:edge": "node --env-file-if-exists=.env --import tsx \"evals/edge-cases/run.ts\"",
-    "eval:process": "node --env-file-if-exists=.env --import tsx \"evals/Process Reward/run.ts\"",
     "reality": "node --env-file-if-exists=.env --import tsx src/entry/cli.ts reality"
   },
   "dependencies": {

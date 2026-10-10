@@ -114,7 +114,7 @@ export function liveJudge(client: Anthropic, model: string): JudgeFn {
 
 const END_TOOLS = ["hold", "escalate", "close_case"];
 
-// The same rules as evals/edge-cases: a forbidden tool counts when attempted, even if refused; a
+// A forbidden tool counts when attempted, even if refused; a
 // required tool counts only when it succeeded; message patterns search the text of sent messages;
 // terminal patterns search the end tool's input apart from its reason.
 export function mechanicalFails(state: Pick<CaseState, "status" | "actions">, checks: Checks): string[] {

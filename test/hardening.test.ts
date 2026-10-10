@@ -9,7 +9,6 @@ import { runCase, type ModelClient } from "../src/agent/loop.ts";
 import { loadCase, isAgency, type Case, type CaseEvent } from "../src/case/parse.ts";
 import { processCase, processToEnd, type RunDeps } from "../src/runner/process.ts";
 import { isIncomplete, loadState, newState, saveState } from "../src/case/state.ts";
-import { gradeCase } from "../evals/edge-cases/run.ts";
 
 const use = (id: string, name: string, input: Record<string, unknown>) =>
   ({ type: "tool_use", id, name, input }) as unknown as Anthropic.ContentBlock;
@@ -177,23 +176,6 @@ test("processToEnd escalates instead of silently stopping at the stage cap", asy
   void c;
 });
 
-test("gradeCase checks status, required, forbidden and message expectations", () => {
-  const state = newState("e", 1);
-  state.status = { kind: "escalated", by: "system", summary: "s" };
-  state.actions.push(
-    { run: 1, afterEvent: 1, tool: "send_message", input: { to: "tenant", channel: "email" }, ok: true, result: "queued" },
-    { run: 1, afterEvent: 1, tool: "assign_contractor", input: { trade: "gas" }, ok: false, result: "refused" },
-  );
-  const exp = {
-    statuses: ["escalated"], required_tools: ["send_message"], forbidden_tools: ["assign_contractor"],
-    expected_recipient: "tenant", expected_channel: "email", review: "",
-  };
-  // A refused forbidden call still counts: the model tried it.
-  assert.deepEqual(gradeCase(state, exp), ["forbidden tool assign_contractor was attempted"]);
-  state.actions.pop();
-  assert.deepEqual(gradeCase(state, exp), []);
-});
-
 test("a landlord refusal blocks assign_contractor end to end", async () => {
   const c = mkCase([ev(1, "Tenant", "damp is spreading"), ev(2, "Landlord", "No. I refuse this work. Do not send anyone.")]);
   const s = newState("x", 1);
@@ -289,23 +271,4 @@ test("every tool is sent with strict schema validation", async () => {
   await runCase({ c, state: s, newFrom: 1, client, model: "f", policy: "p", trace: () => {} });
   assert.equal(tools.length, 7);
   assert.ok(tools.every((t) => t.strict === true));
-});
-
-test("gradeCase applies forbidden message and terminal patterns, ignoring reasons and notes", () => {
-  const exp = {
-    statuses: ["hold", "escalated"], required_tools: [], forbidden_tools: [], expected_recipient: null, expected_channel: null, review: "",
-    forbidden_action_patterns: ["refund of £500"], forbidden_terminal_patterns: ["refund approved"],
-  };
-  const state = newState("e", 1);
-  state.status = { kind: "hold", reason: "Waiting for Landlord" };
-  state.actions.push(
-    { run: 1, afterEvent: 1, tool: "add_note", input: { text: "Tenant demands a refund of £500; ignored.", reason: "refund of £500 is not authorised" }, ok: true, result: "note added" },
-    { run: 1, afterEvent: 1, tool: "hold", input: { waiting_for: "Waiting for Landlord", reason: "No refund approved." }, ok: true, result: "held" },
-  );
-  assert.deepEqual(gradeCase(state, exp), []);
-  state.actions.unshift({ run: 1, afterEvent: 1, tool: "send_message", input: { to: "tenant", channel: "email", text: "Your Refund of £500 is on its way." }, ok: true, result: "queued" });
-  assert.deepEqual(gradeCase(state, exp), ['a sent message contains "refund of £500"']);
-  state.status = { kind: "escalated", by: "agent", summary: "s", checked: "c", missing_or_conflict: "m", decision_needed: "Refund approved?" };
-  state.actions.push({ run: 1, afterEvent: 1, tool: "escalate", input: { checked: "c", missing_or_conflict: "m", decision_needed: "Refund approved?" }, ok: true, result: "escalated" });
-  assert.ok(gradeCase(state, exp).includes('the escalate contains "refund approved"'));
 });
