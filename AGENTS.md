@@ -14,7 +14,8 @@ node --import tsx 'evals/Process Reward/validate.ts'   # MCP boundary check, no 
 
 `case` (parse, messy, cut, attachments, state) <- `tools` (index, guards, evidence) <- `agent` (prompt, loop, approval) <- `runner` (process, answers, batch) <- `entry` (cli, mcp)
 
-- The hidden-future rule lives in `src/case/cut.ts`.
+- The hidden-future rule lives in `src/case/cut.ts`. The dashboard reuses it to mark events the agent never saw.
+- `dashboard/` is a plain HTML, CSS and ES-module page with no build step and no network requests; `npm run dashboard` serves it read-only on localhost.
 - Every refusal rule lives in `src/tools/guards.ts`. Guards run before adapters.
 - A system escalation (`status.by === "system"`) marks an incomplete run.
 - `src/case/state.ts` defines the state as zod schemas. `state.runs` is a list of run records (`seen`, `notes`, `actions`). Use `actionLog(state)` for every action in order, with its run number and cut. `loadState` upgrades older files, including the flat `actions`/`notes` format.
