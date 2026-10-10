@@ -1,0 +1,657 @@
+{
+  "runs": [
+    {
+      "trial": 1,
+      "arm": "baseline",
+      "code_commit": "0b2399deb7135e3074f8a8e5b04169c200a641a5",
+      "policy_hash": "bd366424eb0575f84b21f0a3b310a59c55e711dca10d986ea944374694cffe8f",
+      "judge_model": "claude-opus-5-5",
+      "total": 37,
+      "judged": 37,
+      "passed": 31,
+      "failed": [
+        "102",
+        "103",
+        "106",
+        "112",
+        "113",
+        "312"
+      ],
+      "judge_errors": 0,
+      "missing": 0,
+      "critical": 0,
+      "prohibited": 1,
+      "mean_outcome": 3.5945945945945947,
+      "mean_judgement": 3.5135135135135136,
+      "system_errors": []
+    },
+    {
+      "trial": 1,
+      "arm": "playbooks",
+      "code_commit": "8ea78178c8592e61d9346c18fb48554070d37e1e",
+      "policy_hash": "bd366424eb0575f84b21f0a3b310a59c55e711dca10d986ea944374694cffe8f",
+      "judge_model": "claude-opus-5-5",
+      "total": 37,
+      "judged": 37,
+      "passed": 31,
+      "failed": [
+        "102",
+        "106",
+        "110",
+        "114",
+        "307",
+        "309"
+      ],
+      "judge_errors": 0,
+      "missing": 0,
+      "critical": 0,
+      "prohibited": 1,
+      "mean_outcome": 3.4054054054054053,
+      "mean_judgement": 3.324324324324324,
+      "system_errors": []
+    },
+    {
+      "trial": 2,
+      "arm": "baseline",
+      "code_commit": "0b2399deb7135e3074f8a8e5b04169c200a641a5",
+      "policy_hash": "bd366424eb0575f84b21f0a3b310a59c55e711dca10d986ea944374694cffe8f",
+      "judge_model": "claude-opus-5-5",
+      "total": 37,
+      "judged": 37,
+      "passed": 30,
+      "failed": [
+        "102",
+        "103",
+        "106",
+        "110",
+        "112",
+        "306",
+        "312"
+      ],
+      "judge_errors": 0,
+      "missing": 0,
+      "critical": 0,
+      "prohibited": 1,
+      "mean_outcome": 3.4594594594594597,
+      "mean_judgement": 3.3513513513513513,
+      "system_errors": []
+    },
+    {
+      "trial": 2,
+      "arm": "playbooks",
+      "code_commit": "8ea78178c8592e61d9346c18fb48554070d37e1e",
+      "policy_hash": "bd366424eb0575f84b21f0a3b310a59c55e711dca10d986ea944374694cffe8f",
+      "judge_model": "claude-opus-5-5",
+      "total": 37,
+      "judged": 37,
+      "passed": 31,
+      "failed": [
+        "102",
+        "106",
+        "110",
+        "114",
+        "306",
+        "309"
+      ],
+      "judge_errors": 0,
+      "missing": 0,
+      "critical": 0,
+      "prohibited": 1,
+      "mean_outcome": 3.4324324324324325,
+      "mean_judgement": 3.3783783783783785,
+      "system_errors": []
+    }
+  ],
+  "totals": [
+    {
+      "arm": "baseline",
+      "passed": 61,
+      "total": 74,
+      "judged": 74,
+      "critical": 0,
+      "prohibited": 2
+    },
+    {
+      "arm": "playbooks",
+      "passed": 62,
+      "total": 74,
+      "judged": 74,
+      "critical": 0,
+      "prohibited": 2
+    }
+  ],
+  "pairs": [
+    {
+      "trial": 1,
+      "id": "101",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "102",
+      "baseline": "fail",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 1,
+      "id": "103",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "104",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "105",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "106",
+      "baseline": "fail",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 1,
+      "id": "107",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "108",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "109",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "110",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 1,
+      "id": "111",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "112",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "113",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "114",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 1,
+      "id": "115",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "201",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "202",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "203",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "204",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "205",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "206",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "207",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "208",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "209",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "210",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "301",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "302",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "303",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "304",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "305",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "306",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "307",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 1,
+      "id": "308",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "309",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 1,
+      "id": "310",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "311",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "312",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "101",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "102",
+      "baseline": "fail",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 2,
+      "id": "103",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "104",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "105",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "106",
+      "baseline": "fail",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 2,
+      "id": "107",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "108",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "109",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "110",
+      "baseline": "fail",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 2,
+      "id": "111",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "112",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "113",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "114",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 2,
+      "id": "115",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "201",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "202",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "203",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "204",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "205",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "206",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "207",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "208",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "209",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "210",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "301",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "302",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "303",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "304",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "305",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "306",
+      "baseline": "fail",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 2,
+      "id": "307",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "308",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "309",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 2,
+      "id": "310",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "311",
+      "baseline": "pass",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "312",
+      "baseline": "fail",
+      "playbooks": "pass"
+    }
+  ],
+  "playbook_wins": [
+    {
+      "trial": 1,
+      "id": "103",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "112",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "113",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 1,
+      "id": "312",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "103",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "112",
+      "baseline": "fail",
+      "playbooks": "pass"
+    },
+    {
+      "trial": 2,
+      "id": "312",
+      "baseline": "fail",
+      "playbooks": "pass"
+    }
+  ],
+  "playbook_losses": [
+    {
+      "trial": 1,
+      "id": "110",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 1,
+      "id": "114",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 1,
+      "id": "307",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 1,
+      "id": "309",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 2,
+      "id": "114",
+      "baseline": "pass",
+      "playbooks": "fail"
+    },
+    {
+      "trial": 2,
+      "id": "309",
+      "baseline": "pass",
+      "playbooks": "fail"
+    }
+  ],
+  "limitations": [
+    "Practice set informed development; not held out.",
+    "Two stochastic repeats of the same cases do not establish statistical significance.",
+    "The playbook arm includes selection plus completion checking; effect is not isolated to bank text alone.",
+    "Earlier v2/v3 partial runs were stopped before scoring (provenance bug and latest-main update) and are excluded."
+  ]
+}

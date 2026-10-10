@@ -1,0 +1,440 @@
+{
+  "code_commit": "0b2399deb7135e3074f8a8e5b04169c200a641a5",
+  "trial": 1,
+  "arm": "baseline",
+  "actor_model": "claude-sonnet-5-5",
+  "selector_model": null,
+  "playbooks_enabled": false,
+  "policy_hash": "bd366424eb0575f84b21f0a3b310a59c55e711dca10d986ea944374694cffe8f",
+  "started_at": "2026-10-10T14:18:34.520Z",
+  "invocation": "MCP run_case at manifest.step, complete stage, labels excluded",
+  "counterbalance": "Alternate arm order by case index and trial",
+  "results": [
+    {
+      "id": "103",
+      "step": 24,
+      "duration_ms": 14169,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Quote"
+      },
+      "error": null
+    },
+    {
+      "id": "101",
+      "step": 25,
+      "duration_ms": 15177,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Provider"
+      },
+      "error": null
+    },
+    {
+      "id": "104",
+      "step": 9,
+      "duration_ms": 13485,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    },
+    {
+      "id": "102",
+      "step": 9,
+      "duration_ms": 13234,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    },
+    {
+      "id": "107",
+      "step": 18,
+      "duration_ms": 6911,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Quote"
+      },
+      "error": null
+    },
+    {
+      "id": "105",
+      "step": 20,
+      "duration_ms": 16108,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Read the landlord email [event 020], the inspection report and the summary sent to the landlord [event 017, event 018]. Reviewed the scheduling history of 13 to 15 February [events 002-014]. The report confirms tenant-installed dog flap in the utility room/back door and a Bedroom 1 sticker-mark defect, with pets present and no photos.\nMissing or in conflict: Conflicts: (1) the landlord email [event 020] is signed by Felix Clarke, but the inspection summary was addressed to Oliver Bennett [event 017]; sender identity and authority are unconfirmed. (2) The summary email said no issues [event 017], but the report lists the dog flap and a defect. (3) The report is dated 16 Feb although the visit was booked for 15 Feb [events 012, 018]. (4) Nothing on file shows whether the dog flap was approved, who changed the lock, or who holds the spare front door key. (5) Report has no photos. The inspection record is empty [event 016].\nDecision needed: Decide how to handle the unapproved dog flap (ask the tenant to remove it and make good, or seek retrospective consent), and who will contact the tenant to retrieve the spare front door key, after confirming the landlord's identity.",
+        "checked": "Read the landlord email [event 020], the inspection report and the summary sent to the landlord [event 017, event 018]. Reviewed the scheduling history of 13 to 15 February [events 002-014]. The report confirms tenant-installed dog flap in the utility room/back door and a Bedroom 1 sticker-mark defect, with pets present and no photos.",
+        "missing_or_conflict": "Conflicts: (1) the landlord email [event 020] is signed by Felix Clarke, but the inspection summary was addressed to Oliver Bennett [event 017]; sender identity and authority are unconfirmed. (2) The summary email said no issues [event 017], but the report lists the dog flap and a defect. (3) The report is dated 16 Feb although the visit was booked for 15 Feb [events 012, 018]. (4) Nothing on file shows whether the dog flap was approved, who changed the lock, or who holds the spare front door key. (5) Report has no photos. The inspection record is empty [event 016].",
+        "decision_needed": "Decide how to handle the unapproved dog flap (ask the tenant to remove it and make good, or seek retrospective consent), and who will contact the tenant to retrieve the spare front door key, after confirming the landlord's identity."
+      },
+      "error": null
+    },
+    {
+      "id": "109",
+      "step": 20,
+      "duration_ms": 12330,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Tenant"
+      },
+      "error": null
+    },
+    {
+      "id": "106",
+      "step": 9,
+      "duration_ms": 11275,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Tenant"
+      },
+      "error": null
+    },
+    {
+      "id": "108",
+      "step": 21,
+      "duration_ms": 8434,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    },
+    {
+      "id": "111",
+      "step": 22,
+      "duration_ms": 8959,
+      "status": {
+        "kind": "closed",
+        "checks": {
+          "outcome": "resolved_without_work",
+          "work_confirmed_by": "contractor [event 022]",
+          "landlord_informed": true,
+          "keys": "not_issued",
+          "invoice": "not_required"
+        }
+      },
+      "error": null
+    },
+    {
+      "id": "110",
+      "step": 21,
+      "duration_ms": 10879,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Provider"
+      },
+      "error": null
+    },
+    {
+      "id": "113",
+      "step": 10,
+      "duration_ms": 7145,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Tenant"
+      },
+      "error": null
+    },
+    {
+      "id": "112",
+      "step": 43,
+      "duration_ms": 12086,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Provider"
+      },
+      "error": null
+    },
+    {
+      "id": "115",
+      "step": 12,
+      "duration_ms": 6067,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Landlord approval was confirmed and Riverside Services was assigned [event 005, event 006]. The tenant was told the contractor would contact her [event 007]. The contractor was sent the job on 17 Dec [event 008] and then three reminders on 18, 20 and 23 Dec [event 009, event 010, event 011]. There is no reply from the contractor and no appointment is confirmed. The system flagged 3+ reminders [event 012]. The tenant has asked no open questions.\nMissing or in conflict: Riverside Services has not replied or confirmed a visit in 8 days. The tenant contact number in the first contractor email (07700 900504, ext 900418) differs from the number in the reminders (07700 900710). The contractor may have had the wrong number. The garden photo attachment was unavailable [event 008]. The tenant said the area is communal [event 002], and this is not confirmed. The landlord's note that the gardener was on annual leave [event 004] may explain the delay.\nDecision needed: Decide whether to chase Riverside Services by phone, after confirming the correct tenant contact number, or to reassign the job to another provider. A reassignment needs fresh landlord approval.",
+        "checked": "Landlord approval was confirmed and Riverside Services was assigned [event 005, event 006]. The tenant was told the contractor would contact her [event 007]. The contractor was sent the job on 17 Dec [event 008] and then three reminders on 18, 20 and 23 Dec [event 009, event 010, event 011]. There is no reply from the contractor and no appointment is confirmed. The system flagged 3+ reminders [event 012]. The tenant has asked no open questions.",
+        "missing_or_conflict": "Riverside Services has not replied or confirmed a visit in 8 days. The tenant contact number in the first contractor email (07700 900504, ext 900418) differs from the number in the reminders (07700 900710). The contractor may have had the wrong number. The garden photo attachment was unavailable [event 008]. The tenant said the area is communal [event 002], and this is not confirmed. The landlord's note that the gardener was on annual leave [event 004] may explain the delay.",
+        "decision_needed": "Decide whether to chase Riverside Services by phone, after confirming the correct tenant contact number, or to reassign the job to another provider. A reassignment needs fresh landlord approval."
+      },
+      "error": null
+    },
+    {
+      "id": "202",
+      "step": 9,
+      "duration_ms": 10112,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    },
+    {
+      "id": "201",
+      "step": 25,
+      "duration_ms": 8359,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    },
+    {
+      "id": "204",
+      "step": 17,
+      "duration_ms": 12280,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    },
+    {
+      "id": "114",
+      "step": 16,
+      "duration_ms": 15115,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Provider"
+      },
+      "error": null
+    },
+    {
+      "id": "203",
+      "step": 22,
+      "duration_ms": 5950,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Provider"
+      },
+      "error": null
+    },
+    {
+      "id": "206",
+      "step": 21,
+      "duration_ms": 13101,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Read full case. Landlord approved Keystone Compliance attending for oven not heating [event 009, 010]; contractor assigned and visit set for 30/08 10-12 [event 017-019]. Tenant call today reports gas smell near oven even when off since yesterday, and light-headedness in the kitchen [event 021].\nMissing or in conflict: Safety: possible gas leak/CO exposure, yet the hob/oven was stated to be electric [event 002], so source is unknown. Date conflict: agency records say 30/08 [event 017-020], tenant says she arranged 8 Sept [event 021]; 30/08/2025 is also a Saturday, not Monday. Tenant and contact names are inconsistent across events (Clara, Ruben, Grace) and the contractor is named Keystone, Riverside Works and Lantern Utilities in different events. Landlord has not been told of the gas report.\nDecision needed: Arrange an emergency response now (gas engineer/emergency services, and inform the landlord), and then confirm the correct visit date with the contractor and tenant.",
+        "checked": "Read full case. Landlord approved Keystone Compliance attending for oven not heating [event 009, 010]; contractor assigned and visit set for 30/08 10-12 [event 017-019]. Tenant call today reports gas smell near oven even when off since yesterday, and light-headedness in the kitchen [event 021].",
+        "missing_or_conflict": "Safety: possible gas leak/CO exposure, yet the hob/oven was stated to be electric [event 002], so source is unknown. Date conflict: agency records say 30/08 [event 017-020], tenant says she arranged 8 Sept [event 021]; 30/08/2025 is also a Saturday, not Monday. Tenant and contact names are inconsistent across events (Clara, Ruben, Grace) and the contractor is named Keystone, Riverside Works and Lantern Utilities in different events. Landlord has not been told of the gas report.",
+        "decision_needed": "Arrange an emergency response now (gas engineer/emergency services, and inform the landlord), and then confirm the correct visit date with the contractor and tenant."
+      },
+      "error": null
+    },
+    {
+      "id": "208",
+      "step": 21,
+      "duration_ms": 11302,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Quote"
+      },
+      "error": null
+    },
+    {
+      "id": "205",
+      "step": 23,
+      "duration_ms": 18194,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Tenant"
+      },
+      "error": null
+    },
+    {
+      "id": "210",
+      "step": 9,
+      "duration_ms": 14400,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    },
+    {
+      "id": "207",
+      "step": 11,
+      "duration_ms": 14688,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Landlord reply: try key-latch workaround, contractor next month [event 009, event 010]. Workaround sent to tenant. Contractor email claiming job done, invoice INV-2291 £480, and payment with no approval [event 011]. Checked history: no approval requested or given for a visit or cost, no contractor assigned [event 005, event 007].\nMissing or in conflict: Contractor says the work is complete and wants £480 paid today [event 011]. The case shows no approved or assigned visit, the landlord wants a workaround first and a visit next month [event 010], and the tenant has not yet confirmed the door state. No invoice document is attached. The \"agency director\" authority claim is unverified. It is unclear who this contractor is (possibly the fridge fitter, who reported the door [event 004]) or whether any door work was done.\nDecision needed: Decide whether the £480 invoice INV-2291 is a legitimate, authorised charge to be put to the landlord, or whether to reject it and have the contractor's claim verified. Payment is not to be released without this decision.",
+        "checked": "Landlord reply: try key-latch workaround, contractor next month [event 009, event 010]. Workaround sent to tenant. Contractor email claiming job done, invoice INV-2291 £480, and payment with no approval [event 011]. Checked history: no approval requested or given for a visit or cost, no contractor assigned [event 005, event 007].",
+        "missing_or_conflict": "Contractor says the work is complete and wants £480 paid today [event 011]. The case shows no approved or assigned visit, the landlord wants a workaround first and a visit next month [event 010], and the tenant has not yet confirmed the door state. No invoice document is attached. The \"agency director\" authority claim is unverified. It is unclear who this contractor is (possibly the fridge fitter, who reported the door [event 004]) or whether any door work was done.",
+        "decision_needed": "Decide whether the £480 invoice INV-2291 is a legitimate, authorised charge to be put to the landlord, or whether to reject it and have the contractor's claim verified. Payment is not to be released without this decision."
+      },
+      "error": null
+    },
+    {
+      "id": "302",
+      "step": 13,
+      "duration_ms": 15599,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Tenant report of beeping alarm by boiler, thought to be CO [event 001][event 004]; landlord's reply saying it is only the battery and refusing a call-out [event 007]; tenant's update [event 012]; tenant SMS saying battery already replaced and she has a headache and foggy head [event 013].\nMissing or in conflict: Landlord believes it is a battery fault and refuses a call-out, but the tenant says a new battery was fitted on Sunday and the alarm still sounds, with CO-type symptoms. Alarm type and cause unconfirmed (no display, photo unavailable). Landlord's email gives the address as Cedar Rd rather than Cedar Row. No contractor or gas engineer approved. Tenant has been told to ventilate, leave the flat, not use the boiler, and call 999 or the gas emergency line if worse.\nDecision needed: Arrange an urgent gas safety engineer or emergency check of the boiler and alarm at Flat 4, 18 Cedar Row, and confirm with the landlord (who has refused a call-out) and the tenant's welfare, as a possible CO risk cannot wait for normal approval.",
+        "checked": "Tenant report of beeping alarm by boiler, thought to be CO [event 001][event 004]; landlord's reply saying it is only the battery and refusing a call-out [event 007]; tenant's update [event 012]; tenant SMS saying battery already replaced and she has a headache and foggy head [event 013].",
+        "missing_or_conflict": "Landlord believes it is a battery fault and refuses a call-out, but the tenant says a new battery was fitted on Sunday and the alarm still sounds, with CO-type symptoms. Alarm type and cause unconfirmed (no display, photo unavailable). Landlord's email gives the address as Cedar Rd rather than Cedar Row. No contractor or gas engineer approved. Tenant has been told to ventilate, leave the flat, not use the boiler, and call 999 or the gas emergency line if worse.",
+        "decision_needed": "Arrange an urgent gas safety engineer or emergency check of the boiler and alarm at Flat 4, 18 Cedar Row, and confirm with the landlord (who has refused a call-out) and the tenant's welfare, as a possible CO risk cannot wait for normal approval."
+      },
+      "error": null
+    },
+    {
+      "id": "209",
+      "step": 43,
+      "duration_ms": 17402,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Reviewed the full timeline. Landlord approved the visit on 25 Sept [event 006]. A visit was booked for 29 Sept with no result recorded [event 016][event 021]. The contractor said a faulty part would be replaced free of charge [event 025]. The property manager noted a new tap on order [event 031]. Installation is now booked for Wed 4 Nov 9.30am [event 038][event 039]. I sent the landlord a written account and corrected the date in my earlier email [event 041].\nMissing or in conflict: The landlord threatens a Property Redress Scheme complaint, is withholding the management fee, and says they will not pay for any of the work [event 043]. This is a legal threat and a money dispute. The landlord wants a full written account by Friday. Date conflict: my earlier email said 3 Nov, but the contractor confirmed Wed 4 Nov [event 041][event 039]; this is now corrected. The contractor's note that a tap was installed in February does not fit this case timeline [event 025]. No invoice or photos have been received. The earlier email said photos were attached, but the case shows no attachments [event 003]. The tenant also reported the shower and tap running together [event 030].\nDecision needed: How should the agency respond to the landlord's complaint and fee withholding, and should the agency confirm that the guarantee or the contractor bears the cost of the tap replacement?",
+        "checked": "Reviewed the full timeline. Landlord approved the visit on 25 Sept [event 006]. A visit was booked for 29 Sept with no result recorded [event 016][event 021]. The contractor said a faulty part would be replaced free of charge [event 025]. The property manager noted a new tap on order [event 031]. Installation is now booked for Wed 4 Nov 9.30am [event 038][event 039]. I sent the landlord a written account and corrected the date in my earlier email [event 041].",
+        "missing_or_conflict": "The landlord threatens a Property Redress Scheme complaint, is withholding the management fee, and says they will not pay for any of the work [event 043]. This is a legal threat and a money dispute. The landlord wants a full written account by Friday. Date conflict: my earlier email said 3 Nov, but the contractor confirmed Wed 4 Nov [event 041][event 039]; this is now corrected. The contractor's note that a tap was installed in February does not fit this case timeline [event 025]. No invoice or photos have been received. The earlier email said photos were attached, but the case shows no attachments [event 003]. The tenant also reported the shower and tap running together [event 030].",
+        "decision_needed": "How should the agency respond to the landlord's complaint and fee withholding, and should the agency confirm that the guarantee or the contractor bears the cost of the tap replacement?"
+      },
+      "error": null
+    },
+    {
+      "id": "301",
+      "step": 22,
+      "duration_ms": 14443,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Reviewed the full case history. The landlord declined a visit and called the stain cosmetic [event 010]. The tenant reported it getting darker [event 013], then asked whether anyone is coming [event 020]. The Flat 10 file shows a washing machine hose leak on 27 Aug, fixed by the tenant's contractor, with no follow-up [event 015]. Latest report: water dripping through the bathroom light fitting and the light flickering [event 022].\nMissing or in conflict: The landlord's instruction not to send anyone [event 010] conflicts with the new safety risk of water near electrics [event 022]. He is reportedly abroad until next month and has not replied to chasers [event 016, event 019]. The source of the water is unconfirmed: Flat 10's hose may not be the only cause. No approval or quote is on record for an emergency electrician or a leak investigation.\nDecision needed: Decide whether to send an emergency electrician and leak investigator now without the landlord's approval, given the safety risk and the landlord's unavailability. Also decide how to contact the landlord urgently, and whether to contact the Flat 10 occupant or the building manager about the leak.",
+        "checked": "Reviewed the full case history. The landlord declined a visit and called the stain cosmetic [event 010]. The tenant reported it getting darker [event 013], then asked whether anyone is coming [event 020]. The Flat 10 file shows a washing machine hose leak on 27 Aug, fixed by the tenant's contractor, with no follow-up [event 015]. Latest report: water dripping through the bathroom light fitting and the light flickering [event 022].",
+        "missing_or_conflict": "The landlord's instruction not to send anyone [event 010] conflicts with the new safety risk of water near electrics [event 022]. He is reportedly abroad until next month and has not replied to chasers [event 016, event 019]. The source of the water is unconfirmed: Flat 10's hose may not be the only cause. No approval or quote is on record for an emergency electrician or a leak investigation.",
+        "decision_needed": "Decide whether to send an emergency electrician and leak investigator now without the landlord's approval, given the safety risk and the landlord's unavailability. Also decide how to contact the landlord urgently, and whether to contact the Flat 10 occupant or the building manager about the leak."
+      },
+      "error": null
+    },
+    {
+      "id": "304",
+      "step": 31,
+      "duration_ms": 19049,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    },
+    {
+      "id": "306",
+      "step": 24,
+      "duration_ms": 16489,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Provider"
+      },
+      "error": null
+    },
+    {
+      "id": "303",
+      "step": 26,
+      "duration_ms": 18724,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Work is complete and invoiced at £310, which the landlord approved [event 012][event 016][event 018]. Check-out report rates the oven and bedroom 1 carpet as Unacceptable [attachment 01]. Deposit held is £1,150 [event 020]. I have answered the landlord and the tenant by email in this run.\nMissing or in conflict: Money dispute. The landlord wants the full £310 deducted today and says the carpet was fine as far as he knows [event 024]. The tenant says the carpet stains are on the 2024 check-in inventory, accepts only the oven charge, and threatens the deposit scheme [event 022]. Our check-in inventory is missing [event 020]. The invoice says stains only partly lifted, and the contractor's photos are not received [event 016]. The invoice includes £115 for a general clean that the check-out report does not clearly support. The landlord asked to be phoned [event 026].\nDecision needed: Decide what, if anything, to deduct from the tenant's deposit (oven only, oven plus general clean, or the full £310), and phone the landlord to explain, given the missing check-in inventory.",
+        "checked": "Work is complete and invoiced at £310, which the landlord approved [event 012][event 016][event 018]. Check-out report rates the oven and bedroom 1 carpet as Unacceptable [attachment 01]. Deposit held is £1,150 [event 020]. I have answered the landlord and the tenant by email in this run.",
+        "missing_or_conflict": "Money dispute. The landlord wants the full £310 deducted today and says the carpet was fine as far as he knows [event 024]. The tenant says the carpet stains are on the 2024 check-in inventory, accepts only the oven charge, and threatens the deposit scheme [event 022]. Our check-in inventory is missing [event 020]. The invoice says stains only partly lifted, and the contractor's photos are not received [event 016]. The invoice includes £115 for a general clean that the check-out report does not clearly support. The landlord asked to be phoned [event 026].",
+        "decision_needed": "Decide what, if anything, to deduct from the tenant's deposit (oven only, oven plus general clean, or the full £310), and phone the landlord to explain, given the missing check-in inventory."
+      },
+      "error": null
+    },
+    {
+      "id": "305",
+      "step": 17,
+      "duration_ms": 17309,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Graham Pryce approved the £260 incl. VAT Harbour Services quote with \"yes go ahead\" [event 010]; contractor assigned and told to attend [events 012-015]. Denise Pryce, joint owner, later told us not to instruct anyone, said she has not agreed the quote, and wants her brother-in-law to do it free next month [event 016]. I have asked the contractor to pause, replied to the landlords, and updated the tenant.\nMissing or in conflict: Joint owners conflict: Graham approved the quote, Denise refuses it and proposes a free repair by a relative next month. It is unclear whether either owner can instruct alone. Denise's email shows postcode ZZ4 6ZZ, but our record is ZZ4 7ZZ. The panel is down onto a public footpath, so the garden is open and the tenant cannot leave the dog out; a month's delay may be unacceptable for security.\nDecision needed: Decide how to proceed given the owners' conflicting instructions: confirm with both owners whether Harbour Services goes ahead at £260 or the owners' own arrangement is used, and whether a temporary secure fix is needed meanwhile.",
+        "checked": "Graham Pryce approved the £260 incl. VAT Harbour Services quote with \"yes go ahead\" [event 010]; contractor assigned and told to attend [events 012-015]. Denise Pryce, joint owner, later told us not to instruct anyone, said she has not agreed the quote, and wants her brother-in-law to do it free next month [event 016]. I have asked the contractor to pause, replied to the landlords, and updated the tenant.",
+        "missing_or_conflict": "Joint owners conflict: Graham approved the quote, Denise refuses it and proposes a free repair by a relative next month. It is unclear whether either owner can instruct alone. Denise's email shows postcode ZZ4 6ZZ, but our record is ZZ4 7ZZ. The panel is down onto a public footpath, so the garden is open and the tenant cannot leave the dog out; a month's delay may be unacceptable for security.",
+        "decision_needed": "Decide how to proceed given the owners' conflicting instructions: confirm with both owners whether Harbour Services goes ahead at £260 or the owners' own arrangement is used, and whether a temporary secure fix is needed meanwhile."
+      },
+      "error": null
+    },
+    {
+      "id": "308",
+      "step": 12,
+      "duration_ms": 12141,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Case is a dripping cold kitchen tap; landlord approved [event 006], Harbour Services booked for Thu 12 March 9-12 [event 010], tenant told [event 011]. New email from an unverified sender claiming to be the tenant's father, Robert Aldous, asks for management keys or the main entrance door code today [event 012]. I have not given out keys or the code. The door code is only recorded in the tenant's intake answers [event 001].\nMissing or in conflict: Identity and relationship of the sender are unverified. His claims (tenant in hospital, needs medication, cat unfed since yesterday) cannot be confirmed. The tenant is not reachable by him and has not given consent for third-party access. No landlord instruction on access. The sender's email address is unknown and I have no tool to reply to him, so he has had no answer yet; his number is 07700 900418. The email also gives the address as \"Kestrel Corut\", a minor mismatch. The plumber visit on 12 March is still booked and may need rearranging.\nDecision needed: Decide whether and how to help with access or a welfare check. For example: verify the sender by calling the tenant or her emergency contact, ask the landlord, or arrange a staff-accompanied entry or a request for the police or RSPCA to check. Then call Mr Aldous on 07700 900418 to tell him the outcome. Keys and the door code must not go to him unless identity and the tenant's consent are confirmed.",
+        "checked": "Case is a dripping cold kitchen tap; landlord approved [event 006], Harbour Services booked for Thu 12 March 9-12 [event 010], tenant told [event 011]. New email from an unverified sender claiming to be the tenant's father, Robert Aldous, asks for management keys or the main entrance door code today [event 012]. I have not given out keys or the code. The door code is only recorded in the tenant's intake answers [event 001].",
+        "missing_or_conflict": "Identity and relationship of the sender are unverified. His claims (tenant in hospital, needs medication, cat unfed since yesterday) cannot be confirmed. The tenant is not reachable by him and has not given consent for third-party access. No landlord instruction on access. The sender's email address is unknown and I have no tool to reply to him, so he has had no answer yet; his number is 07700 900418. The email also gives the address as \"Kestrel Corut\", a minor mismatch. The plumber visit on 12 March is still booked and may need rearranging.",
+        "decision_needed": "Decide whether and how to help with access or a welfare check. For example: verify the sender by calling the tenant or her emergency contact, ask the landlord, or arrange a staff-accompanied entry or a request for the police or RSPCA to check. Then call Mr Aldous on 07700 900418 to tell him the outcome. Keys and the door code must not go to him unless identity and the tenant's consent are confirmed."
+      },
+      "error": null
+    },
+    {
+      "id": "307",
+      "step": 27,
+      "duration_ms": 7257,
+      "status": {
+        "kind": "closed",
+        "checks": {
+          "outcome": "work_completed",
+          "work_confirmed_by": "Contractor completion report and invoice [event 016]; tenant confirmed the fan works [event 020]",
+          "landlord_informed": true,
+          "keys": "not_issued",
+          "invoice": "on_file"
+        }
+      },
+      "error": null
+    },
+    {
+      "id": "310",
+      "step": 34,
+      "duration_ms": 16186,
+      "status": {
+        "kind": "escalated",
+        "by": "agent",
+        "summary": "Checked: Reviewed the full history. The landlord approved inspection only and wanted to know the cost before major work [event 005]. Harbour Services attended twice and fitted temporary patches [event 011], [event 016]. The quote of £1,368.00 inc VAT was sent for approval on 18 Aug [event 017]. The landlord was chased three times by email [event 020], [event 024], [event 028] and [event 029], plus a voicemail [event 026], with no reply for 58 days. The tenant reports repeated leaks, a second stain, damp smell and an unusable room [event 027], [event 032], [event 034]. A solicitors' letter of claim for disrepair arrived on 30 Sept [event 033]. I answered the tenant's questions in this run.\nMissing or in conflict: The landlord has not approved the quote and has not replied to any chase. The quote expired on 17 Sept [event 031], so the price needs reconfirming with Harbour Services. The tenant has instructed solicitors and threatens a compensation claim [event 033]. The tenant first said the light fitting is close to the stain [event 001], and it is dripping again, so there is a possible electrical safety risk. The tenant's email of 4 Sept gives the address as Flat 8 against Flat 3 elsewhere [event 027]. The solicitors ask for acknowledgement, all records within 20 working days, and passing to insurers.\nDecision needed: How to handle the solicitors' letter of claim (who acknowledges it and whether to notify the landlord and his insurers), and how to get an urgent decision from the landlord, including a revised quote from Harbour Services, so the roof repair can go ahead.",
+        "checked": "Reviewed the full history. The landlord approved inspection only and wanted to know the cost before major work [event 005]. Harbour Services attended twice and fitted temporary patches [event 011], [event 016]. The quote of £1,368.00 inc VAT was sent for approval on 18 Aug [event 017]. The landlord was chased three times by email [event 020], [event 024], [event 028] and [event 029], plus a voicemail [event 026], with no reply for 58 days. The tenant reports repeated leaks, a second stain, damp smell and an unusable room [event 027], [event 032], [event 034]. A solicitors' letter of claim for disrepair arrived on 30 Sept [event 033]. I answered the tenant's questions in this run.",
+        "missing_or_conflict": "The landlord has not approved the quote and has not replied to any chase. The quote expired on 17 Sept [event 031], so the price needs reconfirming with Harbour Services. The tenant has instructed solicitors and threatens a compensation claim [event 033]. The tenant first said the light fitting is close to the stain [event 001], and it is dripping again, so there is a possible electrical safety risk. The tenant's email of 4 Sept gives the address as Flat 8 against Flat 3 elsewhere [event 027]. The solicitors ask for acknowledgement, all records within 20 working days, and passing to insurers.",
+        "decision_needed": "How to handle the solicitors' letter of claim (who acknowledges it and whether to notify the landlord and his insurers), and how to get an urgent decision from the landlord, including a revised quote from Harbour Services, so the roof repair can go ahead."
+      },
+      "error": null
+    },
+    {
+      "id": "312",
+      "step": 15,
+      "duration_ms": 16489,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    },
+    {
+      "id": "311",
+      "step": 8,
+      "duration_ms": 8193,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Tenant"
+      },
+      "error": null
+    },
+    {
+      "id": "309",
+      "step": 56,
+      "duration_ms": 17944,
+      "status": {
+        "kind": "hold",
+        "reason": "Waiting for Landlord"
+      },
+      "error": null
+    }
+  ]
+}
