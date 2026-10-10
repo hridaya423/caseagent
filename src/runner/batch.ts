@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFile
 import { join } from "node:path";
 import { decisionOf } from "./answers.ts";
 import { processCase, processToEnd, summary, type RunDeps } from "./process.ts";
-import { isIncomplete, loadState } from "../case/state.ts";
+import { actionLog, isIncomplete, loadState } from "../case/state.ts";
 
 export type BatchRow = {
   id: string;
@@ -121,8 +121,8 @@ export async function runBatch(o: BatchOptions): Promise<BatchRow[]> {
           status: d.status,
           incomplete: isIncomplete(state),
           next: d.next,
-          messages: state.actions.filter((a) => a.ok && a.tool === "send_message").length,
-          runs: state.runs,
+          messages: actionLog(state).filter((a) => a.ok && a.tool === "send_message").length,
+          runs: state.runs.length,
           seconds: (Date.now() - started) / 1000,
           ...usage(join(deps.out, "traces", `${state.caseId}.jsonl`)),
         };
@@ -132,7 +132,7 @@ export async function runBatch(o: BatchOptions): Promise<BatchRow[]> {
         const state = loadState(join(deps.out, "state", `${id}.json`));
         row = {
           id, status: state ? decisionOf(state).status : "error", incomplete: true, next: "A person must review the case.", messages: 0,
-          runs: state?.runs ?? 0, seconds: (Date.now() - started) / 1000, input_tokens: 0, output_tokens: 0, models: [], error: message,
+          runs: state?.runs.length ?? 0, seconds: (Date.now() - started) / 1000, input_tokens: 0, output_tokens: 0, models: [], error: message,
         };
         log(`[${++done}/${todo.length}] ${id}: failed: ${message}`);
       }

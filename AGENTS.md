@@ -17,4 +17,5 @@ node --import tsx 'evals/Process Reward/validate.ts'   # MCP boundary check, no 
 - The hidden-future rule lives in `src/case/cut.ts`.
 - Every refusal rule lives in `src/tools/guards.ts`. Guards run before adapters.
 - A system escalation (`status.by === "system"`) marks an incomplete run.
+- `src/case/state.ts` defines the state as zod schemas. `state.runs` is a list of run records (`seen`, `notes`, `actions`). Use `actionLog(state)` for every action in order, with its run number and cut. `loadState` upgrades older files, including the flat `actions`/`notes` format.
 - Paths built from `import.meta.url` are relative to the file's folder. `src/runner/process.ts` reads `../../policy.md`.

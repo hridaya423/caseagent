@@ -147,7 +147,7 @@ test("trials: a partially measured sample does not count for or against pass_k",
 
 test("gradeRun: a message then hold passes; closing after a message, a refusal, or no match fails", () => {
   const exp = { acceptable_actions: [{ tool: "send_message", exact_arguments: { to: "tenant", channel: "email" } }] };
-  const act = (tool: string, input: Record<string, unknown>, ok = true, result = "ok") => ({ run: 1, afterEvent: 1, tool, input, ok, result });
+  const act = (tool: string, input: Record<string, unknown>, ok = true, result = "ok") => ({ tool, input, ok, result });
   const msg = act("send_message", { to: "tenant", channel: "email" });
   const hold = act("hold", { waiting_for: "Waiting for Tenant" });
   assert.deepEqual(gradeRun([msg, hold], exp), { matched: 0, violations: [] });

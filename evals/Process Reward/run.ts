@@ -6,7 +6,10 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../../src/entry/mcp.ts';
 import { liveDeps, type RunDeps } from '../../src/runner/process.ts';
-import { isIncomplete, type CaseState } from '../../src/case/state.ts';
+import { actionLog, isIncomplete, type Action, type CaseState } from '../../src/case/state.ts';
+
+// An action as results.json records it: with its run number and the last event that run could see.
+type LoggedAction = ReturnType<typeof actionLog>[number];
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const repo = resolve(root, '../..');
@@ -20,7 +23,7 @@ type Expected = { acceptable_actions: { tool: string; exact_arguments: Record<st
 export type RunOutcome = 'completed' | 'model_failure' | 'runtime_failure';
 export type SampleResult = {
   id: string; case_id: string; step: number; trial: number; run_outcome: RunOutcome; incomplete: boolean;
-  status: CaseState['status'] | null; actions: CaseState['actions']; structural_match: boolean;
+  status: CaseState['status'] | null; actions: LoggedAction[]; structural_match: boolean;
   semantic_review: 'pending' | 'not_required' | 'not_run'; score: 0 | null; error: string | null;
   expected: Expected; trace: string; mcp_error: boolean; measured: boolean;
   // Index in actions of the action that matched an acceptable branch, and why the run failed the structural check.
@@ -47,7 +50,7 @@ const END_TOOLS = new Set(['hold', 'escalate', 'close_case']);
 // 3. no guard refused an action, because a refusal means the model tried something
 //    the rules forbid (an unapproved assignment, an event reference in a message).
 // Extra actions beside the match go to semantic review.
-export function gradeRun(actions: CaseState['actions'], expected: Expected): { matched: number | null; violations: string[] } {
+export function gradeRun(actions: Action[], expected: Expected): { matched: number | null; violations: string[] } {
   const violations: string[] = [];
   const matched = actions.findIndex((a) => a.ok && expected.acceptable_actions.some((e) =>
     a.tool === e.tool && Object.entries(e.exact_arguments).every(([k, v]) => a.input[k] === v)));
@@ -114,14 +117,15 @@ export async function runSuite(opts: {
       // A timed-out call may still be running in the background, so its state file is not this sample's result.
       const state = !error && existsSync(statePath) ? (JSON.parse(readFileSync(statePath, 'utf8')) as CaseState) : null;
       const outcome = classify(state, traceKinds(join(out, trace)), error);
-      const grade = outcome === 'completed' ? gradeRun(state!.actions, sample.expected as Expected) : { matched: null, violations: [] };
-      const action = grade.matched === null ? undefined : state!.actions[grade.matched];
+      const actions = state ? actionLog(state) : [];
+      const grade = outcome === 'completed' ? gradeRun(actions, sample.expected as Expected) : { matched: null, violations: [] };
+      const action = grade.matched === null ? undefined : actions[grade.matched];
 
       // A runtime_failure is a failure of our infrastructure, so the trial is not measured.
       const isMeasured = outcome !== 'runtime_failure';
       const result: SampleResult = {
         id: sample.id, case_id: sample.case_id, step: sample.step, trial, run_outcome: outcome,
-        incomplete: state ? isIncomplete(state) : true, status: state?.status ?? null, actions: state?.actions ?? [],
+        incomplete: state ? isIncomplete(state) : true, status: state?.status ?? null, actions,
         structural_match: outcome === 'completed' && grade.violations.length === 0,
         matched_action: grade.matched, violations: grade.violations,
         semantic_review: outcome === 'completed' ? 'pending' : outcome === 'model_failure' ? 'not_required' : 'not_run',
